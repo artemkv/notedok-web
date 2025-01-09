@@ -1,7 +1,7 @@
 import "./App.css";
 import "./components/ClientArea";
 import ClientArea from "./components/ClientArea";
-import { AppState } from "./model";
+import { AppState } from "./state";
 
 function App(props: { state: AppState }) {
   const state = props.state;

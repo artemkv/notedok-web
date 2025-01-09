@@ -1,7 +1,8 @@
 import "./TemplateNote.css";
-import { TemplateNoteState, ActionType } from "../model";
+import { TemplateNoteState } from "../state";
 import { useContext } from "react";
 import AppContext from "../AppContext";
+import { EventType } from "../events";
 
 // TODO: where to put the CSS that are common with note?
 
@@ -12,13 +13,13 @@ function TemplateNote(props: { state: TemplateNoteState }) {
 
   const onStartNoteTextEditing = () => {
     dispatch({
-      type: ActionType.TemplateNoteStartTextEditing,
+      type: EventType.TemplateNoteStartTextEditing,
     });
   };
 
   const onCancelNoteTextEditing = () => {
     dispatch({
-      type: ActionType.TemplateNoteCancelTextEditing,
+      type: EventType.TemplateNoteCancelTextEditing,
     });
   };
 

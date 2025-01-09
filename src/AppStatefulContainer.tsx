@@ -1,11 +1,12 @@
-import { useReducer } from "react";
-import { Reducer, IntialState } from "./model";
+import useReducer from "./hooks/useReducer";
+import { IntialState, InitialCommand } from "./state";
 import App from "./App";
 import AppContext from "./AppContext";
 import uistrings from "./uistrings";
+import { Reducer } from "./reducer";
 
 function AppStatefulContainer() {
-  const [state, dispatch] = useReducer(Reducer, IntialState);
+  const [state, dispatch] = useReducer(Reducer, IntialState, InitialCommand);
 
   const context = {
     uistrings: uistrings,

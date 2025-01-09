@@ -1,8 +1,10 @@
 import { createContext } from "react";
-import { Dispatch } from "./model";
 import uistrings from "./uistrings";
+import { AppEvent } from "./events";
+import { Dispatch } from "./hooks/useReducer";
 
-const nop: Dispatch = () => {};
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const nop: Dispatch<AppEvent> = (_: AppEvent) => {};
 
 const deafultContext = {
   uistrings: uistrings,
