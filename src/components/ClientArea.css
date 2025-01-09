@@ -1,0 +1,10 @@
+.client-area-outer {
+    margin-left: auto;
+    margin-right: auto;
+    width: 900px;
+}
+
+.client-area-inner {
+    width: 100%;
+    height: 100%;
+}

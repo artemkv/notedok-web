@@ -1,0 +1,24 @@
+.search-inner {
+    width: 100%;
+    height: 100%;
+}
+
+.search-panel {
+    margin: 16px;
+    padding: 16px;
+    background-color: white;
+    border-right: 1px solid #e3e3e3;
+    border-bottom: 1px solid #e3e3e3;
+}
+
+.search-textbox {
+    font-family: monospace;
+    font-size: 18px;
+    font-weight: 400;
+    padding: 4px 8px 2px 8px;
+    border: none;
+    outline: none;
+    box-sizing: border-box;
+    color: #000000;
+    width: 100%;
+}

@@ -1,0 +1,10 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body,
+html {
+    font-family: "Segoe UI", arial, sans-serif;
+    background-color: #f1f1f1;
+}
