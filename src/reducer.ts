@@ -48,10 +48,7 @@ export const Reducer = (
         fileListVersion,
       },
       lastUsedNoteId: 0,
-      renderingQueue: {
-        queue: [],
-        readyNoteIds: new Set<string>(),
-      },
+      renderingQueue: [],
       notes: [],
     };
 

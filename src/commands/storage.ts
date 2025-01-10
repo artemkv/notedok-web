@@ -1,10 +1,11 @@
+import { convertToLoadedNote } from "../business";
 import {
   CommandType,
   LoadNextPageCommand,
   RetrieveFileListCommand,
 } from "../commands";
 import { EventType } from "../events";
-import { Note } from "../state";
+import { NotLoadedNote } from "../state";
 
 export const RetrieveFileList: RetrieveFileListCommand = {
   type: CommandType.RetrieveFileList,
@@ -35,7 +36,7 @@ export const RetrieveFileList: RetrieveFileListCommand = {
 };
 
 export const LoadNextPage = (
-  notes: Array<Note>,
+  notes: Array<NotLoadedNote>,
   fileListVersion: number
 ): LoadNextPageCommand => ({
   type: CommandType.LoadNextPage,
@@ -45,25 +46,25 @@ export const LoadNextPage = (
 
     // TODO: Only complete the rendering if the file list is still the same
 
-    let notesReversed: Array<Note> = [];
+    let notesReversed: Array<NotLoadedNote> = [];
 
     notes.forEach((note) => {
       notesReversed = [note, ...notesReversed];
     });
 
     notesReversed.forEach((note) => {
-      const updatedNote = {
-        ...note,
-      };
-
-      updatedNote.text = "dummy content for " + note.id; // TODO: note should be immutable, so make a new one
+      // TODO: maybe push to helper method
+      const loadedNote = convertToLoadedNote(
+        note,
+        "dummy content for " + note.id
+      );
 
       setTimeout(() => {
         // console.log("loaded " + updatedNote.id);
 
         dispatch({
           type: EventType.LoadNoteContentSuccess,
-          data: [updatedNote, fileListVersion], // TODO:
+          data: [loadedNote, fileListVersion], // TODO:
         });
       }, 300);
     });

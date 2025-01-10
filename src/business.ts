@@ -1,28 +1,40 @@
-import { Note, NoteListState, NoteListStateFileListRetrieved } from "./state";
+import {
+  LoadedNote,
+  NoteListState,
+  NoteListStateFileListRetrieved,
+  NoteType,
+  NotLoadedNote,
+} from "./state";
 
 const NOTES_ON_PAGE = 5;
 
 export const shiftNotesToLoadForNextPage = (
   noteListState: NoteListStateFileListRetrieved
-): [NoteListStateFileListRetrieved, Array<Note>] => {
+): [NoteListStateFileListRetrieved, Array<NotLoadedNote>] => {
   let pageSize = NOTES_ON_PAGE;
 
+  // Shortcuts to inner props
   const fileList = noteListState.unprocessedFiles.fileList;
-  const renderingQueue = noteListState.renderingQueue.queue;
+  const renderingQueue = noteListState.renderingQueue;
 
+  // Detect an actual page size
   if (fileList.length < pageSize) {
     pageSize = fileList.length;
   }
 
+  // Split out the files for the first page
   const filesToLoad = fileList.slice(0, pageSize);
   const filesRemaining = fileList.slice(pageSize, fileList.length);
 
+  // Prepare the dummy notes that need to be loaded
   const notesToLoad = filesToLoad.map((path, idx) => {
-    return createNote(noteListState.lastUsedNoteId + idx, path);
+    return createNotLoadedNote(noteListState.lastUsedNoteId + idx, path);
   });
 
+  // Keep track of the order
   const newRenderingQueue = [...renderingQueue, ...notesToLoad];
 
+  // New state
   const newNoteListState: NoteListStateFileListRetrieved = {
     state: NoteListState.FileListRetrieved,
     unprocessedFiles: {
@@ -30,10 +42,7 @@ export const shiftNotesToLoadForNextPage = (
       fileListVersion: noteListState.unprocessedFiles.fileListVersion,
     },
     lastUsedNoteId: noteListState.lastUsedNoteId + pageSize,
-    renderingQueue: {
-      queue: newRenderingQueue,
-      readyNoteIds: noteListState.renderingQueue.readyNoteIds,
-    },
+    renderingQueue: newRenderingQueue,
     notes: noteListState.notes,
   };
 
@@ -42,47 +51,68 @@ export const shiftNotesToLoadForNextPage = (
 
 export const handleLoadedNode = (
   noteListState: NoteListStateFileListRetrieved,
-  note: Note
+  note: LoadedNote
 ): NoteListStateFileListRetrieved => {
-  const queue = noteListState.renderingQueue.queue;
-  const readyNoteIds = noteListState.renderingQueue.readyNoteIds;
+  // Shortcuts to inner props
+  const queue = noteListState.renderingQueue;
 
+  // Update the note on the queue with the loaded one
   const newQueue = queue.map((n) => (n.id === note.id ? note : n));
-  const newReadyNoteIds = new Set<string>([...readyNoteIds, note.id]);
 
+  // Find out which notes can already be rendered
+  const readyNotes: Array<LoadedNote> = [];
   let readyIdx = 0;
   while (
     readyIdx < newQueue.length &&
-    newReadyNoteIds.has(newQueue[readyIdx].id)
+    newQueue[readyIdx].type === NoteType.Loaded
   ) {
-    newReadyNoteIds.delete(newQueue[readyIdx].id);
+    const note = newQueue[readyIdx];
+    if (note.type === NoteType.Loaded) {
+      readyNotes.push(note);
+    }
     readyIdx++;
   }
 
-  const readyNotes = newQueue.slice(0, readyIdx);
+  // Cut out the notes that are not ready
   const notReadyNotes = newQueue.slice(readyIdx, newQueue.length);
 
+  // New state
   const newNoteListState: NoteListStateFileListRetrieved = {
     state: NoteListState.FileListRetrieved,
     unprocessedFiles: noteListState.unprocessedFiles,
     lastUsedNoteId: noteListState.lastUsedNoteId,
-    renderingQueue: {
-      queue: notReadyNotes,
-      readyNoteIds: newReadyNoteIds,
-    },
+    renderingQueue: notReadyNotes,
     notes: [...noteListState.notes, ...readyNotes],
   };
 
   return newNoteListState;
 };
 
-export const createNote = (id: number, path: string): Note => {
-  const note = {
+export const createNotLoadedNote = (
+  id: number,
+  path: string
+): NotLoadedNote => {
+  const note: NotLoadedNote = {
+    type: NoteType.NotLoaded,
     id: "note_" + id.toString(),
     path,
     title: path, // TODO: titleToPathCoverter
-    text: "",
   };
 
   return note;
+};
+
+export const convertToLoadedNote = (
+  note: NotLoadedNote,
+  text: string
+): LoadedNote => {
+  const loadedNote: LoadedNote = {
+    type: NoteType.Loaded,
+    id: note.id,
+    path: note.path,
+    title: note.title,
+    text,
+  };
+
+  return loadedNote;
 };

@@ -1,11 +1,26 @@
 import { RetrieveFileList } from "./commands/storage";
 
-export interface Note {
+export enum NoteType {
+  NotLoaded,
+  Loaded,
+}
+
+export interface NotLoadedNote {
+  type: NoteType.NotLoaded;
+  id: string;
+  path: string;
+  title: string;
+}
+
+export interface LoadedNote {
+  type: NoteType.Loaded;
   id: string;
   path: string;
   title: string;
   text: string;
 }
+
+export type Note = NotLoadedNote | LoadedNote;
 
 export enum TemplateNoteState {
   Initial,
@@ -28,11 +43,8 @@ export interface NoteListStateFileListRetrieved {
     fileListVersion: number;
   };
   lastUsedNoteId: number;
-  renderingQueue: {
-    queue: Array<Note>;
-    readyNoteIds: Set<string>;
-  };
-  notes: Array<Note>;
+  renderingQueue: Array<Note>;
+  notes: Array<LoadedNote>;
 }
 
 export type NoteList =

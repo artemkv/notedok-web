@@ -10,6 +10,7 @@ function RegularNote(props: { note: Note }) {
 
   // TODO: do I need to htmlEscape??
   // TODO: render formatted
+  // TODO: maybe extract text rendering into helper functions
   return (
     <div id={note.id} className="note-outer">
       <div className="note-inner">
@@ -40,6 +41,7 @@ function RegularNote(props: { note: Note }) {
 
 export default RegularNote;
 
+// TODO: buttons
 /*
           <a
             href="javascript:void(0);"

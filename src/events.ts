@@ -1,4 +1,4 @@
-import { Note } from "./state";
+import { LoadedNote } from "./state";
 
 export enum EventType {
   TemplateNoteStartTextEditing,
@@ -26,7 +26,7 @@ export interface RetrieveFileListSuccessEvent extends Event {
 
 export interface LoadNoteContentSuccessEvent extends Event {
   type: EventType.LoadNoteContentSuccess;
-  data: [Note, number];
+  data: [LoadedNote, number];
 }
 
 export type AppEvent =

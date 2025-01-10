@@ -7,6 +7,7 @@ function MoreButton(props: { notesNotYetLoadedTotal: number }) {
 
   const notesNotYetLoadedTotal = props.notesNotYetLoadedTotal;
 
+  // TODO: handle click
   return (
     <button className="more-button">
       {`${uistrings.MoreButtonText} (`}

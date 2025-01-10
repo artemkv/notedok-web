@@ -10,6 +10,7 @@ function Footer(props: { noteList: NoteList }) {
     notesNotYetLoadedTotal = noteList.unprocessedFiles.fileList.length;
   }
 
+  // TODO: only show when there are more notes to load
   return (
     <div className="footer-outer">
       <div className="footer-inner">
