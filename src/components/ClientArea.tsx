@@ -1,5 +1,6 @@
 import { AppState } from "../state";
 import "./ClientArea.css";
+import Footer from "./Footer";
 import NoteContainer from "./NoteContainer";
 import SearchPanel from "./SearchPanel";
 
@@ -15,6 +16,7 @@ function ClientArea(props: { state: AppState }) {
           noteList={noteList}
           templateNoteState={templateNoteState}
         />
+        <Footer noteList={noteList} />
       </div>
     </div>
   );

@@ -13,20 +13,31 @@ export enum TemplateNoteState {
 }
 
 export enum NoteListState {
-  NotLoaded,
-  Loaded,
+  RetrievingFileList,
+  FileListRetrieved,
 }
 
-export interface NoteListNotLoaded {
-  state: NoteListState.NotLoaded;
+export interface NoteListStateRetrievingFileList {
+  state: NoteListState.RetrievingFileList;
 }
 
-export interface NoteListLoaded {
-  state: NoteListState.Loaded;
+export interface NoteListStateFileListRetrieved {
+  state: NoteListState.FileListRetrieved;
+  unprocessedFiles: {
+    fileList: Array<string>;
+    fileListVersion: number;
+  };
+  lastUsedNoteId: number;
+  renderingQueue: {
+    queue: Array<Note>;
+    readyNoteIds: Set<string>;
+  };
   notes: Array<Note>;
 }
 
-export type NoteList = NoteListNotLoaded | NoteListLoaded;
+export type NoteList =
+  | NoteListStateRetrievingFileList
+  | NoteListStateFileListRetrieved;
 
 export interface AppState {
   templateNoteState: TemplateNoteState;
@@ -36,7 +47,7 @@ export interface AppState {
 export const IntialState: AppState = {
   templateNoteState: TemplateNoteState.Initial,
   noteList: {
-    state: NoteListState.NotLoaded,
+    state: NoteListState.RetrievingFileList,
   },
 };
 

@@ -1,4 +1,4 @@
-import "./TemplateNote.css";
+import "./Note.css";
 import { TemplateNoteState } from "../state";
 import { useContext } from "react";
 import AppContext from "../AppContext";
