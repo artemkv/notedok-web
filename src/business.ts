@@ -1,16 +1,16 @@
 import {
-  LoadedNote,
+  NoteLoaded,
   NoteListState,
-  NoteListStateFileListRetrieved,
+  NoteListFileListRetrieved,
   NoteType,
-  NotLoadedNote,
-} from "./state";
+  NoteNotLoaded,
+} from "./model";
 
 const NOTES_ON_PAGE = 5;
 
 export const shiftNotesToLoadForNextPage = (
-  noteListState: NoteListStateFileListRetrieved
-): [NoteListStateFileListRetrieved, Array<NotLoadedNote>] => {
+  noteListState: NoteListFileListRetrieved
+): [NoteListFileListRetrieved, Array<NoteNotLoaded>] => {
   let pageSize = NOTES_ON_PAGE;
 
   // Shortcuts to inner props
@@ -28,14 +28,14 @@ export const shiftNotesToLoadForNextPage = (
 
   // Prepare the dummy notes that need to be loaded
   const notesToLoad = filesToLoad.map((path, idx) => {
-    return createNotLoadedNote(noteListState.lastUsedNoteId + idx, path);
+    return createNoteNotLoaded(noteListState.lastUsedNoteId + idx, path);
   });
 
   // Keep track of the order
   const newRenderingQueue = [...renderingQueue, ...notesToLoad];
 
   // New state
-  const newNoteListState: NoteListStateFileListRetrieved = {
+  const newNoteListState: NoteListFileListRetrieved = {
     state: NoteListState.FileListRetrieved,
     unprocessedFiles: {
       fileList: filesRemaining,
@@ -50,9 +50,9 @@ export const shiftNotesToLoadForNextPage = (
 };
 
 export const handleLoadedNode = (
-  noteListState: NoteListStateFileListRetrieved,
-  note: LoadedNote
-): NoteListStateFileListRetrieved => {
+  noteListState: NoteListFileListRetrieved,
+  note: NoteLoaded
+): NoteListFileListRetrieved => {
   // Shortcuts to inner props
   const queue = noteListState.renderingQueue;
 
@@ -60,7 +60,7 @@ export const handleLoadedNode = (
   const newQueue = queue.map((n) => (n.id === note.id ? note : n));
 
   // Find out which notes can already be rendered
-  const readyNotes: Array<LoadedNote> = [];
+  const readyNotes: Array<NoteLoaded> = [];
   let readyIdx = 0;
   while (
     readyIdx < newQueue.length &&
@@ -77,7 +77,7 @@ export const handleLoadedNode = (
   const notReadyNotes = newQueue.slice(readyIdx, newQueue.length);
 
   // New state
-  const newNoteListState: NoteListStateFileListRetrieved = {
+  const newNoteListState: NoteListFileListRetrieved = {
     state: NoteListState.FileListRetrieved,
     unprocessedFiles: noteListState.unprocessedFiles,
     lastUsedNoteId: noteListState.lastUsedNoteId,
@@ -88,11 +88,11 @@ export const handleLoadedNode = (
   return newNoteListState;
 };
 
-export const createNotLoadedNote = (
+export const createNoteNotLoaded = (
   id: number,
   path: string
-): NotLoadedNote => {
-  const note: NotLoadedNote = {
+): NoteNotLoaded => {
+  const note: NoteNotLoaded = {
     type: NoteType.NotLoaded,
     id: "note_" + id.toString(),
     path,
@@ -102,11 +102,11 @@ export const createNotLoadedNote = (
   return note;
 };
 
-export const convertToLoadedNote = (
-  note: NotLoadedNote,
+export const convertToNoteLoaded = (
+  note: NoteNotLoaded,
   text: string
-): LoadedNote => {
-  const loadedNote: LoadedNote = {
+): NoteLoaded => {
+  const NoteLoaded: NoteLoaded = {
     type: NoteType.Loaded,
     id: note.id,
     path: note.path,
@@ -114,5 +114,5 @@ export const convertToLoadedNote = (
     text,
   };
 
-  return loadedNote;
+  return NoteLoaded;
 };

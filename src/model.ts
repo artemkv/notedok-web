@@ -5,14 +5,14 @@ export enum NoteType {
   Loaded,
 }
 
-export interface NotLoadedNote {
+export interface NoteNotLoaded {
   type: NoteType.NotLoaded;
   id: string;
   path: string;
   title: string;
 }
 
-export interface LoadedNote {
+export interface NoteLoaded {
   type: NoteType.Loaded;
   id: string;
   path: string;
@@ -20,7 +20,7 @@ export interface LoadedNote {
   text: string;
 }
 
-export type Note = NotLoadedNote | LoadedNote;
+export type Note = NoteNotLoaded | NoteLoaded;
 
 export enum TemplateNoteState {
   Initial,
@@ -32,11 +32,11 @@ export enum NoteListState {
   FileListRetrieved,
 }
 
-export interface NoteListStateRetrievingFileList {
+export interface NoteListRetrievingFileList {
   state: NoteListState.RetrievingFileList;
 }
 
-export interface NoteListStateFileListRetrieved {
+export interface NoteListFileListRetrieved {
   state: NoteListState.FileListRetrieved;
   unprocessedFiles: {
     fileList: Array<string>;
@@ -44,12 +44,10 @@ export interface NoteListStateFileListRetrieved {
   };
   lastUsedNoteId: number;
   renderingQueue: Array<Note>;
-  notes: Array<LoadedNote>;
+  notes: Array<NoteLoaded>;
 }
 
-export type NoteList =
-  | NoteListStateRetrievingFileList
-  | NoteListStateFileListRetrieved;
+export type NoteList = NoteListRetrievingFileList | NoteListFileListRetrieved;
 
 export interface AppState {
   templateNoteState: TemplateNoteState;

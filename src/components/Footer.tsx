@@ -1,4 +1,4 @@
-import { NoteList, NoteListState } from "../state";
+import { NoteList, NoteListState } from "../model";
 import "./Footer.css";
 import MoreButton from "./MoreButton";
 

@@ -1,11 +1,11 @@
-import { convertToLoadedNote } from "../business";
+import { convertToNoteLoaded } from "../business";
 import {
   CommandType,
-  LoadNextPageCommand,
+  LoadNotesContentCommand,
   RetrieveFileListCommand,
 } from "../commands";
 import { EventType } from "../events";
-import { NotLoadedNote } from "../state";
+import { NoteNotLoaded } from "../model";
 
 export const RetrieveFileList: RetrieveFileListCommand = {
   type: CommandType.RetrieveFileList,
@@ -36,9 +36,9 @@ export const RetrieveFileList: RetrieveFileListCommand = {
 };
 
 export const LoadNextPage = (
-  notes: Array<NotLoadedNote>,
+  notes: Array<NoteNotLoaded>,
   fileListVersion: number
-): LoadNextPageCommand => ({
+): LoadNotesContentCommand => ({
   type: CommandType.LoadNextPage,
   notes,
   execute: (dispatch) => {
@@ -46,7 +46,7 @@ export const LoadNextPage = (
 
     // TODO: Only complete the rendering if the file list is still the same
 
-    let notesReversed: Array<NotLoadedNote> = [];
+    let notesReversed: Array<NoteNotLoaded> = [];
 
     notes.forEach((note) => {
       notesReversed = [note, ...notesReversed];
@@ -54,7 +54,7 @@ export const LoadNextPage = (
 
     notesReversed.forEach((note) => {
       // TODO: maybe push to helper method
-      const loadedNote = convertToLoadedNote(
+      const NoteLoaded = convertToNoteLoaded(
         note,
         "dummy content for " + note.id
       );
@@ -64,7 +64,7 @@ export const LoadNextPage = (
 
         dispatch({
           type: EventType.LoadNoteContentSuccess,
-          data: [loadedNote, fileListVersion], // TODO:
+          data: [NoteLoaded, fileListVersion], // TODO:
         });
       }, 300);
     });

@@ -1,5 +1,5 @@
 import "./Note.css";
-import { TemplateNoteState } from "../state";
+import { TemplateNoteState } from "../model";
 import { useContext } from "react";
 import AppContext from "../AppContext";
 import { EventType } from "../events";

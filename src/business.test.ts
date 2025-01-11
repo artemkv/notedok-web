@@ -1,14 +1,14 @@
 import { test, expect } from "@jest/globals";
-import { NoteListState, NoteListStateFileListRetrieved } from "./state";
+import { NoteListState, NoteListFileListRetrieved } from "./model";
 import {
-  convertToLoadedNote,
-  createNotLoadedNote,
+  convertToNoteLoaded,
+  createNoteNotLoaded,
   handleLoadedNode,
   shiftNotesToLoadForNextPage,
 } from "./business";
 
 test("Test all notes are shifted to load when less notes than a default page size", () => {
-  const noteListState: NoteListStateFileListRetrieved = {
+  const noteListState: NoteListFileListRetrieved = {
     state: NoteListState.FileListRetrieved,
     unprocessedFiles: {
       fileList: ["file1.txt", "file2.txt", "file3.txt"],
@@ -28,7 +28,7 @@ test("Test all notes are shifted to load when less notes than a default page siz
 });
 
 test("First 5 notes are shifted to load when more notes than a default page size", () => {
-  const noteListState: NoteListStateFileListRetrieved = {
+  const noteListState: NoteListFileListRetrieved = {
     state: NoteListState.FileListRetrieved,
     unprocessedFiles: {
       fileList: [
@@ -56,7 +56,7 @@ test("First 5 notes are shifted to load when more notes than a default page size
 });
 
 test("First note loaded first", () => {
-  const noteListState: NoteListStateFileListRetrieved = {
+  const noteListState: NoteListFileListRetrieved = {
     state: NoteListState.FileListRetrieved,
     unprocessedFiles: {
       fileList: ["file6.txt", "file7.txt"],
@@ -64,20 +64,20 @@ test("First note loaded first", () => {
     },
     lastUsedNoteId: 4,
     renderingQueue: [
-      createNotLoadedNote(0, "file1.txt"),
-      createNotLoadedNote(1, "file2.txt"),
-      createNotLoadedNote(2, "file3.txt"),
-      createNotLoadedNote(3, "file4.txt"),
-      createNotLoadedNote(4, "file5.txt"),
+      createNoteNotLoaded(0, "file1.txt"),
+      createNoteNotLoaded(1, "file2.txt"),
+      createNoteNotLoaded(2, "file3.txt"),
+      createNoteNotLoaded(3, "file4.txt"),
+      createNoteNotLoaded(4, "file5.txt"),
     ],
     notes: [],
   };
 
-  const loadedNote = convertToLoadedNote(
-    createNotLoadedNote(0, "file1.txt"),
+  const NoteLoaded = convertToNoteLoaded(
+    createNoteNotLoaded(0, "file1.txt"),
     "text"
   );
-  const newNoteListState = handleLoadedNode(noteListState, loadedNote);
+  const newNoteListState = handleLoadedNode(noteListState, NoteLoaded);
 
   // TODO: check properly
   expect(newNoteListState.renderingQueue.length).toEqual(4);
@@ -85,7 +85,7 @@ test("First note loaded first", () => {
 });
 
 test("Second note loaded first", () => {
-  const noteListState: NoteListStateFileListRetrieved = {
+  const noteListState: NoteListFileListRetrieved = {
     state: NoteListState.FileListRetrieved,
     unprocessedFiles: {
       fileList: ["file6.txt", "file7.txt"],
@@ -93,20 +93,20 @@ test("Second note loaded first", () => {
     },
     lastUsedNoteId: 4,
     renderingQueue: [
-      createNotLoadedNote(0, "file1.txt"),
-      createNotLoadedNote(1, "file2.txt"),
-      createNotLoadedNote(2, "file3.txt"),
-      createNotLoadedNote(3, "file4.txt"),
-      createNotLoadedNote(4, "file5.txt"),
+      createNoteNotLoaded(0, "file1.txt"),
+      createNoteNotLoaded(1, "file2.txt"),
+      createNoteNotLoaded(2, "file3.txt"),
+      createNoteNotLoaded(3, "file4.txt"),
+      createNoteNotLoaded(4, "file5.txt"),
     ],
     notes: [],
   };
 
-  const loadedNote = convertToLoadedNote(
-    createNotLoadedNote(1, "file2.txt"),
+  const NoteLoaded = convertToNoteLoaded(
+    createNoteNotLoaded(1, "file2.txt"),
     "text"
   );
-  const newNoteListState = handleLoadedNode(noteListState, loadedNote);
+  const newNoteListState = handleLoadedNode(noteListState, NoteLoaded);
 
   // TODO: check properly
   expect(newNoteListState.renderingQueue.length).toEqual(5);
@@ -114,7 +114,7 @@ test("Second note loaded first", () => {
 });
 
 test("First note loads after second note", () => {
-  const noteListState: NoteListStateFileListRetrieved = {
+  const noteListState: NoteListFileListRetrieved = {
     state: NoteListState.FileListRetrieved,
     unprocessedFiles: {
       fileList: ["file6.txt", "file7.txt"],
@@ -122,20 +122,20 @@ test("First note loads after second note", () => {
     },
     lastUsedNoteId: 4,
     renderingQueue: [
-      createNotLoadedNote(0, "file1.txt"),
-      convertToLoadedNote(createNotLoadedNote(1, "file2.txt"), "text"),
-      createNotLoadedNote(2, "file3.txt"),
-      createNotLoadedNote(3, "file4.txt"),
-      createNotLoadedNote(4, "file5.txt"),
+      createNoteNotLoaded(0, "file1.txt"),
+      convertToNoteLoaded(createNoteNotLoaded(1, "file2.txt"), "text"),
+      createNoteNotLoaded(2, "file3.txt"),
+      createNoteNotLoaded(3, "file4.txt"),
+      createNoteNotLoaded(4, "file5.txt"),
     ],
     notes: [],
   };
 
-  const loadedNote = convertToLoadedNote(
-    createNotLoadedNote(0, "file1.txt"),
+  const NoteLoaded = convertToNoteLoaded(
+    createNoteNotLoaded(0, "file1.txt"),
     "text"
   );
-  const newNoteListState = handleLoadedNode(noteListState, loadedNote);
+  const newNoteListState = handleLoadedNode(noteListState, NoteLoaded);
 
   // TODO: check properly
   expect(newNoteListState.renderingQueue.length).toEqual(3);

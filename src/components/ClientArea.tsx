@@ -1,4 +1,4 @@
-import { AppState } from "../state";
+import { AppState } from "../model";
 import "./ClientArea.css";
 import Footer from "./Footer";
 import NoteContainer from "./NoteContainer";

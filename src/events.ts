@@ -1,4 +1,4 @@
-import { LoadedNote } from "./state";
+import { NoteLoaded } from "./model";
 
 export enum EventType {
   TemplateNoteStartTextEditing,
@@ -7,26 +7,22 @@ export enum EventType {
   LoadNoteContentSuccess, // TODO: handle failure
 }
 
-export interface Event {
-  type: EventType;
-}
-
-export interface TemplateNoteStartTextEditingEvent extends Event {
+export interface TemplateNoteStartTextEditingEvent {
   type: EventType.TemplateNoteStartTextEditing;
 }
 
-export interface TemplateNoteCancelTextEditingEvent extends Event {
+export interface TemplateNoteCancelTextEditingEvent {
   type: EventType.TemplateNoteCancelTextEditing;
 }
 
-export interface RetrieveFileListSuccessEvent extends Event {
+export interface RetrieveFileListSuccessEvent {
   type: EventType.RetrieveFileListSuccess;
   data: Array<string>;
 }
 
-export interface LoadNoteContentSuccessEvent extends Event {
+export interface LoadNoteContentSuccessEvent {
   type: EventType.LoadNoteContentSuccess;
-  data: [LoadedNote, number];
+  data: [NoteLoaded, number];
 }
 
 export type AppEvent =

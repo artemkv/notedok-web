@@ -1,6 +1,6 @@
 import { AppEvent } from "./events";
 import { Command } from "./hooks/useReducer";
-import { Note } from "./state";
+import { NoteNotLoaded } from "./model";
 
 export enum CommandType {
   DoNothing,
@@ -16,15 +16,15 @@ export interface RetrieveFileListCommand extends Command<AppEvent> {
   type: CommandType.RetrieveFileList;
 }
 
-export interface LoadNextPageCommand extends Command<AppEvent> {
+export interface LoadNotesContentCommand extends Command<AppEvent> {
   type: CommandType.LoadNextPage;
-  notes: Array<Note>;
+  notes: Array<NoteNotLoaded>;
 }
 
 export type AppCommand =
   | DoNothingCommand
   | RetrieveFileListCommand
-  | LoadNextPageCommand;
+  | LoadNotesContentCommand;
 
 export const DoNothing: DoNothingCommand = {
   type: CommandType.DoNothing,

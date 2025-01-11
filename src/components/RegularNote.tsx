@@ -1,9 +1,9 @@
 import "./Note.css";
 import { useContext } from "react";
-import { Note } from "../state";
+import { NoteLoaded } from "../model";
 import AppContext from "../AppContext";
 
-function RegularNote(props: { note: Note }) {
+function RegularNote(props: { note: NoteLoaded }) {
   const { uistrings } = useContext(AppContext);
 
   const note = props.note;

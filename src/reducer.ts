@@ -5,9 +5,9 @@ import { AppEvent, EventType } from "./events";
 import {
   AppState,
   NoteListState,
-  NoteListStateFileListRetrieved,
+  NoteListFileListRetrieved,
   TemplateNoteState,
-} from "./state";
+} from "./model";
 import * as O from "optics-ts";
 
 const JustState = (state: AppState): [AppState, AppCommand] => [
@@ -41,7 +41,7 @@ export const Reducer = (
       fileListVersion = state.noteList.unprocessedFiles.fileListVersion + 1;
     }
 
-    const noteListState: NoteListStateFileListRetrieved = {
+    const noteListState: NoteListFileListRetrieved = {
       state: NoteListState.FileListRetrieved,
       unprocessedFiles: {
         fileList: fileList,

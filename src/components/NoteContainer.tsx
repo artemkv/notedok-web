@@ -1,6 +1,6 @@
 import TemplateNote from "./TemplateNote";
 import "./NoteContainer.css";
-import { NoteList, NoteListState, TemplateNoteState } from "../state";
+import { NoteList, NoteListState, TemplateNoteState } from "../model";
 import ProgressIndicator from "./ProgressIndicator";
 import RegularNote from "./RegularNote";
 
