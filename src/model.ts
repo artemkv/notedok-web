@@ -57,10 +57,8 @@ export interface NoteListRetrievingFileList {
 
 export interface NoteListFileListRetrieved {
   state: NoteListState.FileListRetrieved;
-  unprocessedFiles: {
-    fileList: Array<string>;
-    fileListVersion: number; // TODO: I think it has to go up
-  };
+  fileListVersion: number;
+  unprocessedFiles: Array<string>;
   lastUsedNoteId: number;
   renderingQueue: Array<Note>;
   notes: Array<NoteLoaded>;

@@ -15,17 +15,20 @@ export const shiftNotesToLoadForNextPage = (
   let pageSize = NOTES_ON_PAGE;
 
   // Shortcuts to inner props
-  const fileList = noteListState.unprocessedFiles.fileList;
+  const unprocessedFiles = noteListState.unprocessedFiles;
   const renderingQueue = noteListState.renderingQueue;
 
   // Detect an actual page size
-  if (fileList.length < pageSize) {
-    pageSize = fileList.length;
+  if (unprocessedFiles.length < pageSize) {
+    pageSize = unprocessedFiles.length;
   }
 
   // Split out the files for the first page
-  const filesToLoad = fileList.slice(0, pageSize);
-  const filesRemaining = fileList.slice(pageSize, fileList.length);
+  const filesToLoad = unprocessedFiles.slice(0, pageSize);
+  const filesRemaining = unprocessedFiles.slice(
+    pageSize,
+    unprocessedFiles.length
+  );
 
   // Prepare the dummy notes that need to be loaded
   const notesToLoad = filesToLoad.map((path, idx) => {
@@ -38,10 +41,8 @@ export const shiftNotesToLoadForNextPage = (
   // New state
   const newNoteListState: NoteListFileListRetrieved = {
     state: NoteListState.FileListRetrieved,
-    unprocessedFiles: {
-      fileList: filesRemaining,
-      fileListVersion: noteListState.unprocessedFiles.fileListVersion,
-    },
+    fileListVersion: noteListState.fileListVersion,
+    unprocessedFiles: filesRemaining,
     lastUsedNoteId: noteListState.lastUsedNoteId + pageSize,
     renderingQueue: newRenderingQueue,
     notes: noteListState.notes,
@@ -80,6 +81,7 @@ export const handleLoadedNode = (
   // New state
   const newNoteListState: NoteListFileListRetrieved = {
     state: NoteListState.FileListRetrieved,
+    fileListVersion: noteListState.fileListVersion,
     unprocessedFiles: noteListState.unprocessedFiles,
     lastUsedNoteId: noteListState.lastUsedNoteId,
     renderingQueue: notReadyNotes,

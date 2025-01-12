@@ -77,15 +77,13 @@ export const Reducer = (
     // So it should be stored 1 level up, and we should skip rendering if the version does not match
     let fileListVersion = 0;
     if (state.noteList.state === NoteListState.FileListRetrieved) {
-      fileListVersion = state.noteList.unprocessedFiles.fileListVersion + 1;
+      fileListVersion = state.noteList.fileListVersion + 1;
     }
 
     const noteList: NoteListFileListRetrieved = {
       state: NoteListState.FileListRetrieved,
-      unprocessedFiles: {
-        fileList: fileList,
-        fileListVersion,
-      },
+      fileListVersion,
+      unprocessedFiles: fileList,
       lastUsedNoteId: 0,
       renderingQueue: [],
       notes: [],
@@ -105,7 +103,7 @@ export const Reducer = (
     if (state.noteList.state === NoteListState.FileListRetrieved) {
       // TODO: so yes, this is the second place the version is checked
       // I think this is correct, but need to be reviewed when the version check moves up
-      if (state.noteList.unprocessedFiles.fileListVersion === fileListVersion) {
+      if (state.noteList.fileListVersion === fileListVersion) {
         const newNoteListState = handleLoadedNode(state.noteList, note);
 
         const optic = O.optic_<AppState>().prop("noteList");
@@ -122,7 +120,7 @@ export const Reducer = (
       const optic = O.optic_<AppState>().prop("noteList");
       return [
         O.set(optic)(newNoteList)(state),
-        LoadNextPage(notesToLoad, noteList.unprocessedFiles.fileListVersion),
+        LoadNextPage(notesToLoad, noteList.fileListVersion),
       ];
     }
   }

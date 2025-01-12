@@ -8,7 +8,7 @@ function Footer(props: { noteList: NoteList }) {
 
   let notesNotYetLoadedTotal = 0;
   if (noteList.state === NoteListState.FileListRetrieved) {
-    notesNotYetLoadedTotal = noteList.unprocessedFiles.fileList.length;
+    notesNotYetLoadedTotal = noteList.unprocessedFiles.length;
   }
 
   return (
