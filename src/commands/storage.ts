@@ -18,7 +18,7 @@ export const RetrieveFileList: RetrieveFileListCommand = {
 
         dispatch({
           type: EventType.RetrieveFileListSuccess,
-          data: [
+          fileList: [
             "file001 dfjglkj sdflkj glkjlk;gdsjflkgj sdlkf gkjashdfkjahs dkjfh asdkjhfkjsadhfkjj gfklfjsdlkgj lskdfj gklf hdsakjhfkjdsahfjkasdh fkj.txt",
             "file005 <script>.txt",
             "file014 ?*.txt",
@@ -54,13 +54,12 @@ export const LoadNextPage = (
 
     notesReversed.forEach((note) => {
       // TODO: maybe push to helper method
-      const NoteLoaded = convertToNoteLoaded(
+      const noteLoaded = convertToNoteLoaded(
         note,
-        ""
-        /*        "dummy content for *" +
+        "dummy content for *" +
           note.id +
           "*" +
-          " <script type='text/javascript'>alert('injected')</script>"*/
+          " <script type='text/javascript'>alert('injected')</script>"
       );
 
       setTimeout(() => {
@@ -68,7 +67,8 @@ export const LoadNextPage = (
 
         dispatch({
           type: EventType.LoadNoteContentSuccess,
-          data: [NoteLoaded, fileListVersion], // TODO:
+          note: noteLoaded,
+          fileListVersion, // TODO:
         });
       }, 300);
     });

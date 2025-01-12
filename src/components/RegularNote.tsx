@@ -14,7 +14,7 @@ function RegularNote(props: { note: NoteLoaded; isEditing: boolean }) {
   const onStartNoteTextEditing = () => {
     dispatch({
       type: EventType.RegularNoteStartTextEditing,
-      data: note,
+      note,
     });
   };
 
@@ -40,6 +40,7 @@ function RegularNote(props: { note: NoteLoaded; isEditing: boolean }) {
         dangerouslySetInnerHTML={{
           __html: renderNoteTextHtml(htmlEscape(note.text)),
         }}
+        onClick={onStartNoteTextEditing}
       ></div>
     );
   };
@@ -50,9 +51,10 @@ function RegularNote(props: { note: NoteLoaded; isEditing: boolean }) {
     return (
       <div>
         <div className="note-text-editable-container">
-          <textarea className="note-text-editable text-area-short">
-            {note.text}
-          </textarea>
+          <textarea
+            className="note-text-editable text-area-short"
+            value={note.text}
+          ></textarea>
           <button className="note-save-button">
             {uistrings.SaveButtonText}
           </button>

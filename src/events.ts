@@ -3,14 +3,12 @@ import { NoteLoaded } from "./model";
 export enum EventType {
   TemplateNoteStartTextEditing,
   TemplateNoteCancelTextEditing,
+  RegularNoteStartTextEditing,
+  RegularNoteCancelTextEditing,
   RetrieveFileListSuccess, // TODO: handle failure
   LoadNoteContentSuccess, // TODO: handle failure
   LoadNextPage,
-  RegularNoteStartTextEditing,
-  RegularNoteCancelTextEditing,
 }
-
-// TODO: still use data or should I move to named properties? I think I should
 
 export interface TemplateNoteStartTextEditingEvent {
   type: EventType.TemplateNoteStartTextEditing;
@@ -20,27 +18,28 @@ export interface TemplateNoteCancelTextEditingEvent {
   type: EventType.TemplateNoteCancelTextEditing;
 }
 
-export interface RetrieveFileListSuccessEvent {
-  type: EventType.RetrieveFileListSuccess;
-  data: Array<string>;
-}
-
-export interface LoadNoteContentSuccessEvent {
-  type: EventType.LoadNoteContentSuccess;
-  data: [NoteLoaded, number];
-}
-
-export interface LoadNextPageEvent {
-  type: EventType.LoadNextPage;
-}
-
 export interface RegularNoteStartTextEditingEvent {
   type: EventType.RegularNoteStartTextEditing;
-  data: NoteLoaded;
+  note: NoteLoaded;
 }
 
 export interface RegularNoteCancelTextEditingEvent {
   type: EventType.RegularNoteCancelTextEditing;
+}
+
+export interface RetrieveFileListSuccessEvent {
+  type: EventType.RetrieveFileListSuccess;
+  fileList: Array<string>;
+}
+
+export interface LoadNoteContentSuccessEvent {
+  type: EventType.LoadNoteContentSuccess;
+  note: NoteLoaded;
+  fileListVersion: number;
+}
+
+export interface LoadNextPageEvent {
+  type: EventType.LoadNextPage;
 }
 
 export type AppEvent =

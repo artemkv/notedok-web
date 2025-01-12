@@ -51,7 +51,7 @@ export const Reducer = (
       noteList: state.noteList,
       noteEditor: {
         state: NoteEditorState.EditingRegularNote,
-        note: event.data,
+        note: event.note,
       },
     };
 
@@ -70,7 +70,7 @@ export const Reducer = (
     return JustState(newState);
   }
   if (event.type === EventType.RetrieveFileListSuccess) {
-    const fileList = event.data;
+    const fileList = event.fileList;
 
     // TODO: this is the wrong place to do it.
     // File list version should increase every time we issue the command to retrieve file list
@@ -98,7 +98,8 @@ export const Reducer = (
     ];
   }
   if (event.type === EventType.LoadNoteContentSuccess) {
-    const [note, fileListVersion] = event.data;
+    const note = event.note;
+    const fileListVersion = event.fileListVersion;
 
     if (state.noteList.state === NoteListState.FileListRetrieved) {
       // TODO: so yes, this is the second place the version is checked
