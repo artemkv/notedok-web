@@ -1,6 +1,7 @@
 const uistrings = {
   TemplateNoteTitlePlaceholder: "New note",
   NoteTitlePlaceholder: "No title",
+  TemplateNoteNoteTextPlaceholder: "Type your text here",
   NoteTextPlaceholder: "Type your text here",
   MoreButtonText: "More",
   MoreButtonNotLoadedText: "not loaded",

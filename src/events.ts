@@ -6,7 +6,11 @@ export enum EventType {
   RetrieveFileListSuccess, // TODO: handle failure
   LoadNoteContentSuccess, // TODO: handle failure
   LoadNextPage,
+  RegularNoteStartTextEditing,
+  RegularNoteCancelTextEditing,
 }
+
+// TODO: still use data or should I move to named properties? I think I should
 
 export interface TemplateNoteStartTextEditingEvent {
   type: EventType.TemplateNoteStartTextEditing;
@@ -30,9 +34,20 @@ export interface LoadNextPageEvent {
   type: EventType.LoadNextPage;
 }
 
+export interface RegularNoteStartTextEditingEvent {
+  type: EventType.RegularNoteStartTextEditing;
+  data: NoteLoaded;
+}
+
+export interface RegularNoteCancelTextEditingEvent {
+  type: EventType.RegularNoteCancelTextEditing;
+}
+
 export type AppEvent =
   | TemplateNoteStartTextEditingEvent
   | TemplateNoteCancelTextEditingEvent
   | RetrieveFileListSuccessEvent
   | LoadNoteContentSuccessEvent
-  | LoadNextPageEvent;
+  | LoadNextPageEvent
+  | RegularNoteStartTextEditingEvent
+  | RegularNoteCancelTextEditingEvent;

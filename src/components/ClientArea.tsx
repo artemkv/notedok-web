@@ -5,17 +5,14 @@ import NoteContainer from "./NoteContainer";
 import SearchPanel from "./SearchPanel";
 
 function ClientArea(props: { state: AppState }) {
-  const templateNoteState = props.state.templateNoteState;
+  const noteEditor = props.state.noteEditor;
   const noteList = props.state.noteList;
 
   return (
     <div className="client-area-outer">
       <div className="client-area-inner">
         <SearchPanel />
-        <NoteContainer
-          noteList={noteList}
-          templateNoteState={templateNoteState}
-        />
+        <NoteContainer noteList={noteList} noteEditor={noteEditor} />
         <Footer noteList={noteList} />
       </div>
     </div>

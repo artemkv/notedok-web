@@ -22,10 +22,29 @@ export interface NoteLoaded {
 
 export type Note = NoteNotLoaded | NoteLoaded;
 
-export enum TemplateNoteState {
-  Initial,
-  EditingText,
+export enum NoteEditorState {
+  NotActive,
+  EditingTemplateNote,
+  EditingRegularNote,
 }
+
+export interface NoteEditorNotActive {
+  state: NoteEditorState.NotActive;
+}
+
+export interface NoteEditorEditingTemplateNote {
+  state: NoteEditorState.EditingTemplateNote;
+}
+
+export interface NoteEditorEditingRegularNote {
+  state: NoteEditorState.EditingRegularNote;
+  note: NoteLoaded;
+}
+
+export type NoteEditor =
+  | NoteEditorNotActive
+  | NoteEditorEditingTemplateNote
+  | NoteEditorEditingRegularNote;
 
 export enum NoteListState {
   RetrievingFileList,
@@ -40,7 +59,7 @@ export interface NoteListFileListRetrieved {
   state: NoteListState.FileListRetrieved;
   unprocessedFiles: {
     fileList: Array<string>;
-    fileListVersion: number;
+    fileListVersion: number; // TODO: I think it has to go up
   };
   lastUsedNoteId: number;
   renderingQueue: Array<Note>;
@@ -50,14 +69,16 @@ export interface NoteListFileListRetrieved {
 export type NoteList = NoteListRetrievingFileList | NoteListFileListRetrieved;
 
 export interface AppState {
-  templateNoteState: TemplateNoteState;
   noteList: NoteList;
+  noteEditor: NoteEditor;
 }
 
 export const IntialState: AppState = {
-  templateNoteState: TemplateNoteState.Initial,
   noteList: {
     state: NoteListState.RetrievingFileList,
+  },
+  noteEditor: {
+    state: NoteEditorState.NotActive,
   },
 };
 

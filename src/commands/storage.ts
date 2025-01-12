@@ -56,10 +56,11 @@ export const LoadNextPage = (
       // TODO: maybe push to helper method
       const NoteLoaded = convertToNoteLoaded(
         note,
-        "dummy content for *" +
+        ""
+        /*        "dummy content for *" +
           note.id +
           "*" +
-          " <script type='text/javascript'>alert('injected')</script>"
+          " <script type='text/javascript'>alert('injected')</script>"*/
       );
 
       setTimeout(() => {

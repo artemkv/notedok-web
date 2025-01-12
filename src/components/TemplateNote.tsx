@@ -1,15 +1,15 @@
 import "./Note.css";
-import { TemplateNoteState } from "../model";
+import { NoteEditor, NoteEditorState } from "../model";
 import { useContext } from "react";
 import AppContext from "../AppContext";
 import { EventType } from "../events";
 
 // TODO: where to put the CSS that are common with note?
 
-function TemplateNote(props: { state: TemplateNoteState }) {
+function TemplateNote(props: { noteEditor: NoteEditor }) {
   const { uistrings, dispatch } = useContext(AppContext);
 
-  const state = props.state;
+  const noteEditor = props.noteEditor;
 
   const onStartNoteTextEditing = () => {
     dispatch({
@@ -23,15 +23,17 @@ function TemplateNote(props: { state: TemplateNoteState }) {
     });
   };
 
-  const templateNotePlaceHolder = () => {
+  const placeHolder = () => {
     return (
       <div className="note-text" tabIndex={0} onClick={onStartNoteTextEditing}>
-        <span className="placeholder">{uistrings.NoteTextPlaceholder}</span>
+        <span className="placeholder">
+          {uistrings.TemplateNoteNoteTextPlaceholder}
+        </span>
       </div>
     );
   };
 
-  const templateNoteTextEditor = () => {
+  const textEditor = () => {
     return (
       <div>
         <div className="note-text-editable-container">
@@ -59,9 +61,9 @@ function TemplateNote(props: { state: TemplateNoteState }) {
           placeholder={uistrings.TemplateNoteTitlePlaceholder}
           maxLength={50}
         />
-        {state === TemplateNoteState.Initial
-          ? templateNotePlaceHolder()
-          : templateNoteTextEditor()}
+        {noteEditor.state === NoteEditorState.EditingTemplateNote
+          ? textEditor()
+          : placeHolder()}
       </div>
     </div>
   );

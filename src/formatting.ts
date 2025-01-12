@@ -1,5 +1,6 @@
 // This is legacy code, I am not going to review it, as I am moving to md support
 // This is not going to be used for any newly created notes
+// TODO: port the unit-tests
 export const formatWiki = (wiki: string) => {
   const WHITESPACE = /^\s$/;
   const NEWLINE = /^\n$/;

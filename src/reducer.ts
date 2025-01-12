@@ -6,7 +6,7 @@ import {
   AppState,
   NoteListState,
   NoteListFileListRetrieved,
-  TemplateNoteState,
+  NoteEditorState,
 } from "./model";
 import * as O from "optics-ts";
 
@@ -15,6 +15,7 @@ const JustState = (state: AppState): [AppState, AppCommand] => [
   DoNothing,
 ];
 
+// TODO: see if I really need optics
 export const Reducer = (
   state: AppState,
   event: AppEvent
@@ -22,16 +23,51 @@ export const Reducer = (
   // console.log(`Reducing event '${JSON.stringify(event)}'`);
 
   if (event.type === EventType.TemplateNoteStartTextEditing) {
-    const newTemplateNoteState = TemplateNoteState.EditingText;
+    // TODO: finish editing any other note that was being edited
 
-    const optic = O.optic_<AppState>().prop("templateNoteState");
-    return JustState(O.set(optic)(newTemplateNoteState)(state));
+    const newState: AppState = {
+      noteList: state.noteList,
+      noteEditor: {
+        state: NoteEditorState.EditingTemplateNote,
+      },
+    };
+
+    return JustState(newState);
   }
   if (event.type === EventType.TemplateNoteCancelTextEditing) {
-    const newTemplateNoteState = TemplateNoteState.Initial;
+    const newState: AppState = {
+      noteList: state.noteList,
+      noteEditor: {
+        state: NoteEditorState.NotActive,
+      },
+    };
 
-    const optic = O.optic_<AppState>().prop("templateNoteState");
-    return JustState(O.set(optic)(newTemplateNoteState)(state));
+    return JustState(newState);
+  }
+  if (event.type === EventType.RegularNoteStartTextEditing) {
+    // TODO: finish editing any other note that was being edited
+
+    const newState: AppState = {
+      noteList: state.noteList,
+      noteEditor: {
+        state: NoteEditorState.EditingRegularNote,
+        note: event.data,
+      },
+    };
+
+    return JustState(newState);
+  }
+  if (event.type === EventType.RegularNoteCancelTextEditing) {
+    // TODO: finish editing any other note that was being edited
+
+    const newState: AppState = {
+      noteList: state.noteList,
+      noteEditor: {
+        state: NoteEditorState.NotActive,
+      },
+    };
+
+    return JustState(newState);
   }
   if (event.type === EventType.RetrieveFileListSuccess) {
     const fileList = event.data;
