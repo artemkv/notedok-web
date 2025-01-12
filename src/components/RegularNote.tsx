@@ -2,6 +2,7 @@ import "./Note.css";
 import { useContext } from "react";
 import { NoteLoaded } from "../model";
 import AppContext from "../AppContext";
+import { htmlEscape, renderNoteTextHtml } from "../ui";
 
 function RegularNote(props: { note: NoteLoaded }) {
   const { uistrings } = useContext(AppContext);
@@ -22,9 +23,13 @@ function RegularNote(props: { note: NoteLoaded }) {
           maxLength={50}
         />
         {note.text ? (
-          <div className="note-text" tabIndex={0}>
-            {note.text}
-          </div>
+          <div
+            className="note-text"
+            tabIndex={0}
+            dangerouslySetInnerHTML={{
+              __html: renderNoteTextHtml(htmlEscape(note.text)),
+            }}
+          ></div>
         ) : (
           <div className="note-text" tabIndex={0}>
             <span className="placeholder">

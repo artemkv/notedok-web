@@ -1,3 +1,45 @@
+! Show first 5 notes
+
+As a regular user, I want to see my first 5 notes when I load page initially
+
+* Load list of files from the storage (async)
+* Render first 5 notes (or as many as could find)
+	* TODO: Only text files should be shown (filter based on file extension ".txt")
+	* TODO: File name becomes a title (file extension ".txt" is omitted)
+	* File content becomes a text
+	* Title should be rendered as safe content
+	* Text should be rendered as safe content
+	* Note loading and rendering should be done asynchronously, since it might take time to retrieve the note content
+	* Title is always displayed as a single line
+	* Long title should be rendered with "..." at the end, replacing the hidden part
+	* Long text should be all visible, the note height is variable and adjusts to fit all text
+
+
+! Progress indicator
+
+As a regular user, I want to have an understanding that the page is alive and doing something
+
+* Render the progress indicator while file list is being retrieved
+
+
+! Load next 5 notes
+
+As a regular user, I want to see next 5 notes if the note I am interested in is not yet shown on the page
+
+* When clicked on "More" button load next 5 notes (or as many as could find)
+* Loading and rendering should be done the same as for the first 5 notes
+
+
+! Number of notes yet to load
+
+As a regular user, I feel frustrated when I only see first 5 notes and have no idea how many there are more.
+
+* Indicate number of notes matching the current search filter and not yet loaded on the "More" button: "More (N not loaded)"
+
+
+
+
+
 Test:
 - notes loaded in a random order are rendered in the order the are returned
 - start loading second page before the first page notes have finished loading

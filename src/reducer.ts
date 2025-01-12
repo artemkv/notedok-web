@@ -36,6 +36,9 @@ export const Reducer = (
   if (event.type === EventType.RetrieveFileListSuccess) {
     const fileList = event.data;
 
+    // TODO: this is the wrong place to do it.
+    // File list version should increase every time we issue the command to retrieve file list
+    // So it should be stored 1 level up, and we should skip rendering if the version does not match
     let fileListVersion = 0;
     if (state.noteList.state === NoteListState.FileListRetrieved) {
       fileListVersion = state.noteList.unprocessedFiles.fileListVersion + 1;
@@ -64,6 +67,8 @@ export const Reducer = (
     const [note, fileListVersion] = event.data;
 
     if (state.noteList.state === NoteListState.FileListRetrieved) {
+      // TODO: so yes, this is the second place the version is checked
+      // I think this is correct, but need to be reviewed when the version check moves up
       if (state.noteList.unprocessedFiles.fileListVersion === fileListVersion) {
         const newNoteListState = handleLoadedNode(state.noteList, note);
 

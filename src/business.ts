@@ -1,3 +1,4 @@
+import { getTitleFromPath } from "./conversion";
 import {
   NoteLoaded,
   NoteListState,
@@ -96,7 +97,7 @@ export const createNoteNotLoaded = (
     type: NoteType.NotLoaded,
     id: "note_" + id.toString(),
     path,
-    title: path, // TODO: titleToPathCoverter
+    title: getTitleFromPath(path),
   };
 
   return note;

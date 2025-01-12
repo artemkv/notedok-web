@@ -19,9 +19,9 @@ export const RetrieveFileList: RetrieveFileListCommand = {
         dispatch({
           type: EventType.RetrieveFileListSuccess,
           data: [
-            "file001.txt",
-            "file005.txt",
-            "file014.txt",
+            "file001 dfjglkj sdflkj glkjlk;gdsjflkgj sdlkf gkjashdfkjahs dkjfh asdkjhfkjsadhfkjj gfklfjsdlkgj lskdfj gklf hdsakjhfkjdsahfjkasdh fkj.txt",
+            "file005 <script>.txt",
+            "file014 ?*.txt",
             "file015.txt",
             "file016.txt",
             "file017.txt",
@@ -56,7 +56,10 @@ export const LoadNextPage = (
       // TODO: maybe push to helper method
       const NoteLoaded = convertToNoteLoaded(
         note,
-        "dummy content for " + note.id
+        "dummy content for *" +
+          note.id +
+          "*" +
+          " <script type='text/javascript'>alert('injected')</script>"
       );
 
       setTimeout(() => {
