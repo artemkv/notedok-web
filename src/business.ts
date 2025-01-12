@@ -63,20 +63,23 @@ export const handleLoadedNode = (
 
   // Find out which notes can already be rendered
   const readyNotes: Array<NoteLoaded> = [];
-  let readyIdx = 0;
+  let fisrtNotReadyNoteIdx = 0;
   while (
-    readyIdx < newQueue.length &&
-    newQueue[readyIdx].type === NoteType.Loaded
+    fisrtNotReadyNoteIdx < newQueue.length &&
+    newQueue[fisrtNotReadyNoteIdx].type === NoteType.Loaded
   ) {
-    const note = newQueue[readyIdx];
+    const note = newQueue[fisrtNotReadyNoteIdx];
     if (note.type === NoteType.Loaded) {
       readyNotes.push(note);
     }
-    readyIdx++;
+    fisrtNotReadyNoteIdx++;
   }
 
   // Cut out the notes that are not ready
-  const notReadyNotes = newQueue.slice(readyIdx, newQueue.length);
+  const notReadyNotes = newQueue.slice(fisrtNotReadyNoteIdx, newQueue.length);
+
+  // Now ready to be shown
+  const newNotes = [...noteListState.notes, ...readyNotes];
 
   // New state
   const newNoteListState: NoteListFileListRetrieved = {
@@ -85,7 +88,7 @@ export const handleLoadedNode = (
     unprocessedFiles: noteListState.unprocessedFiles,
     lastUsedNoteId: noteListState.lastUsedNoteId,
     renderingQueue: notReadyNotes,
-    notes: [...noteListState.notes, ...readyNotes],
+    notes: newNotes,
   };
 
   return newNoteListState;
