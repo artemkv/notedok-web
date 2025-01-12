@@ -41,7 +41,7 @@ export const Reducer = (
       fileListVersion = state.noteList.unprocessedFiles.fileListVersion + 1;
     }
 
-    const noteListState: NoteListFileListRetrieved = {
+    const noteList: NoteListFileListRetrieved = {
       state: NoteListState.FileListRetrieved,
       unprocessedFiles: {
         fileList: fileList,
@@ -52,12 +52,11 @@ export const Reducer = (
       notes: [],
     };
 
-    const [newNoteListState, notesToLoad] =
-      shiftNotesToLoadForNextPage(noteListState);
+    const [newNoteList, notesToLoad] = shiftNotesToLoadForNextPage(noteList);
 
     const optic = O.optic_<AppState>().prop("noteList");
     return [
-      O.set(optic)(newNoteListState)(state),
+      O.set(optic)(newNoteList)(state),
       LoadNextPage(notesToLoad, fileListVersion),
     ];
   }
@@ -73,6 +72,18 @@ export const Reducer = (
       }
     }
     return JustState(state);
+  }
+  if (event.type === EventType.LoadNextPage) {
+    const noteList = state.noteList;
+    if (noteList.state === NoteListState.FileListRetrieved) {
+      const [newNoteList, notesToLoad] = shiftNotesToLoadForNextPage(noteList);
+
+      const optic = O.optic_<AppState>().prop("noteList");
+      return [
+        O.set(optic)(newNoteList)(state),
+        LoadNextPage(notesToLoad, noteList.unprocessedFiles.fileListVersion),
+      ];
+    }
   }
 
   console.error(`Unknown event '${JSON.stringify(event)}'`);

@@ -5,6 +5,7 @@ export enum EventType {
   TemplateNoteCancelTextEditing,
   RetrieveFileListSuccess, // TODO: handle failure
   LoadNoteContentSuccess, // TODO: handle failure
+  LoadNextPage,
 }
 
 export interface TemplateNoteStartTextEditingEvent {
@@ -25,8 +26,13 @@ export interface LoadNoteContentSuccessEvent {
   data: [NoteLoaded, number];
 }
 
+export interface LoadNextPageEvent {
+  type: EventType.LoadNextPage;
+}
+
 export type AppEvent =
   | TemplateNoteStartTextEditingEvent
   | TemplateNoteCancelTextEditingEvent
   | RetrieveFileListSuccessEvent
-  | LoadNoteContentSuccessEvent;
+  | LoadNoteContentSuccessEvent
+  | LoadNextPageEvent;
