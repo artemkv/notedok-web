@@ -1,6 +1,10 @@
-import { handleLoadedNode, shiftNotesToLoadForNextPage } from "./business";
+import {
+  finishEditing,
+  handleLoadedNode,
+  shiftNotesToLoadForNextPage,
+} from "./business";
 import { AppCommand, DoNothing } from "./commands";
-import { LoadNextPage } from "./commands/storage";
+import { LoadNextPage, SaveNoteText } from "./commands/storage";
 import { AppEvent, EventType } from "./events";
 import {
   AppState,
@@ -22,11 +26,7 @@ export const Reducer = (
 ): [AppState, AppCommand] => {
   // console.log(`Reducing event '${JSON.stringify(event)}'`);
 
-  // TODO: stop note editing when clicked outside of editor???
-
   if (event.type === EventType.TemplateNoteStartTextEditing) {
-    // TODO: finish editing any other note that was being edited and save
-
     const newState: AppState = {
       noteList: state.noteList,
       noteEditor: {
@@ -37,6 +37,7 @@ export const Reducer = (
 
     return JustState(newState);
   }
+
   if (event.type === EventType.TemplateNoteCancelTextEditing) {
     const newState: AppState = {
       noteList: state.noteList,
@@ -47,7 +48,9 @@ export const Reducer = (
 
     return JustState(newState);
   }
+
   if (event.type === EventType.TemplateNoteTextUpdated) {
+    // TODO: convert to a regular note
     // TODO: update the note in the note list
     // TODO: save changes
     // TODO: what if updated before file list is retrieved?
@@ -61,9 +64,8 @@ export const Reducer = (
 
     return JustState(newState);
   }
-  if (event.type === EventType.RegularNoteStartTextEditing) {
-    // TODO: finish editing any other note that was being edited and save
 
+  if (event.type === EventType.RegularNoteStartTextEditing) {
     const newState: AppState = {
       noteList: state.noteList,
       noteEditor: {
@@ -75,6 +77,7 @@ export const Reducer = (
 
     return JustState(newState);
   }
+
   if (event.type === EventType.RegularNoteCancelTextEditing) {
     const newState: AppState = {
       noteList: state.noteList,
@@ -85,6 +88,29 @@ export const Reducer = (
 
     return JustState(newState);
   }
+
+  if (event.type === EventType.RegularNoteTextUpdated) {
+    const noteList = state.noteList;
+    const noteEditor = state.noteEditor;
+    if (noteList.state === NoteListState.FileListRetrieved) {
+      if (noteEditor.state === NoteEditorState.EditingRegularNote) {
+        const newNoteList = finishEditing(noteList, noteEditor);
+
+        const newState: AppState = {
+          noteList: newNoteList,
+          noteEditor: {
+            state: NoteEditorState.NotActive,
+          },
+        };
+        const command = SaveNoteText(noteEditor.note, noteEditor.text);
+
+        return [newState, command];
+      }
+    }
+
+    return JustState(state);
+  }
+
   if (event.type === EventType.NoteEditorTextChanged) {
     if (
       state.noteEditor.state === NoteEditorState.EditingRegularNote ||
@@ -102,19 +128,7 @@ export const Reducer = (
     }
     return JustState(state);
   }
-  if (event.type === EventType.RegularNoteTextUpdated) {
-    // TODO: update the note in the note list
-    // TODO: save changes
 
-    const newState: AppState = {
-      noteList: state.noteList,
-      noteEditor: {
-        state: NoteEditorState.NotActive,
-      },
-    };
-
-    return JustState(newState);
-  }
   if (event.type === EventType.RetrieveFileListSuccess) {
     const fileList = event.fileList;
 
@@ -143,6 +157,7 @@ export const Reducer = (
       LoadNextPage(notesToLoad, fileListVersion),
     ];
   }
+
   if (event.type === EventType.LoadNoteContentSuccess) {
     const note = event.note;
     const fileListVersion = event.fileListVersion;
@@ -159,6 +174,7 @@ export const Reducer = (
     }
     return JustState(state);
   }
+
   if (event.type === EventType.LoadNextPage) {
     const noteList = state.noteList;
     if (noteList.state === NoteListState.FileListRetrieved) {

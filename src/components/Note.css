@@ -80,3 +80,13 @@ textarea.text-area-short {
 {
     color: #000000;
 }
+
+.codeblock
+{
+    border: 1px dotted #a9a9a9;
+    padding: 12px;
+    font-size: 12px;
+    font-family: monospace;
+    overflow-x: auto;
+    background: #fbfbfb;
+}

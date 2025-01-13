@@ -5,18 +5,19 @@ import {
   NoteListFileListRetrieved,
   NoteType,
   NoteNotLoaded,
+  NoteEditorEditingRegularNote,
 } from "./model";
 
 const NOTES_ON_PAGE = 5;
 
 export const shiftNotesToLoadForNextPage = (
-  noteListState: NoteListFileListRetrieved
+  noteList: NoteListFileListRetrieved
 ): [NoteListFileListRetrieved, Array<NoteNotLoaded>] => {
   let pageSize = NOTES_ON_PAGE;
 
   // Shortcuts to inner props
-  const unprocessedFiles = noteListState.unprocessedFiles;
-  const renderingQueue = noteListState.renderingQueue;
+  const unprocessedFiles = noteList.unprocessedFiles;
+  const renderingQueue = noteList.renderingQueue;
 
   // Detect an actual page size
   if (unprocessedFiles.length < pageSize) {
@@ -32,31 +33,31 @@ export const shiftNotesToLoadForNextPage = (
 
   // Prepare the dummy notes that need to be loaded
   const notesToLoad = filesToLoad.map((path, idx) => {
-    return createNoteNotLoaded(noteListState.lastUsedNoteId + idx, path);
+    return createNoteNotLoaded(noteList.lastUsedNoteId + idx, path);
   });
 
   // Keep track of the order
   const newRenderingQueue = [...renderingQueue, ...notesToLoad];
 
   // New state
-  const newNoteListState: NoteListFileListRetrieved = {
+  const newNoteList: NoteListFileListRetrieved = {
     state: NoteListState.FileListRetrieved,
-    fileListVersion: noteListState.fileListVersion,
+    fileListVersion: noteList.fileListVersion,
     unprocessedFiles: filesRemaining,
-    lastUsedNoteId: noteListState.lastUsedNoteId + pageSize,
+    lastUsedNoteId: noteList.lastUsedNoteId + pageSize,
     renderingQueue: newRenderingQueue,
-    notes: noteListState.notes,
+    notes: noteList.notes,
   };
 
-  return [newNoteListState, notesToLoad];
+  return [newNoteList, notesToLoad];
 };
 
 export const handleLoadedNode = (
-  noteListState: NoteListFileListRetrieved,
+  noteList: NoteListFileListRetrieved,
   note: NoteLoaded
 ): NoteListFileListRetrieved => {
   // Shortcuts to inner props
-  const queue = noteListState.renderingQueue;
+  const queue = noteList.renderingQueue;
 
   // Update the note on the queue with the loaded one
   const newQueue = queue.map((n) => (n.id === note.id ? note : n));
@@ -79,19 +80,45 @@ export const handleLoadedNode = (
   const notReadyNotes = newQueue.slice(fisrtNotReadyNoteIdx, newQueue.length);
 
   // Now ready to be shown
-  const newNotes = [...noteListState.notes, ...readyNotes];
+  const newNotes = [...noteList.notes, ...readyNotes];
 
   // New state
-  const newNoteListState: NoteListFileListRetrieved = {
+  const newNoteList: NoteListFileListRetrieved = {
     state: NoteListState.FileListRetrieved,
-    fileListVersion: noteListState.fileListVersion,
-    unprocessedFiles: noteListState.unprocessedFiles,
-    lastUsedNoteId: noteListState.lastUsedNoteId,
+    fileListVersion: noteList.fileListVersion,
+    unprocessedFiles: noteList.unprocessedFiles,
+    lastUsedNoteId: noteList.lastUsedNoteId,
     renderingQueue: notReadyNotes,
     notes: newNotes,
   };
 
-  return newNoteListState;
+  return newNoteList;
+};
+
+export const finishEditing = (
+  noteList: NoteListFileListRetrieved,
+  noteEditor: NoteEditorEditingRegularNote
+): NoteListFileListRetrieved => {
+  // Shortcuts to inner props
+  const note = noteEditor.note;
+  const newText = noteEditor.text;
+
+  // New note with updated text
+  const newNote = {
+    ...note,
+    text: newText,
+  };
+
+  // Update the note list with the updated one
+  const newNotes = noteList.notes.map((n) => (n.id === note.id ? newNote : n));
+
+  // New state
+  const newNoteList: NoteListFileListRetrieved = {
+    ...noteList,
+    notes: newNotes,
+  };
+
+  return newNoteList;
 };
 
 export const createNoteNotLoaded = (

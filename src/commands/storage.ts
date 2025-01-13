@@ -3,9 +3,10 @@ import {
   CommandType,
   LoadNotesContentCommand,
   RetrieveFileListCommand,
+  SaveNoteTextCommand,
 } from "../commands";
 import { EventType } from "../events";
-import { NoteNotLoaded } from "../model";
+import { NoteLoaded, NoteNotLoaded } from "../model";
 
 export const RetrieveFileList: RetrieveFileListCommand = {
   type: CommandType.RetrieveFileList,
@@ -72,5 +73,17 @@ export const LoadNextPage = (
         });
       }, 300);
     });
+  },
+});
+
+export const SaveNoteText = (
+  note: NoteLoaded,
+  newText: string
+): SaveNoteTextCommand => ({
+  type: CommandType.SaveNoteText,
+  note,
+  newText,
+  execute: (dispatch) => {
+    // TODO:
   },
 });
