@@ -56,6 +56,10 @@ textarea.text-area-short {
     min-height: 300px;
 }
 
+textarea.text-area-tall {
+    min-height: 600px;
+}
+
 .note-save-button
 {
     display:none;

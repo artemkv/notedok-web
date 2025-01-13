@@ -4,6 +4,7 @@ import { NoteEditor, NoteEditorState, NoteLoaded } from "../model";
 import AppContext from "../AppContext";
 import { htmlEscape, renderNoteTextHtml } from "../ui";
 import { EventType } from "../events";
+import { countLines } from "../util";
 
 function RegularNote(props: { note: NoteLoaded; noteEditor: NoteEditor }) {
   const { uistrings, dispatch } = useContext(AppContext);
@@ -68,6 +69,10 @@ function RegularNote(props: { note: NoteLoaded; noteEditor: NoteEditor }) {
     focusTextarea();
   });
 
+  const isLongText = () => {
+    return countLines(note.text) > 10;
+  };
+
   const placeHolder = () => {
     return (
       <div className="note-text" tabIndex={0} onClick={onStartNoteTextEditing}>
@@ -90,14 +95,15 @@ function RegularNote(props: { note: NoteLoaded; noteEditor: NoteEditor }) {
   };
 
   // TODO: should I html escape??
-  // TODO: the size of text area should adapt
   // TODO: cancel editing by esc
   const textEditor = () => {
     return (
       <div className="note-text-editable-container">
         <textarea
           ref={textareaRef}
-          className="note-text-editable text-area-short"
+          className={`note-text-editable ${
+            isLongText() ? "text-area-tall" : "text-area-short"
+          }`}
           value={editedText}
           onChange={textAreaValueOnChange}
           onBlur={textAreaValueOnBlur}

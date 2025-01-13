@@ -94,6 +94,8 @@ export const Reducer = (
     const noteEditor = state.noteEditor;
     if (noteList.state === NoteListState.FileListRetrieved) {
       if (noteEditor.state === NoteEditorState.EditingRegularNote) {
+        // TODO: check the text has actually changed
+
         const newNoteList = finishEditing(noteList, noteEditor);
 
         const newState: AppState = {
