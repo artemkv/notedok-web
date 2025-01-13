@@ -122,7 +122,9 @@ function RegularNote(props: { note: NoteLoaded; noteEditor: NoteEditor }) {
   const readonlyNoteControlArea = () => {
     return (
       <div className="note-controlarea">
-        <a className="note-button">{uistrings.EditButtonText}</a>
+        <a className="note-button" onClick={onStartNoteTextEditing}>
+          {uistrings.EditButtonText}
+        </a>
       </div>
     );
   };
