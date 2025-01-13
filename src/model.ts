@@ -34,11 +34,13 @@ export interface NoteEditorNotActive {
 
 export interface NoteEditorEditingTemplateNote {
   state: NoteEditorState.EditingTemplateNote;
+  text: string;
 }
 
 export interface NoteEditorEditingRegularNote {
   state: NoteEditorState.EditingRegularNote;
   note: NoteLoaded;
+  text: string;
 }
 
 export type NoteEditor =

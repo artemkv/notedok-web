@@ -22,13 +22,16 @@ export const Reducer = (
 ): [AppState, AppCommand] => {
   // console.log(`Reducing event '${JSON.stringify(event)}'`);
 
+  // TODO: stop note editing when clicked outside of editor???
+
   if (event.type === EventType.TemplateNoteStartTextEditing) {
-    // TODO: finish editing any other note that was being edited
+    // TODO: finish editing any other note that was being edited and save
 
     const newState: AppState = {
       noteList: state.noteList,
       noteEditor: {
         state: NoteEditorState.EditingTemplateNote,
+        text: "",
       },
     };
 
@@ -44,21 +47,64 @@ export const Reducer = (
 
     return JustState(newState);
   }
+  if (event.type === EventType.TemplateNoteTextUpdated) {
+    // TODO: update the note in the note list
+    // TODO: save changes
+    // TODO: what if updated before file list is retrieved?
+
+    const newState: AppState = {
+      noteList: state.noteList,
+      noteEditor: {
+        state: NoteEditorState.NotActive,
+      },
+    };
+
+    return JustState(newState);
+  }
   if (event.type === EventType.RegularNoteStartTextEditing) {
-    // TODO: finish editing any other note that was being edited
+    // TODO: finish editing any other note that was being edited and save
 
     const newState: AppState = {
       noteList: state.noteList,
       noteEditor: {
         state: NoteEditorState.EditingRegularNote,
         note: event.note,
+        text: event.note.text,
       },
     };
 
     return JustState(newState);
   }
   if (event.type === EventType.RegularNoteCancelTextEditing) {
-    // TODO: finish editing any other note that was being edited
+    const newState: AppState = {
+      noteList: state.noteList,
+      noteEditor: {
+        state: NoteEditorState.NotActive,
+      },
+    };
+
+    return JustState(newState);
+  }
+  if (event.type === EventType.NoteEditorTextChanged) {
+    if (
+      state.noteEditor.state === NoteEditorState.EditingRegularNote ||
+      state.noteEditor.state === NoteEditorState.EditingTemplateNote
+    ) {
+      const newState: AppState = {
+        noteList: state.noteList,
+        noteEditor: {
+          ...state.noteEditor,
+          text: event.newText,
+        },
+      };
+
+      return JustState(newState);
+    }
+    return JustState(state);
+  }
+  if (event.type === EventType.RegularNoteTextUpdated) {
+    // TODO: update the note in the note list
+    // TODO: save changes
 
     const newState: AppState = {
       noteList: state.noteList,
