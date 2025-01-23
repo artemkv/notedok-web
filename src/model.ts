@@ -1,5 +1,7 @@
 import { RetrieveFileList } from "./commands/storage";
 
+// note
+
 export enum NoteType {
   NotLoaded,
   Loaded,
@@ -22,31 +24,63 @@ export interface NoteLoaded {
 
 export type Note = NoteNotLoaded | NoteLoaded;
 
-export enum NoteEditorState {
+// note text editor
+
+export enum NoteTextEditorState {
   NotActive,
   EditingTemplateNote,
   EditingRegularNote,
 }
 
-export interface NoteEditorNotActive {
-  state: NoteEditorState.NotActive;
+export interface NoteTextEditorNotActive {
+  state: NoteTextEditorState.NotActive;
 }
 
-export interface NoteEditorEditingTemplateNote {
-  state: NoteEditorState.EditingTemplateNote;
+export interface NoteTextEditorEditingTemplateNote {
+  state: NoteTextEditorState.EditingTemplateNote;
   text: string;
 }
 
-export interface NoteEditorEditingRegularNote {
-  state: NoteEditorState.EditingRegularNote;
+export interface NoteTextEditorEditingRegularNote {
+  state: NoteTextEditorState.EditingRegularNote;
   note: NoteLoaded;
   text: string;
 }
 
-export type NoteEditor =
-  | NoteEditorNotActive
-  | NoteEditorEditingTemplateNote
-  | NoteEditorEditingRegularNote;
+export type NoteTextEditor =
+  | NoteTextEditorNotActive
+  | NoteTextEditorEditingTemplateNote
+  | NoteTextEditorEditingRegularNote;
+
+// note title editor
+
+export enum NoteTitleEditorState {
+  NotActive,
+  EditingTemplateNote,
+  EditingRegularNote,
+}
+
+export interface NoteTitleEditorNotActive {
+  state: NoteTitleEditorState.NotActive;
+}
+
+export interface NoteTitleEditorEditingTemplateNote {
+  state: NoteTitleEditorState.EditingTemplateNote;
+  text: string;
+}
+
+export interface NoteTitleEditorEditingRegularNote {
+  state: NoteTitleEditorState.EditingRegularNote;
+  note: NoteLoaded;
+  text: string;
+}
+
+export type NoteTitleEditor =
+  | NoteTitleEditorNotActive
+  | NoteTitleEditorEditingTemplateNote
+  | NoteTitleEditorEditingRegularNote;
+
+// note list
 
 export enum NoteListState {
   RetrievingFileList,
@@ -68,18 +102,28 @@ export interface NoteListFileListRetrieved {
 
 export type NoteList = NoteListRetrievingFileList | NoteListFileListRetrieved;
 
+// App state
+
+// TODO: having editors at this level allows editing before the notes are loaded, check that this is possible
 export interface AppState {
+  noteTextEditor: NoteTextEditor;
+  noteTitleEditor: NoteTitleEditor;
   noteList: NoteList;
-  noteEditor: NoteEditor;
 }
 
+// Initial state
+
 export const IntialState: AppState = {
+  noteTextEditor: {
+    state: NoteTextEditorState.NotActive,
+  },
+  noteTitleEditor: {
+    state: NoteTitleEditorState.NotActive,
+  },
   noteList: {
     state: NoteListState.RetrievingFileList,
   },
-  noteEditor: {
-    state: NoteEditorState.NotActive,
-  },
 };
 
+// Initial command - here to avoid circular refs
 export const InitialCommand = RetrieveFileList;

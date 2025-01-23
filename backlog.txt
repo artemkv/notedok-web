@@ -4,8 +4,8 @@ As a regular user, I want to see my first 5 notes when I load page initially
 
 * Load list of files from the storage (async)
 * Render first 5 notes (or as many as could find)
-	* TODO: Only text files should be shown (filter based on file extension ".txt")
-	* TODO: File name becomes a title (file extension ".txt" is omitted)
+	* Only text files should be shown (filter based on file extension ".txt")
+	* File name becomes a title (file extension ".txt" is omitted)
 	* File content becomes a text
 	* Title should be rendered as safe content
 	* Text should be rendered as safe content
@@ -36,6 +36,40 @@ As a regular user, I feel frustrated when I only see first 5 notes and have no i
 
 * Indicate number of notes matching the current search filter and not yet loaded on the "More" button: "More (N not loaded)"
 
+
+! Edit a note
+
+As a regular user, I want to edit note title and text
+
+* Title is rendered as a textbox without border, so it is immediately editable
+* Title max length is limited to 50 chars
+* Text becomes a textarea when clicked (click resulting in a text selection is ignored)
+* Title/text textboxes have the same visual style
+* When empty, title should be rendered as a watermark "No title"
+* When empty, text should be rendered as a watermark "Type your text here"
+* After changes are collected to be saved, the text textarea becomes a div again
+
+
+! Save the changes
+
+As a regular user, I want to make sure the changes I did are saved
+
+* TODO: When title/text textbox loses focus, changes are saved to the S3
+* Changes should be saved asynchronously
+* TODO: If title left empty, generate the file name
+* When title is updated (manually or when auto-generated), the file should be renamed
+* TODO: Title can be invalid file name. The app should make a best effort to replace the invalid characters as follows:
+/ becomes (sl)
+? becomes (qst)
+< becomes (lt)
+> becomes (gt)
+\ becomes (bsl)
+: becomes (col)
+* becomes (star)
+| becomes (pipe)
+" becomes (dqt)
+^ becomes (crt)
+* TODO: check more S3-specific limitations
 
 
 

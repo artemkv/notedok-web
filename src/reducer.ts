@@ -1,16 +1,18 @@
 import {
-  finishEditing,
+  finishNoteTextEditing,
+  finishNoteTitleEditing,
   handleLoadedNode,
   shiftNotesToLoadForNextPage,
 } from "./business";
 import { AppCommand, DoNothing } from "./commands";
-import { LoadNextPage, SaveNoteText } from "./commands/storage";
+import { LoadNextPage } from "./commands/storage";
 import { AppEvent, EventType } from "./events";
 import {
   AppState,
   NoteListState,
   NoteListFileListRetrieved,
-  NoteEditorState,
+  NoteTextEditorState,
+  NoteTitleEditorState,
 } from "./model";
 import * as O from "optics-ts";
 
@@ -24,25 +26,114 @@ export const Reducer = (
   state: AppState,
   event: AppEvent
 ): [AppState, AppCommand] => {
-  // console.log(`Reducing event '${JSON.stringify(event)}'`);
+  console.log(
+    `Reducing event '${EventType[event.type]} ${JSON.stringify(event)}'`
+  );
 
-  if (event.type === EventType.TemplateNoteStartTextEditing) {
+  if (event.type === EventType.TemplateNoteTitleEditorTextChanged) {
     const newState: AppState = {
       noteList: state.noteList,
-      noteEditor: {
-        state: NoteEditorState.EditingTemplateNote,
-        text: "",
+      noteTitleEditor: {
+        state: NoteTitleEditorState.EditingTemplateNote,
+        text: event.newText,
+      },
+      noteTextEditor: state.noteTextEditor,
+    };
+
+    return JustState(newState);
+  }
+
+  if (event.type === EventType.TemplateNoteTitleUpdated) {
+    // TODO: save title
+
+    const newState: AppState = {
+      noteList: state.noteList,
+      noteTitleEditor: {
+        state: NoteTitleEditorState.NotActive,
+      },
+      noteTextEditor: state.noteTextEditor,
+    };
+
+    return JustState(newState);
+  }
+
+  if (event.type === EventType.RegularNoteTitleEditorTextChanged) {
+    const newState: AppState = {
+      noteList: state.noteList,
+      noteTitleEditor: {
+        state: NoteTitleEditorState.EditingRegularNote,
+        note: event.note,
+        text: event.newText,
+      },
+      noteTextEditor: state.noteTextEditor,
+    };
+
+    return JustState(newState);
+  }
+
+  if (event.type === EventType.RegularNoteTitleUpdated) {
+    const noteList = state.noteList;
+    const noteTitleEditor = state.noteTitleEditor;
+    if (noteList.state === NoteListState.FileListRetrieved) {
+      if (noteTitleEditor.state === NoteTitleEditorState.EditingRegularNote) {
+        const [newNoteList, command] = finishNoteTitleEditing(
+          noteList,
+          noteTitleEditor
+        );
+
+        const newState: AppState = {
+          noteList: newNoteList,
+          noteTitleEditor: {
+            state: NoteTitleEditorState.NotActive,
+          },
+          noteTextEditor: state.noteTextEditor,
+        };
+
+        return [newState, command];
+      }
+    }
+
+    return JustState(state);
+  }
+
+  if (event.type === EventType.NoteTextEditorTextChanged) {
+    if (
+      state.noteTextEditor.state === NoteTextEditorState.EditingRegularNote ||
+      state.noteTextEditor.state === NoteTextEditorState.EditingTemplateNote
+    ) {
+      const newState: AppState = {
+        noteList: state.noteList,
+        noteTitleEditor: state.noteTitleEditor,
+        noteTextEditor: {
+          ...state.noteTextEditor,
+          text: event.newText,
+        },
+      };
+
+      return JustState(newState);
+    }
+    return JustState(state);
+  }
+
+  if (event.type === EventType.NoteTextEditorCancelEdit) {
+    const newState: AppState = {
+      noteList: state.noteList,
+      noteTitleEditor: state.noteTitleEditor,
+      noteTextEditor: {
+        state: NoteTextEditorState.NotActive,
       },
     };
 
     return JustState(newState);
   }
 
-  if (event.type === EventType.TemplateNoteCancelTextEditing) {
+  if (event.type === EventType.TemplateNoteStartTextEditing) {
     const newState: AppState = {
       noteList: state.noteList,
-      noteEditor: {
-        state: NoteEditorState.NotActive,
+      noteTitleEditor: state.noteTitleEditor,
+      noteTextEditor: {
+        state: NoteTextEditorState.EditingTemplateNote,
+        text: "",
       },
     };
 
@@ -57,8 +148,9 @@ export const Reducer = (
 
     const newState: AppState = {
       noteList: state.noteList,
-      noteEditor: {
-        state: NoteEditorState.NotActive,
+      noteTitleEditor: state.noteTitleEditor,
+      noteTextEditor: {
+        state: NoteTextEditorState.NotActive,
       },
     };
 
@@ -68,8 +160,9 @@ export const Reducer = (
   if (event.type === EventType.RegularNoteStartTextEditing) {
     const newState: AppState = {
       noteList: state.noteList,
-      noteEditor: {
-        state: NoteEditorState.EditingRegularNote,
+      noteTitleEditor: state.noteTitleEditor,
+      noteTextEditor: {
+        state: NoteTextEditorState.EditingRegularNote,
         note: event.note,
         text: event.note.text,
       },
@@ -78,56 +171,28 @@ export const Reducer = (
     return JustState(newState);
   }
 
-  if (event.type === EventType.RegularNoteCancelTextEditing) {
-    const newState: AppState = {
-      noteList: state.noteList,
-      noteEditor: {
-        state: NoteEditorState.NotActive,
-      },
-    };
-
-    return JustState(newState);
-  }
-
   if (event.type === EventType.RegularNoteTextUpdated) {
     const noteList = state.noteList;
-    const noteEditor = state.noteEditor;
+    const noteTextEditor = state.noteTextEditor;
     if (noteList.state === NoteListState.FileListRetrieved) {
-      if (noteEditor.state === NoteEditorState.EditingRegularNote) {
-        // TODO: check the text has actually changed
-
-        const newNoteList = finishEditing(noteList, noteEditor);
+      if (noteTextEditor.state === NoteTextEditorState.EditingRegularNote) {
+        const [newNoteList, command] = finishNoteTextEditing(
+          noteList,
+          noteTextEditor
+        );
 
         const newState: AppState = {
           noteList: newNoteList,
-          noteEditor: {
-            state: NoteEditorState.NotActive,
+          noteTitleEditor: state.noteTitleEditor,
+          noteTextEditor: {
+            state: NoteTextEditorState.NotActive,
           },
         };
-        const command = SaveNoteText(noteEditor.note, noteEditor.text);
 
         return [newState, command];
       }
     }
 
-    return JustState(state);
-  }
-
-  if (event.type === EventType.NoteEditorTextChanged) {
-    if (
-      state.noteEditor.state === NoteEditorState.EditingRegularNote ||
-      state.noteEditor.state === NoteEditorState.EditingTemplateNote
-    ) {
-      const newState: AppState = {
-        noteList: state.noteList,
-        noteEditor: {
-          ...state.noteEditor,
-          text: event.newText,
-        },
-      };
-
-      return JustState(newState);
-    }
     return JustState(state);
   }
 

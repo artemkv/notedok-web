@@ -2,6 +2,7 @@ import { convertToNoteLoaded } from "../business";
 import {
   CommandType,
   LoadNotesContentCommand,
+  RenameNoteCommand,
   RetrieveFileListCommand,
   SaveNoteTextCommand,
 } from "../commands";
@@ -79,5 +80,19 @@ export const SaveNoteText = (
   newText,
   execute: (dispatch) => {
     // TODO:
+    console.log("Saving text");
+  },
+});
+
+export const RenameNote = (
+  note: NoteLoaded,
+  newTitle: string
+): RenameNoteCommand => ({
+  type: CommandType.RenameNote,
+  note,
+  newTitle,
+  execute: (dispatch) => {
+    // TODO:
+    console.log("Saving title");
   },
 });

@@ -1,3 +1,5 @@
+import { AppCommand, DoNothing } from "./commands";
+import { RenameNote, SaveNoteText } from "./commands/storage";
 import { getTitleFromPath } from "./conversion";
 import {
   NoteLoaded,
@@ -5,7 +7,8 @@ import {
   NoteListFileListRetrieved,
   NoteType,
   NoteNotLoaded,
-  NoteEditorEditingRegularNote,
+  NoteTextEditorEditingRegularNote,
+  NoteTitleEditorEditingRegularNote,
 } from "./model";
 
 const NOTES_ON_PAGE = 5;
@@ -95,13 +98,52 @@ export const handleLoadedNode = (
   return newNoteList;
 };
 
-export const finishEditing = (
+export const finishNoteTitleEditing = (
   noteList: NoteListFileListRetrieved,
-  noteEditor: NoteEditorEditingRegularNote
-): NoteListFileListRetrieved => {
+  noteTitleEditor: NoteTitleEditorEditingRegularNote
+): [NoteListFileListRetrieved, AppCommand] => {
   // Shortcuts to inner props
-  const note = noteEditor.note;
-  const newText = noteEditor.text;
+  const note = noteTitleEditor.note;
+  const newTitle = noteTitleEditor.text;
+
+  // Only save if the title has actually changed
+  if (newTitle === note.title) {
+    return [noteList, DoNothing];
+  }
+
+  // New note with updated text
+  const newNote = {
+    ...note,
+    title: newTitle,
+  };
+
+  // Update the note list with the updated one
+  const newNotes = noteList.notes.map((n) => (n.id === note.id ? newNote : n));
+
+  // New state
+  const newNoteList: NoteListFileListRetrieved = {
+    ...noteList,
+    notes: newNotes,
+  };
+
+  // TODO: is async, just like in the older version, but in the future I could add saving indicators
+  const command = RenameNote(noteTitleEditor.note, noteTitleEditor.text);
+
+  return [newNoteList, command];
+};
+
+export const finishNoteTextEditing = (
+  noteList: NoteListFileListRetrieved,
+  noteTextEditor: NoteTextEditorEditingRegularNote
+): [NoteListFileListRetrieved, AppCommand] => {
+  // Shortcuts to inner props
+  const note = noteTextEditor.note;
+  const newText = noteTextEditor.text;
+
+  // Only save if the text has actually changed
+  if (newText === note.text) {
+    return [noteList, DoNothing];
+  }
 
   // New note with updated text
   const newNote = {
@@ -118,7 +160,10 @@ export const finishEditing = (
     notes: newNotes,
   };
 
-  return newNoteList;
+  // TODO: is async, just like in the older version, but in the future I could add saving indicators
+  const command = SaveNoteText(noteTextEditor.note, noteTextEditor.text);
+
+  return [newNoteList, command];
 };
 
 export const createNoteNotLoaded = (

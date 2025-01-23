@@ -3,21 +3,52 @@ import { useContext, useEffect, useRef } from "react";
 import AppContext from "../AppContext";
 import { EventType } from "../events";
 import Empty from "./Empty";
-import { NoteEditor, NoteEditorState } from "../model";
+import {
+  NoteTextEditor,
+  NoteTextEditorState,
+  NoteTitleEditor,
+  NoteTitleEditorState,
+} from "../model";
 
-function TemplateNote(props: { noteEditor: NoteEditor }) {
+function TemplateNote(props: {
+  noteTitleEditor: NoteTitleEditor;
+  noteTextEditor: NoteTextEditor;
+}) {
   const { uistrings, dispatch } = useContext(AppContext);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const noteEditor = props.noteEditor;
+  const noteTitleEditor = props.noteTitleEditor;
+  const noteTextEditor = props.noteTextEditor;
 
-  const getEditorState = (): [boolean, string] => {
-    if (noteEditor.state === NoteEditorState.EditingTemplateNote) {
-      return [true, noteEditor.text];
+  const getNoteTitle = (): string => {
+    if (noteTitleEditor.state === NoteTitleEditorState.EditingTemplateNote) {
+      return noteTitleEditor.text;
+    }
+    return "";
+  };
+  const noteTitle = getNoteTitle();
+
+  const getTextEditorState = (): [boolean, string] => {
+    if (noteTextEditor.state === NoteTextEditorState.EditingTemplateNote) {
+      return [true, noteTextEditor.text];
     }
     return [false, ""];
   };
-  const [isEditing, editedText] = getEditorState();
+  const [isEditingText, editedText] = getTextEditorState();
+
+  const noteTitleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({
+      type: EventType.TemplateNoteTitleEditorTextChanged,
+      newText: e.target.value,
+    });
+  };
+
+  const noteTitleOnBlur = () => {
+    dispatch({
+      type: EventType.TemplateNoteTitleUpdated,
+      newTitle: noteTitle,
+    });
+  };
 
   const onStartNoteTextEditing = () => {
     dispatch({
@@ -25,14 +56,14 @@ function TemplateNote(props: { noteEditor: NoteEditor }) {
     });
   };
 
-  const textAreaValueOnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const noteTextOnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     dispatch({
-      type: EventType.NoteEditorTextChanged,
+      type: EventType.NoteTextEditorTextChanged,
       newText: e.target.value,
     });
   };
 
-  const textAreaValueOnBlur = () => {
+  const noteTextOnBlur = () => {
     dispatch({
       type: EventType.TemplateNoteTextUpdated,
       newText: editedText,
@@ -41,7 +72,7 @@ function TemplateNote(props: { noteEditor: NoteEditor }) {
 
   const onCancelNoteTextEditing = () => {
     dispatch({
-      type: EventType.TemplateNoteCancelTextEditing,
+      type: EventType.NoteTextEditorCancelEdit,
     });
   };
 
@@ -62,7 +93,7 @@ function TemplateNote(props: { noteEditor: NoteEditor }) {
     focusTextarea();
   });
 
-  const placeHolder = () => {
+  const noteTextPlaceholder = () => {
     return (
       <div className="note-text" tabIndex={0} onClick={onStartNoteTextEditing}>
         <span className="placeholder">
@@ -80,8 +111,8 @@ function TemplateNote(props: { noteEditor: NoteEditor }) {
           ref={textareaRef}
           className="note-text-editable text-area-short"
           value={editedText}
-          onChange={textAreaValueOnChange}
-          onBlur={textAreaValueOnBlur}
+          onChange={noteTextOnChange}
+          onBlur={noteTextOnBlur}
         ></textarea>
       </div>
     );
@@ -113,11 +144,14 @@ function TemplateNote(props: { noteEditor: NoteEditor }) {
         <input
           type="text"
           className="note-title"
+          value={noteTitle}
+          onChange={noteTitleOnChange}
+          onBlur={noteTitleOnBlur}
           placeholder={uistrings.TemplateNoteTitlePlaceholder}
           maxLength={50}
         />
-        {isEditing ? textEditor() : placeHolder()}
-        {isEditing ? editingNoteControlArea() : <Empty />}
+        {isEditingText ? textEditor() : noteTextPlaceholder()}
+        {isEditingText ? editingNoteControlArea() : <Empty />}
       </div>
     </div>
   );

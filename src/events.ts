@@ -1,24 +1,59 @@
 import { NoteLoaded } from "./model";
 
 export enum EventType {
+  TemplateNoteTitleEditorTextChanged,
+  TemplateNoteTitleUpdated,
+
+  RegularNoteTitleEditorTextChanged,
+  RegularNoteTitleUpdated,
+
+  NoteTextEditorTextChanged,
+  NoteTextEditorCancelEdit,
+
   TemplateNoteStartTextEditing,
-  TemplateNoteCancelTextEditing,
   TemplateNoteTextUpdated,
+
   RegularNoteStartTextEditing,
-  RegularNoteCancelTextEditing,
   RegularNoteTextUpdated,
-  NoteEditorTextChanged,
+
   RetrieveFileListSuccess, // TODO: handle failure
   LoadNoteContentSuccess, // TODO: handle failure
   LoadNextPage,
 }
 
-export interface TemplateNoteStartTextEditingEvent {
-  type: EventType.TemplateNoteStartTextEditing;
+export interface TemplateNoteTitleEditorTextChangedEvent {
+  type: EventType.TemplateNoteTitleEditorTextChanged;
+  newText: string;
 }
 
-export interface TemplateNoteCancelTextEditingEvent {
-  type: EventType.TemplateNoteCancelTextEditing;
+export interface TemplateNoteTitleUpdatedEvent {
+  type: EventType.TemplateNoteTitleUpdated;
+  newTitle: string;
+}
+
+export interface RegularNoteTitleEditorTextChangedEvent {
+  type: EventType.RegularNoteTitleEditorTextChanged;
+  note: NoteLoaded;
+  newText: string;
+}
+
+export interface RegularNoteTitleUpdatedEvent {
+  type: EventType.RegularNoteTitleUpdated;
+  note: NoteLoaded;
+  newTitle: string;
+}
+
+export interface NoteTextEditorTextChangedEvent {
+  type: EventType.NoteTextEditorTextChanged;
+  newText: string;
+}
+
+export interface NoteTextEditorCancelEditEvent {
+  type: EventType.NoteTextEditorCancelEdit;
+}
+
+export interface TemplateNoteStartTextEditingEvent {
+  type: EventType.TemplateNoteStartTextEditing;
 }
 
 export interface TemplateNoteTextUpdatedEvent {
@@ -31,18 +66,9 @@ export interface RegularNoteStartTextEditingEvent {
   note: NoteLoaded;
 }
 
-export interface RegularNoteCancelTextEditingEvent {
-  type: EventType.RegularNoteCancelTextEditing;
-}
-
 export interface RegularNoteTextUpdatedEvent {
   type: EventType.RegularNoteTextUpdated;
   note: NoteLoaded;
-  newText: string;
-}
-
-export interface NoteEditorTextChangedEvent {
-  type: EventType.NoteEditorTextChanged;
   newText: string;
 }
 
@@ -62,13 +88,16 @@ export interface LoadNextPageEvent {
 }
 
 export type AppEvent =
+  | TemplateNoteTitleEditorTextChangedEvent
+  | TemplateNoteTitleUpdatedEvent
+  | RegularNoteTitleEditorTextChangedEvent
+  | RegularNoteTitleUpdatedEvent
+  | NoteTextEditorTextChangedEvent
+  | NoteTextEditorCancelEditEvent
   | TemplateNoteStartTextEditingEvent
-  | TemplateNoteCancelTextEditingEvent
   | TemplateNoteTextUpdatedEvent
   | RegularNoteStartTextEditingEvent
-  | RegularNoteCancelTextEditingEvent
   | RegularNoteTextUpdatedEvent
-  | NoteEditorTextChangedEvent
   | RetrieveFileListSuccessEvent
   | LoadNoteContentSuccessEvent
   | LoadNextPageEvent;

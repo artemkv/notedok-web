@@ -1,5 +1,5 @@
 import useReducer from "./hooks/useReducer";
-import { IntialState, InitialCommand } from "./model";
+import { InitialCommand, IntialState } from "./model";
 import App from "./App";
 import AppContext from "./AppContext";
 import uistrings from "./uistrings";

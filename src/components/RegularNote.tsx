@@ -1,43 +1,82 @@
 import "./Note.css";
 import { useContext, useEffect, useRef } from "react";
-import { NoteEditor, NoteEditorState, NoteLoaded } from "../model";
+import {
+  NoteTextEditor,
+  NoteTextEditorState,
+  NoteLoaded,
+  NoteTitleEditor,
+  NoteTitleEditorState,
+} from "../model";
 import AppContext from "../AppContext";
 import { htmlEscape, renderNoteTextHtml } from "../ui";
 import { EventType } from "../events";
 import { countLines } from "../util";
 
-function RegularNote(props: { note: NoteLoaded; noteEditor: NoteEditor }) {
+function RegularNote(props: {
+  note: NoteLoaded;
+  noteTitleEditor: NoteTitleEditor;
+  noteTextEditor: NoteTextEditor;
+}) {
   const { uistrings, dispatch } = useContext(AppContext);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const note = props.note;
-  const noteEditor = props.noteEditor;
+  const noteTitleEditor = props.noteTitleEditor;
+  const noteTextEditor = props.noteTextEditor;
 
-  const getEditorState = (): [boolean, string] => {
-    if (noteEditor.state === NoteEditorState.EditingRegularNote) {
-      if (noteEditor.note === note) {
-        return [true, noteEditor.text];
+  const getNoteTitle = (): string => {
+    if (noteTitleEditor.state === NoteTitleEditorState.EditingRegularNote) {
+      if (noteTitleEditor.note === note) {
+        return noteTitleEditor.text;
+      }
+    }
+    return note.title;
+  };
+  const noteTitle = getNoteTitle();
+
+  const getTextEditorState = (): [boolean, string] => {
+    if (noteTextEditor.state === NoteTextEditorState.EditingRegularNote) {
+      if (noteTextEditor.note === note) {
+        return [true, noteTextEditor.text];
       }
     }
     return [false, ""];
   };
-  const [isEditing, editedText] = getEditorState();
+  const [isEditingText, editedText] = getTextEditorState();
+
+  const noteTitleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({
+      type: EventType.RegularNoteTitleEditorTextChanged,
+      note,
+      newText: e.target.value,
+    });
+  };
+
+  const noteTitleOnBlur = () => {
+    dispatch({
+      type: EventType.RegularNoteTitleUpdated,
+      note,
+      newTitle: noteTitle,
+    });
+  };
 
   const onStartNoteTextEditing = () => {
+    // TODO: somehow detect if clicked on a hyperlink inside the div
+
     dispatch({
       type: EventType.RegularNoteStartTextEditing,
       note,
     });
   };
 
-  const textAreaValueOnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const noteTextOnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     dispatch({
-      type: EventType.NoteEditorTextChanged,
+      type: EventType.NoteTextEditorTextChanged,
       newText: e.target.value,
     });
   };
 
-  const textAreaValueOnBlur = () => {
+  const noteTextOnBlur = () => {
     dispatch({
       type: EventType.RegularNoteTextUpdated,
       note,
@@ -47,7 +86,7 @@ function RegularNote(props: { note: NoteLoaded; noteEditor: NoteEditor }) {
 
   const onCancelNoteTextEditing = () => {
     dispatch({
-      type: EventType.RegularNoteCancelTextEditing,
+      type: EventType.NoteTextEditorCancelEdit,
     });
   };
 
@@ -73,7 +112,7 @@ function RegularNote(props: { note: NoteLoaded; noteEditor: NoteEditor }) {
     return countLines(note.text) > 10;
   };
 
-  const placeHolder = () => {
+  const noteTextPlaceholder = () => {
     return (
       <div className="note-text" tabIndex={0} onClick={onStartNoteTextEditing}>
         <span className="placeholder">{uistrings.NoteTextPlaceholder}</span>
@@ -107,8 +146,8 @@ function RegularNote(props: { note: NoteLoaded; noteEditor: NoteEditor }) {
             isLongText() ? "text-area-tall" : "text-area-short"
           }`}
           value={editedText}
-          onChange={textAreaValueOnChange}
-          onBlur={textAreaValueOnBlur}
+          onChange={noteTextOnChange}
+          onBlur={noteTextOnBlur}
         ></textarea>
       </div>
     );
@@ -150,12 +189,18 @@ function RegularNote(props: { note: NoteLoaded; noteEditor: NoteEditor }) {
         <input
           type="text"
           className="note-title"
-          value={note.title}
+          value={noteTitle}
+          onChange={noteTitleOnChange}
+          onBlur={noteTitleOnBlur}
           placeholder={uistrings.NoteTitlePlaceholder}
           maxLength={50}
         />
-        {isEditing ? textEditor() : note.text ? noteText() : placeHolder()}
-        {isEditing ? editingNoteControlArea() : readonlyNoteControlArea()}
+        {isEditingText
+          ? textEditor()
+          : note.text
+          ? noteText()
+          : noteTextPlaceholder()}
+        {isEditingText ? editingNoteControlArea() : readonlyNoteControlArea()}
       </div>
     </div>
   );
