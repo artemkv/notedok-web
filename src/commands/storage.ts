@@ -7,32 +7,31 @@ import {
 } from "../commands";
 import { EventType } from "../events";
 import { NoteLoaded, NoteNotLoaded } from "../model";
+import { getFiles, getFile } from "../sessionapi";
+
+interface FileData {
+  fileName: string;
+  lastModified: string;
+  etag: string;
+}
+
+interface GetFilesResponse {
+  files: FileData[];
+  hasMore: boolean;
+  nextContinuationToken: string;
+}
 
 export const RetrieveFileList: RetrieveFileListCommand = {
   type: CommandType.RetrieveFileList,
-  execute: (dispatch) => {
+  execute: async (dispatch) => {
     // console.log("Executing initial command");
 
-    setTimeout(
-      () => {
-        // console.log("Dispatching RetrieveFileListSuccess");
+    const getFilesResponse: GetFilesResponse = await getFiles(100, "");
 
-        dispatch({
-          type: EventType.RetrieveFileListSuccess,
-          fileList: [
-            "file001 dfjglkj sdflkj glkjlk;gdsjflkgj sdlkf gkjashdfkjahs dkjfh asdkjhfkjsadhfkjj gfklfjsdlkgj lskdfj gklf hdsakjhfkjdsahfjkasdh fkj.txt",
-            "file005 <script>.txt",
-            "file014 ?*.txt",
-            "file015.txt",
-            "file016.txt",
-            "file017.txt",
-            "file018.txt",
-            "file019.txt",
-          ], // TODO:
-        });
-      },
-      1000 // TODO
-    );
+    dispatch({
+      type: EventType.RetrieveFileListSuccess,
+      fileList: getFilesResponse.files.map((f) => f.fileName),
+    });
   },
 };
 
@@ -54,24 +53,19 @@ export const LoadNextPage = (
     });
 
     notesReversed.forEach((note) => {
-      // TODO: maybe push to helper method
-      const noteLoaded = convertToNoteLoaded(
-        note,
-        "dummy content for *" +
-          note.id +
-          "*" +
-          " <script type='text/javascript'>alert('injected')</script>"
-      );
-
-      setTimeout(() => {
-        // console.log("loaded " + updatedNote.id);
-
-        dispatch({
-          type: EventType.LoadNoteContentSuccess,
-          note: noteLoaded,
-          fileListVersion, // TODO:
+      getFile(note.path) // TODO: url-encode
+        .then((content: string) => {
+          // TODO: maybe push to helper method
+          const noteLoaded = convertToNoteLoaded(note, content);
+          return noteLoaded;
+        })
+        .then((noteLoaded: NoteLoaded) => {
+          dispatch({
+            type: EventType.LoadNoteContentSuccess,
+            note: noteLoaded,
+            fileListVersion, // TODO:
+          });
         });
-      }, 300);
     });
   },
 });

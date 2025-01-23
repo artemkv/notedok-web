@@ -96,6 +96,8 @@ function RegularNote(props: { note: NoteLoaded; noteEditor: NoteEditor }) {
 
   // TODO: should I html escape??
   // TODO: cancel editing by esc
+  // TODO: Before you had to click anywhere outside of the textarea to finish editing
+  //   , now it happens on blur. See if I can restore the old behavior, and if it's actually better
   const textEditor = () => {
     return (
       <div className="note-text-editable-container">
