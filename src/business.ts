@@ -9,8 +9,10 @@ import {
   NoteNotLoaded,
   NoteTextEditorEditingRegularNote,
   NoteTitleEditorEditingRegularNote,
-  NoteTitleEditorEditingTemplateNote,
   NoteTextEditorEditingTemplateNote,
+  NoteTitleEditorEditingTemplateNote,
+  NoteTextEditor,
+  NoteTextEditorState,
 } from "./model";
 
 const NOTES_ON_PAGE = 5;
@@ -168,7 +170,53 @@ export const finishNoteTextEditing = (
   return [newNoteList, command];
 };
 
-export const convertToRegularNoteAndSave = (
+export const convertToRegularNoteOnTitleUpdated = (
+  noteList: NoteListFileListRetrieved,
+  noteTitleEditor: NoteTitleEditorEditingTemplateNote
+): [NoteListFileListRetrieved, NoteTextEditor, AppCommand] => {
+  // Shortcuts to inner props
+  const newTitle = noteTitleEditor.text;
+
+  // Only save if the title is not empty
+  if (newTitle === "") {
+    return [
+      noteList,
+      {
+        state: NoteTextEditorState.NotActive,
+      },
+      DoNothing,
+    ];
+  }
+
+  const path = generatePathFromTitle(newTitle, false);
+
+  const newNote = createNoteNotLoaded(noteList.lastUsedNoteId + 1, path);
+  const newNoteAsLoaded = convertToNoteLoaded(newNote, "");
+
+  // Update the note list with the updated one
+  const newNotes = [newNoteAsLoaded, ...noteList.notes];
+
+  // New note list
+  const newNoteList: NoteListFileListRetrieved = {
+    ...noteList,
+    notes: newNotes,
+    lastUsedNoteId: noteList.lastUsedNoteId + 1,
+  };
+
+  // New text editor
+  const newTextEditor = {
+    state: NoteTextEditorState.EditingRegularNote,
+    note: newNoteAsLoaded,
+    text: "",
+  };
+
+  // TODO: is async, just like in the older version, but in the future I could add saving indicators
+  const command = SaveNoteText(newNoteAsLoaded, ""); // TODO: is new true, what does it do???
+
+  return [newNoteList, newTextEditor, command];
+};
+
+export const convertToRegularNoteOnTextUpdated = (
   noteList: NoteListFileListRetrieved,
   noteTextEditor: NoteTextEditorEditingTemplateNote
 ): [NoteListFileListRetrieved, AppCommand] => {
@@ -180,7 +228,7 @@ export const convertToRegularNoteAndSave = (
     return [noteList, DoNothing];
   }
 
-  const path = generatePathFromTitle("", false);
+  const path = generatePathFromTitle("", true);
 
   const newNote = createNoteNotLoaded(noteList.lastUsedNoteId + 1, path);
   const newNoteAsLoaded = convertToNoteLoaded(newNote, newText);
@@ -192,6 +240,7 @@ export const convertToRegularNoteAndSave = (
   const newNoteList: NoteListFileListRetrieved = {
     ...noteList,
     notes: newNotes,
+    lastUsedNoteId: noteList.lastUsedNoteId + 1,
   };
 
   // TODO: is async, just like in the older version, but in the future I could add saving indicators

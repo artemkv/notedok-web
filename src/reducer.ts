@@ -1,5 +1,6 @@
 import {
-  convertToRegularNoteAndSave,
+  convertToRegularNoteOnTextUpdated,
+  convertToRegularNoteOnTitleUpdated,
   finishNoteTextEditing,
   finishNoteTitleEditing,
   handleLoadedNode,
@@ -27,9 +28,9 @@ export const Reducer = (
   state: AppState,
   event: AppEvent
 ): [AppState, AppCommand] => {
-  console.log(
+  /*console.log(
     `Reducing event '${EventType[event.type]} ${JSON.stringify(event)}'`
-  );
+  );*/
 
   if (event.type === EventType.TemplateNoteTitleEditorTextChanged) {
     const newState: AppState = {
@@ -45,17 +46,28 @@ export const Reducer = (
   }
 
   if (event.type === EventType.TemplateNoteTitleUpdated) {
-    // TODO: save title
+    // TODO: what if updated before file list is retrieved?
 
-    const newState: AppState = {
-      noteList: state.noteList,
-      noteTitleEditor: {
-        state: NoteTitleEditorState.NotActive,
-      },
-      noteTextEditor: state.noteTextEditor,
-    };
+    const noteList = state.noteList;
+    const noteTitleEditor = state.noteTitleEditor;
+    if (noteList.state === NoteListState.FileListRetrieved) {
+      if (noteTitleEditor.state === NoteTitleEditorState.EditingTemplateNote) {
+        const [newNoteList, newTextEditor, command] =
+          convertToRegularNoteOnTitleUpdated(noteList, noteTitleEditor);
 
-    return JustState(newState);
+        const newState: AppState = {
+          noteList: newNoteList,
+          noteTitleEditor: {
+            state: NoteTitleEditorState.NotActive,
+          },
+          noteTextEditor: newTextEditor,
+        };
+
+        return [newState, command];
+      }
+    }
+
+    return JustState(state);
   }
 
   if (event.type === EventType.RegularNoteTitleEditorTextChanged) {
@@ -116,6 +128,7 @@ export const Reducer = (
     return JustState(state);
   }
 
+  // TODO: does not restore the previous text because lost focus happens first
   if (event.type === EventType.NoteTextEditorCancelEdit) {
     const newState: AppState = {
       noteList: state.noteList,
@@ -148,7 +161,7 @@ export const Reducer = (
     const noteTextEditor = state.noteTextEditor;
     if (noteList.state === NoteListState.FileListRetrieved) {
       if (noteTextEditor.state === NoteTextEditorState.EditingTemplateNote) {
-        const [newNoteList, command] = convertToRegularNoteAndSave(
+        const [newNoteList, command] = convertToRegularNoteOnTextUpdated(
           noteList,
           noteTextEditor
         );
