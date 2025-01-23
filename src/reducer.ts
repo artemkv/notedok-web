@@ -16,7 +16,6 @@ import {
   NoteTextEditorState,
   NoteTitleEditorState,
 } from "./model";
-import * as O from "optics-ts";
 
 const JustState = (state: AppState): [AppState, AppCommand] => [
   state,
@@ -34,12 +33,11 @@ export const Reducer = (
 
   if (event.type === EventType.TemplateNoteTitleEditorTextChanged) {
     const newState: AppState = {
-      noteList: state.noteList,
+      ...state,
       noteTitleEditor: {
         state: NoteTitleEditorState.EditingTemplateNote,
         text: event.newText,
       },
-      noteTextEditor: state.noteTextEditor,
     };
 
     return JustState(newState);
@@ -72,13 +70,12 @@ export const Reducer = (
 
   if (event.type === EventType.RegularNoteTitleEditorTextChanged) {
     const newState: AppState = {
-      noteList: state.noteList,
+      ...state,
       noteTitleEditor: {
         state: NoteTitleEditorState.EditingRegularNote,
         note: event.note,
         text: event.newText,
       },
-      noteTextEditor: state.noteTextEditor,
     };
 
     return JustState(newState);
@@ -95,11 +92,11 @@ export const Reducer = (
         );
 
         const newState: AppState = {
+          ...state,
           noteList: newNoteList,
           noteTitleEditor: {
             state: NoteTitleEditorState.NotActive,
           },
-          noteTextEditor: state.noteTextEditor,
         };
 
         return [newState, command];
@@ -115,8 +112,7 @@ export const Reducer = (
       state.noteTextEditor.state === NoteTextEditorState.EditingTemplateNote
     ) {
       const newState: AppState = {
-        noteList: state.noteList,
-        noteTitleEditor: state.noteTitleEditor,
+        ...state,
         noteTextEditor: {
           ...state.noteTextEditor,
           text: event.newText,
@@ -131,8 +127,7 @@ export const Reducer = (
   // TODO: does not restore the previous text because lost focus happens first
   if (event.type === EventType.NoteTextEditorCancelEdit) {
     const newState: AppState = {
-      noteList: state.noteList,
-      noteTitleEditor: state.noteTitleEditor,
+      ...state,
       noteTextEditor: {
         state: NoteTextEditorState.NotActive,
       },
@@ -143,8 +138,7 @@ export const Reducer = (
 
   if (event.type === EventType.TemplateNoteStartTextEditing) {
     const newState: AppState = {
-      noteList: state.noteList,
-      noteTitleEditor: state.noteTitleEditor,
+      ...state,
       noteTextEditor: {
         state: NoteTextEditorState.EditingTemplateNote,
         text: "",
@@ -167,8 +161,8 @@ export const Reducer = (
         );
 
         const newState: AppState = {
+          ...state,
           noteList: newNoteList,
-          noteTitleEditor: state.noteTitleEditor,
           noteTextEditor: {
             state: NoteTextEditorState.NotActive,
           },
@@ -183,8 +177,7 @@ export const Reducer = (
 
   if (event.type === EventType.RegularNoteStartTextEditing) {
     const newState: AppState = {
-      noteList: state.noteList,
-      noteTitleEditor: state.noteTitleEditor,
+      ...state,
       noteTextEditor: {
         state: NoteTextEditorState.EditingRegularNote,
         note: event.note,
@@ -206,8 +199,8 @@ export const Reducer = (
         );
 
         const newState: AppState = {
+          ...state,
           noteList: newNoteList,
-          noteTitleEditor: state.noteTitleEditor,
           noteTextEditor: {
             state: NoteTextEditorState.NotActive,
           },
@@ -242,11 +235,12 @@ export const Reducer = (
 
     const [newNoteList, notesToLoad] = shiftNotesToLoadForNextPage(noteList);
 
-    const optic = O.optic_<AppState>().prop("noteList");
-    return [
-      O.set(optic)(newNoteList)(state),
-      LoadNextPage(notesToLoad, fileListVersion),
-    ];
+    const newState: AppState = {
+      ...state,
+      noteList: newNoteList,
+    };
+
+    return [newState, LoadNextPage(notesToLoad, fileListVersion)];
   }
 
   if (event.type === EventType.LoadNoteContentSuccess) {
@@ -257,10 +251,14 @@ export const Reducer = (
       // TODO: so yes, this is the second place the version is checked
       // I think this is correct, but need to be reviewed when the version check moves up
       if (state.noteList.fileListVersion === fileListVersion) {
-        const newNoteListState = handleLoadedNode(state.noteList, note);
+        const newNoteList = handleLoadedNode(state.noteList, note);
 
-        const optic = O.optic_<AppState>().prop("noteList");
-        return JustState(O.set(optic)(newNoteListState)(state));
+        const newState: AppState = {
+          ...state,
+          noteList: newNoteList,
+        };
+
+        return JustState(newState);
       }
     }
     return JustState(state);
@@ -271,11 +269,12 @@ export const Reducer = (
     if (noteList.state === NoteListState.FileListRetrieved) {
       const [newNoteList, notesToLoad] = shiftNotesToLoadForNextPage(noteList);
 
-      const optic = O.optic_<AppState>().prop("noteList");
-      return [
-        O.set(optic)(newNoteList)(state),
-        LoadNextPage(notesToLoad, noteList.fileListVersion),
-      ];
+      const newState: AppState = {
+        ...state,
+        noteList: newNoteList,
+      };
+
+      return [newState, LoadNextPage(notesToLoad, noteList.fileListVersion)];
     }
   }
 
