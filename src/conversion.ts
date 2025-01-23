@@ -17,3 +17,13 @@ export const getTitleFromPath = (path: string) => {
 
   return title;
 };
+
+export const generatePathFromTitle = (title: string, ensureUniqie: boolean) => {
+  let postfix = "";
+  if (ensureUniqie || !title) {
+    const date = new Date();
+    const n = date.getTime();
+    postfix = TITLE_POSTFIX_SEPARATOR + n;
+  }
+  return "/" + decodePathFileSystemFriendly(title) + postfix + ".txt";
+};

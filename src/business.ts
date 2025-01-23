@@ -1,6 +1,6 @@
 import { AppCommand, DoNothing } from "./commands";
 import { RenameNote, SaveNoteText } from "./commands/storage";
-import { getTitleFromPath } from "./conversion";
+import { generatePathFromTitle, getTitleFromPath } from "./conversion";
 import {
   NoteLoaded,
   NoteListState,
@@ -9,6 +9,8 @@ import {
   NoteNotLoaded,
   NoteTextEditorEditingRegularNote,
   NoteTitleEditorEditingRegularNote,
+  NoteTitleEditorEditingTemplateNote,
+  NoteTextEditorEditingTemplateNote,
 } from "./model";
 
 const NOTES_ON_PAGE = 5;
@@ -162,6 +164,38 @@ export const finishNoteTextEditing = (
 
   // TODO: is async, just like in the older version, but in the future I could add saving indicators
   const command = SaveNoteText(noteTextEditor.note, noteTextEditor.text);
+
+  return [newNoteList, command];
+};
+
+export const convertToRegularNoteAndSave = (
+  noteList: NoteListFileListRetrieved,
+  noteTextEditor: NoteTextEditorEditingTemplateNote
+): [NoteListFileListRetrieved, AppCommand] => {
+  // Shortcuts to inner props
+  const newText = noteTextEditor.text;
+
+  // Only save if the text is not empty
+  if (newText === "") {
+    return [noteList, DoNothing];
+  }
+
+  const path = generatePathFromTitle("", false);
+
+  const newNote = createNoteNotLoaded(noteList.lastUsedNoteId + 1, path);
+  const newNoteAsLoaded = convertToNoteLoaded(newNote, newText);
+
+  // Update the note list with the updated one
+  const newNotes = [newNoteAsLoaded, ...noteList.notes];
+
+  // New state
+  const newNoteList: NoteListFileListRetrieved = {
+    ...noteList,
+    notes: newNotes,
+  };
+
+  // TODO: is async, just like in the older version, but in the future I could add saving indicators
+  const command = SaveNoteText(newNoteAsLoaded, newText); // TODO: is new true, what does it do???
 
   return [newNoteList, command];
 };

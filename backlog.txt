@@ -72,6 +72,27 @@ As a regular user, I want to make sure the changes I did are saved
 * TODO: check more S3-specific limitations
 
 
+!  Template note
+
+As a regular user, when I want to add a new note, I want to be able to type right into the empty pre-created template note.
+
+* Render template note as a first note displayed
+* Title should be rendered as a watermark "New note"
+* TODO: Auto-generated file names should be rendered as empty
+
+
+! Create a note
+
+As a regular user, when I want to add a new note, I want to be able to type right into the empty pre-created note.
+Once the changes are saved, the new empty note should appear allowing me to continue with the next note.
+
+* TODO: Editing the template note creates a new template note (content have to change)
+* TODO: Editing the template note turns it to a regular note, so saving changes should work exactly as with the regular note
+* TODO: If, after the template note turns it to a regular note, the title is still empty, the title watermark should change to "No title"
+* TODO: If after editing title/text stays empty, keep template note and don't create a new note
+
+
+
 
 
 Test:

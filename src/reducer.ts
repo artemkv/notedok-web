@@ -1,4 +1,5 @@
 import {
+  convertToRegularNoteAndSave,
   finishNoteTextEditing,
   finishNoteTitleEditing,
   handleLoadedNode,
@@ -141,20 +142,30 @@ export const Reducer = (
   }
 
   if (event.type === EventType.TemplateNoteTextUpdated) {
-    // TODO: convert to a regular note
-    // TODO: update the note in the note list
-    // TODO: save changes
     // TODO: what if updated before file list is retrieved?
 
-    const newState: AppState = {
-      noteList: state.noteList,
-      noteTitleEditor: state.noteTitleEditor,
-      noteTextEditor: {
-        state: NoteTextEditorState.NotActive,
-      },
-    };
+    const noteList = state.noteList;
+    const noteTextEditor = state.noteTextEditor;
+    if (noteList.state === NoteListState.FileListRetrieved) {
+      if (noteTextEditor.state === NoteTextEditorState.EditingTemplateNote) {
+        const [newNoteList, command] = convertToRegularNoteAndSave(
+          noteList,
+          noteTextEditor
+        );
 
-    return JustState(newState);
+        const newState: AppState = {
+          noteList: newNoteList,
+          noteTitleEditor: state.noteTitleEditor,
+          noteTextEditor: {
+            state: NoteTextEditorState.NotActive,
+          },
+        };
+
+        return [newState, command];
+      }
+    }
+
+    return JustState(state);
   }
 
   if (event.type === EventType.RegularNoteStartTextEditing) {

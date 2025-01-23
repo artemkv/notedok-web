@@ -14,6 +14,25 @@ export const decodePathFileSystemFriendly = (path: string): string => {
   return path;
 };
 
+function encodePathFileSystemFriendly(path: string): string {
+  path = path.replace(/\//g, "(sl)");
+  path = path.replace(/\?/g, "(qst)");
+  path = path.replace(/</g, "(lt)");
+  path = path.replace(/>/g, "(gt)");
+  path = path.replace(/\\/g, "(bsl)");
+  path = path.replace(/:/g, "(col)");
+  path = path.replace(/\*/g, "(star)");
+  path = path.replace(/\|/g, "(pipe)");
+  path = path.replace(/"/g, "(dqt)");
+  path = path.replace(/\^/g, "(crt)");
+
+  if (path[0] === ".") {
+    path = "_" + path;
+  }
+
+  return path;
+}
+
 export const countLines = (text: string) => {
   if (!text) {
     return 0;
