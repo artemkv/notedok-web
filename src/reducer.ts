@@ -5,8 +5,10 @@ import {
   finishNoteTitleEditing,
   handleLoadedNode,
   shiftNotesToLoadForNextPage,
+  updateNotePath,
 } from "./business";
 import { AppCommand, DoNothing } from "./commands";
+import { ReportError } from "./commands/alerts";
 import { LoadNextPage } from "./commands/storage";
 import { AppEvent, EventType } from "./events";
 import {
@@ -243,6 +245,22 @@ export const Reducer = (
     return [newState, LoadNextPage(notesToLoad, fileListVersion)];
   }
 
+  // TODO: losing the editor on template note title save
+  if (event.type === EventType.NoteSavedOnNewPath) {
+    const noteList = state.noteList;
+    if (noteList.state === NoteListState.FileListRetrieved) {
+      const newNoteList = updateNotePath(noteList, event.note, event.newPath);
+
+      const newState: AppState = {
+        ...state,
+        noteList: newNoteList,
+      };
+
+      return JustState(newState);
+    }
+    return JustState(state);
+  }
+
   if (event.type === EventType.LoadNoteContentSuccess) {
     const note = event.note;
     const fileListVersion = event.fileListVersion;
@@ -276,6 +294,10 @@ export const Reducer = (
 
       return [newState, LoadNextPage(notesToLoad, noteList.fileListVersion)];
     }
+  }
+
+  if (event.type === EventType.RestApiError) {
+    return [state, ReportError(event.err)];
   }
 
   console.error(`Unknown event '${JSON.stringify(event)}'`);

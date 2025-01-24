@@ -16,9 +16,10 @@ export interface NoteNotLoaded {
 // TODO: could make it not editable while saving, so that is only editable again once we know the new path
 // TODO: and this could actually be combined with indicator on a note (saving, error upon saving etc.)
 export interface NoteLoaded {
+  // TODO: maybe it's actually not "Not loaded/Loaded" but "ref/full" or smth like that
   type: NoteType.Loaded;
   id: string;
-  path: string;
+  path: string; // can be empty if the note was created on UI and haven't been yet saved
   title: string;
   text: string;
 }

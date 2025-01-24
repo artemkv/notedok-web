@@ -16,9 +16,13 @@ export enum EventType {
   RegularNoteStartTextEditing,
   RegularNoteTextUpdated,
 
+  NoteSavedOnNewPath,
+
   RetrieveFileListSuccess, // TODO: handle failure
   LoadNoteContentSuccess, // TODO: handle failure
   LoadNextPage,
+
+  RestApiError,
 }
 
 export interface TemplateNoteTitleEditorTextChangedEvent {
@@ -87,6 +91,17 @@ export interface LoadNextPageEvent {
   type: EventType.LoadNextPage;
 }
 
+export interface NoteSavedOnNewPathEvent {
+  type: EventType.NoteSavedOnNewPath;
+  note: NoteLoaded;
+  newPath: string;
+}
+
+export interface RestApiErrorEvent {
+  type: EventType.RestApiError;
+  err: unknown;
+}
+
 export type AppEvent =
   | TemplateNoteTitleEditorTextChangedEvent
   | TemplateNoteTitleUpdatedEvent
@@ -98,6 +113,8 @@ export type AppEvent =
   | TemplateNoteTextUpdatedEvent
   | RegularNoteStartTextEditingEvent
   | RegularNoteTextUpdatedEvent
+  | NoteSavedOnNewPathEvent
   | RetrieveFileListSuccessEvent
   | LoadNoteContentSuccessEvent
-  | LoadNextPageEvent;
+  | LoadNextPageEvent
+  | RestApiErrorEvent;

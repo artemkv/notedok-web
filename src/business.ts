@@ -5,7 +5,7 @@ import {
   RenameNoteFromTitle,
   SaveNoteText,
 } from "./commands/storage";
-import { generatePathFromTitle, getTitleFromPath } from "./conversion";
+import { getTitleFromPath } from "./conversion";
 import {
   NoteLoaded,
   NoteListState,
@@ -194,12 +194,14 @@ export const convertToRegularNoteOnTitleUpdated = (
   }
 
   // Initialize new note
-  const path = generatePathFromTitle(newTitle, false); // impure
-  const newNote = createNoteNotLoaded(noteList.lastUsedNoteId + 1, path);
-  const newNoteAsLoaded = convertToNoteLoaded(newNote, "");
+  const newNote = createNewNoteLoaded(
+    noteList.lastUsedNoteId + 1,
+    newTitle,
+    ""
+  );
 
   // Update the note list with the updated one
-  const newNotes = [newNoteAsLoaded, ...noteList.notes];
+  const newNotes = [newNote, ...noteList.notes];
 
   // New note list
   const newNoteList: NoteListFileListRetrieved = {
@@ -211,12 +213,12 @@ export const convertToRegularNoteOnTitleUpdated = (
   // New text editor
   const newTextEditor = {
     state: NoteTextEditorState.EditingRegularNote,
-    note: newNoteAsLoaded,
-    text: newNoteAsLoaded.text,
+    note: newNote,
+    text: newNote.text,
   };
 
   // TODO: is async, just like in the older version, but in the future I could add saving indicators
-  const command = CreateNewNoteWithTitle(newNoteAsLoaded);
+  const command = CreateNewNoteWithTitle(newNote);
 
   return [newNoteList, newTextEditor, command];
 };
@@ -234,12 +236,10 @@ export const convertToRegularNoteOnTextUpdated = (
   }
 
   // Initialize new note
-  const path = generatePathFromTitle("", true); // impure
-  const newNote = createNoteNotLoaded(noteList.lastUsedNoteId + 1, path);
-  const newNoteAsLoaded = convertToNoteLoaded(newNote, newText);
+  const newNote = createNewNoteLoaded(noteList.lastUsedNoteId + 1, "", newText);
 
   // Update the note list with the updated one
-  const newNotes = [newNoteAsLoaded, ...noteList.notes];
+  const newNotes = [newNote, ...noteList.notes];
 
   // New state
   const newNoteList: NoteListFileListRetrieved = {
@@ -249,35 +249,68 @@ export const convertToRegularNoteOnTextUpdated = (
   };
 
   // TODO: is async, just like in the older version, but in the future I could add saving indicators
-  const command = CreateNewNoteWithText(newNoteAsLoaded);
+  const command = CreateNewNoteWithText(newNote);
 
   return [newNoteList, command];
+};
+
+export const updateNotePath = (
+  noteList: NoteListFileListRetrieved,
+  note: NoteLoaded,
+  newPath: string
+): NoteListFileListRetrieved => {
+  // New note with updated text
+  const newNote = {
+    ...note,
+    path: newPath,
+  };
+
+  // Update the note list with the updated one
+  const newNotes = noteList.notes.map((n) => (n.id === note.id ? newNote : n)); // TODO: time to move to helper method?
+
+  // New state
+  const newNoteList: NoteListFileListRetrieved = {
+    ...noteList,
+    notes: newNotes,
+  };
+
+  return newNoteList;
 };
 
 export const createNoteNotLoaded = (
   id: number,
   path: string
 ): NoteNotLoaded => {
-  const note: NoteNotLoaded = {
+  return {
     type: NoteType.NotLoaded,
     id: "note_" + id.toString(),
     path,
   };
-
-  return note;
 };
 
 export const convertToNoteLoaded = (
   note: NoteNotLoaded,
   text: string
 ): NoteLoaded => {
-  const NoteLoaded: NoteLoaded = {
+  return {
     type: NoteType.Loaded,
     id: note.id,
     path: note.path,
     title: getTitleFromPath(note.path),
     text,
   };
+};
 
-  return NoteLoaded;
+export const createNewNoteLoaded = (
+  id: number,
+  title: string,
+  text: string
+): NoteLoaded => {
+  return {
+    type: NoteType.Loaded,
+    id: "note_" + id.toString(),
+    path: "",
+    title,
+    text,
+  };
 };

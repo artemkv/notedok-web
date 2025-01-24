@@ -10,6 +10,7 @@ export enum CommandType {
   SaveNoteText,
   CreateNewNoteWithTitle,
   CreateNewNoteWithText,
+  ReportError,
 }
 
 export interface DoNothingCommand extends Command<AppEvent> {
@@ -45,6 +46,11 @@ export interface CreateNewNoteWithTextCommand extends Command<AppEvent> {
   note: NoteLoaded;
 }
 
+export interface ReportErrorCommand extends Command<AppEvent> {
+  type: CommandType.ReportError;
+  err: unknown;
+}
+
 export type AppCommand =
   | DoNothingCommand
   | RetrieveFileListCommand
@@ -52,7 +58,8 @@ export type AppCommand =
   | RenameNoteFromTitleCommand
   | SaveNoteTextCommand
   | CreateNewNoteWithTitleCommand
-  | CreateNewNoteWithTextCommand;
+  | CreateNewNoteWithTextCommand
+  | ReportErrorCommand;
 
 export const DoNothing: DoNothingCommand = {
   type: CommandType.DoNothing,

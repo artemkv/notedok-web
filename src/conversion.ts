@@ -18,6 +18,7 @@ export const getTitleFromPath = (path: string) => {
   return title;
 };
 
+// TODO: maybe split into 3 ones
 export const generatePathFromTitle = (title: string, ensureUniqie: boolean) => {
   let postfix = "";
   if (ensureUniqie) {

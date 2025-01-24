@@ -73,6 +73,7 @@ export const LoadNextPage = (
 
     notesReversed.forEach((note) => {
       // TODO: one file failing to fetch is blocking the rest
+      // TODO: handle errors
       getFile(note.path) // TODO: url-encode
         .then((content: string) => {
           // TODO: maybe push to helper method
@@ -96,18 +97,38 @@ export const RenameNoteFromTitle = (
   type: CommandType.RenameNoteFromTitle,
   note,
   execute: async (dispatch) => {
+    // First time try with path derived from title
+    // Unless title is empty, in which case we immediately ask for a unique one
     const newPath = generatePathFromTitle(note.title, note.title === ""); // TODO: inform UI about change
     try {
       await renameFile(note.path, newPath);
+      dispatch({
+        type: EventType.NoteSavedOnNewPath,
+        note,
+        newPath,
+      });
     } catch (err) {
       if ((err as ApiError).statusCode === 409) {
         // Regenerate path from title, this time focing uniqueness
         const newPath = generatePathFromTitle(note.title, true);
-        await postFile(newPath, note.text); // TODO: handle error
-
-        // TODO: inform UI about change
+        try {
+          await renameFile(note.path, newPath); // TODO: handle error
+          dispatch({
+            type: EventType.NoteSavedOnNewPath,
+            note,
+            newPath,
+          });
+        } catch (err) {
+          dispatch({
+            type: EventType.RestApiError,
+            err,
+          });
+        }
       } else {
-        // TODO: handle error
+        dispatch({
+          type: EventType.RestApiError,
+          err,
+        });
       }
     }
   },
@@ -117,9 +138,15 @@ export const SaveNoteText = (note: NoteLoaded): SaveNoteTextCommand => ({
   type: CommandType.SaveNoteText,
   note,
   execute: async (dispatch) => {
-    // Title is potentially empty, but the path should have been already made unique.
-    // TODO: Maybe this uniqueness can move here
-    await putFile(note.path, note.text); // TODO: handle error
+    try {
+      // Store at the exact path we loaded from
+      await putFile(note.path, note.text);
+    } catch (err) {
+      dispatch({
+        type: EventType.RestApiError,
+        err,
+      });
+    }
   },
 });
 
@@ -129,18 +156,38 @@ export const CreateNewNoteWithTitle = (
   type: CommandType.CreateNewNoteWithTitle,
   note,
   execute: async (dispatch) => {
-    // Title is not empty, ensured by business, so save it as is, but don't overwrite, in case not unique
+    // Title is not empty, ensured by business, so we first try to store with path derived from the title
+    const path = generatePathFromTitle(note.title, false);
     try {
-      await postFile(note.path, note.text);
+      // Don't overwrite, in case not unique
+      await postFile(path, note.text);
+      dispatch({
+        type: EventType.NoteSavedOnNewPath,
+        note,
+        newPath: path,
+      });
     } catch (err) {
       if ((err as ApiError).statusCode === 409) {
-        // Regenerate path from title, this time focing uniqueness
+        // Regenerate path from title, this time enfocing uniqueness
         const newPath = generatePathFromTitle(note.title, true);
-        await putFile(newPath, note.text); // TODO: handle error
-
-        // TODO: inform UI about change
+        try {
+          await putFile(newPath, note.text);
+          dispatch({
+            type: EventType.NoteSavedOnNewPath,
+            note,
+            newPath: path,
+          });
+        } catch (err) {
+          dispatch({
+            type: EventType.RestApiError,
+            err,
+          });
+        }
       } else {
-        // TODO: handle error
+        dispatch({
+          type: EventType.RestApiError,
+          err,
+        });
       }
     }
   },
@@ -152,8 +199,21 @@ export const CreateNewNoteWithText = (
   type: CommandType.CreateNewNoteWithText,
   note,
   execute: async (dispatch) => {
-    // If note is new, the title is empty, and we know that the path was forced unique by business
-    // TODO: maybe generate the path here, so the uniqueness moves here, and then update the note list through event
-    await putFile(note.path, note.text); // TODO: handle error
+    // Here we know that title is empty, so no need to even try storing it with an original path
+    // Immediately ask for a unique (empty) path
+    const path = generatePathFromTitle(note.title, true);
+    try {
+      await putFile(path, note.text);
+      dispatch({
+        type: EventType.NoteSavedOnNewPath,
+        note,
+        newPath: path,
+      });
+    } catch (err) {
+      dispatch({
+        type: EventType.RestApiError,
+        err,
+      });
+    }
   },
 });

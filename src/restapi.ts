@@ -197,5 +197,5 @@ export const renameFile = (
     newFileName: newFilename,
   };
 
-  return postJson(`/rename`, body, session);
+  return postJson(`/rename`, body, session); // TODO: fails as the response does not return data
 };
