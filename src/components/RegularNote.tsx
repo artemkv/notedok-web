@@ -60,9 +60,15 @@ function RegularNote(props: {
     });
   };
 
-  const onStartNoteTextEditing = () => {
-    // TODO: somehow detect if clicked on a hyperlink inside the div
+  const noteTextOnClick = (e: React.SyntheticEvent) => {
+    const element = e.target as HTMLElement;
 
+    if (element.nodeName.toUpperCase() !== "A") {
+      onStartNoteTextEditing();
+    }
+  };
+
+  const onStartNoteTextEditing = () => {
     if (selectionIsNotEmpty()) {
       return;
     }
@@ -132,7 +138,7 @@ function RegularNote(props: {
         dangerouslySetInnerHTML={{
           __html: renderNoteTextHtml(htmlEscape(note.text)),
         }}
-        onClick={onStartNoteTextEditing}
+        onClick={noteTextOnClick}
       ></div>
     );
   };
