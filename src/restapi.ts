@@ -100,6 +100,25 @@ function postJson(endpoint: string, data: any, session?: string) {
     .then(toData);
 }
 
+function postText(endpoint: string, text: string, session?: string) {
+  const headers: StringMap = {
+    "Content-Type": "text/plain; charset=utf-8",
+  };
+  if (session) {
+    headers["x-session"] = session;
+  }
+
+  return fetch(baseUrl + endpoint, {
+    method: "POST",
+    mode: "cors",
+    cache: "no-cache",
+    headers,
+    body: text,
+  })
+    .then(handleErrors)
+    .then(toText);
+}
+
 /*
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function putJson(endpoint: string, data: any, session?: string) {
@@ -122,6 +141,25 @@ function putJson(endpoint: string, data: any, session?: string) {
     .then(toData);
 }*/
 
+function putText(endpoint: string, text: string, session?: string) {
+  const headers: StringMap = {
+    "Content-Type": "text/plain; charset=utf-8",
+  };
+  if (session) {
+    headers["x-session"] = session;
+  }
+
+  return fetch(baseUrl + endpoint, {
+    method: "PUT",
+    mode: "cors",
+    cache: "no-cache",
+    headers,
+    body: text,
+  })
+    .then(handleErrors)
+    .then(toText);
+}
+
 export const signIn = (idToken: string) => {
   return postJson("/signin", { id_token: idToken });
 };
@@ -139,4 +177,25 @@ export const getFiles = (
 
 export const getFile = (session: string, filename: string) => {
   return getText(`/files/${filename}`, session);
+};
+
+export const postFile = (session: string, filename: string, text: string) => {
+  return postText(`/files/${filename}`, text, session);
+};
+
+export const putFile = (session: string, filename: string, text: string) => {
+  return putText(`/files/${filename}`, text, session);
+};
+
+export const renameFile = (
+  session: string,
+  filename: string,
+  newFilename: string
+) => {
+  const body = {
+    fileName: filename,
+    newFileName: newFilename,
+  };
+
+  return postJson(`/rename`, body, session);
 };

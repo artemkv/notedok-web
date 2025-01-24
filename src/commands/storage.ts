@@ -1,14 +1,24 @@
 import { convertToNoteLoaded } from "../business";
 import {
   CommandType,
+  CreateNewNoteWithTextCommand,
+  CreateNewNoteWithTitleCommand,
   LoadNotesContentCommand,
   RenameNoteCommand,
   RetrieveFileListCommand,
   SaveNoteTextCommand,
 } from "../commands";
+import { generatePathFromTitle } from "../conversion";
 import { EventType } from "../events";
 import { NoteLoaded, NoteNotLoaded } from "../model";
-import { getFiles, getFile } from "../sessionapi";
+import { ApiError } from "../restapi";
+import {
+  getFiles,
+  getFile,
+  putFile,
+  postFile,
+  renameFile,
+} from "../sessionapi";
 
 interface FileData {
   fileName: string;
@@ -22,16 +32,26 @@ interface GetFilesResponse {
   nextContinuationToken: string;
 }
 
+interface FileDataWithDate {
+  fileName: string;
+  lastModified: Date;
+  etag: string;
+}
+
 export const RetrieveFileList: RetrieveFileListCommand = {
   type: CommandType.RetrieveFileList,
   execute: async (dispatch) => {
-    // console.log("Executing initial command");
-
     const getFilesResponse: GetFilesResponse = await getFiles(100, "");
+    const files: FileDataWithDate[] = getFilesResponse.files.map((f) => ({
+      fileName: f.fileName,
+      lastModified: new Date(f.lastModified),
+      etag: f.etag,
+    }));
+    files.sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
 
     dispatch({
       type: EventType.RetrieveFileListSuccess,
-      fileList: getFilesResponse.files.map((f) => f.fileName),
+      fileList: files.map((f) => f.fileName),
     });
   },
 };
@@ -43,8 +63,6 @@ export const LoadNextPage = (
   type: CommandType.LoadNextPage,
   notes,
   execute: (dispatch) => {
-    // console.log("Executing load next page");
-
     // TODO: Only complete the rendering if the file list is still the same
 
     let notesReversed: Array<NoteNotLoaded> = [];
@@ -54,6 +72,7 @@ export const LoadNextPage = (
     });
 
     notesReversed.forEach((note) => {
+      // TODO: one file failing to fetch is blocking the rest
       getFile(note.path) // TODO: url-encode
         .then((content: string) => {
           // TODO: maybe push to helper method
@@ -71,28 +90,68 @@ export const LoadNextPage = (
   },
 });
 
-export const SaveNoteText = (
-  note: NoteLoaded,
-  newText: string
-): SaveNoteTextCommand => ({
-  type: CommandType.SaveNoteText,
+export const RenameNote = (note: NoteLoaded): RenameNoteCommand => ({
+  type: CommandType.RenameNote,
   note,
-  newText,
-  execute: (dispatch) => {
-    // TODO:
-    console.log("Saving text");
+  execute: async (dispatch) => {
+    const newPath = generatePathFromTitle(note.title, note.title === ""); // TODO: inform UI about change
+    try {
+      await renameFile(note.path, newPath);
+    } catch (err) {
+      if ((err as ApiError).statusCode === 409) {
+        // Regenerate path from title, this time focing uniqueness
+        const newPath = generatePathFromTitle(note.title, true);
+        await postFile(newPath, note.text); // TODO: handle error
+
+        // TODO: inform UI about change
+      } else {
+        // TODO: handle error
+      }
+    }
   },
 });
 
-export const RenameNote = (
-  note: NoteLoaded,
-  newTitle: string
-): RenameNoteCommand => ({
-  type: CommandType.RenameNote,
+export const SaveNoteText = (note: NoteLoaded): SaveNoteTextCommand => ({
+  type: CommandType.SaveNoteText,
   note,
-  newTitle,
-  execute: (dispatch) => {
-    // TODO:
-    console.log("Saving title");
+  execute: async (dispatch) => {
+    // Title is potentially empty, but the path should have been already made unique.
+    // TODO: Maybe this uniqueness can move here
+    await putFile(note.path, note.text); // TODO: handle error
+  },
+});
+
+export const CreateNewNoteWithTitle = (
+  note: NoteLoaded
+): CreateNewNoteWithTitleCommand => ({
+  type: CommandType.CreateNewNoteWithTitle,
+  note,
+  execute: async (dispatch) => {
+    // Title is not empty, ensured by business, so save it as is, but don't overwrite, in case not unique
+    try {
+      await postFile(note.path, note.text);
+    } catch (err) {
+      if ((err as ApiError).statusCode === 409) {
+        // Regenerate path from title, this time focing uniqueness
+        const newPath = generatePathFromTitle(note.title, true);
+        await putFile(newPath, note.text); // TODO: handle error
+
+        // TODO: inform UI about change
+      } else {
+        // TODO: handle error
+      }
+    }
+  },
+});
+
+export const CreateNewNoteWithText = (
+  note: NoteLoaded
+): CreateNewNoteWithTextCommand => ({
+  type: CommandType.CreateNewNoteWithText,
+  note,
+  execute: async (dispatch) => {
+    // If note is new, the title is empty, and we know that the path was forced unique by business
+    // TODO: maybe generate the path here, so the uniqueness moves here, and then update the note list through event
+    await putFile(note.path, note.text); // TODO: handle error
   },
 });

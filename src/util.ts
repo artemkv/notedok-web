@@ -14,7 +14,7 @@ export const decodePathFileSystemFriendly = (path: string): string => {
   return path;
 };
 
-function encodePathFileSystemFriendly(path: string): string {
+export const encodePathFileSystemFriendly = (path: string): string => {
   path = path.replace(/\//g, "(sl)");
   path = path.replace(/\?/g, "(qst)");
   path = path.replace(/</g, "(lt)");
@@ -31,7 +31,7 @@ function encodePathFileSystemFriendly(path: string): string {
   }
 
   return path;
-}
+};
 
 export const countLines = (text: string) => {
   if (!text) {

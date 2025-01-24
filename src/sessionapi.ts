@@ -91,3 +91,21 @@ export const getFile = (filename: string) => {
   return api.getFile(getSession(), filename);
   //});
 };
+
+export const postFile = (filename: string, text: string) => {
+  //return callApi(() => {
+  return api.postFile(getSession(), filename, text);
+  //});
+};
+
+export const putFile = (filename: string, text: string) => {
+  //return callApi(() => {
+  return api.putFile(getSession(), filename, text);
+  //});
+};
+
+export const renameFile = (filename: string, newFilename: string) => {
+  //return callApi(() => {
+  return api.renameFile(getSession(), filename, newFilename);
+  //});
+};

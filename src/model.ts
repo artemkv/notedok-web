@@ -11,9 +11,11 @@ export interface NoteNotLoaded {
   type: NoteType.NotLoaded;
   id: string;
   path: string;
-  title: string;
+  title: string; // TODO: this is probably useless at this point
 }
 
+// TODO: could make it not editable while saving, so that is only editable again once we know the new path
+// TODO: and this could actually be combined with indicator on a note (saving, error upon saving etc.)
 export interface NoteLoaded {
   type: NoteType.Loaded;
   id: string;
@@ -43,7 +45,7 @@ export interface NoteTextEditorEditingTemplateNote {
 
 export interface NoteTextEditorEditingRegularNote {
   state: NoteTextEditorState.EditingRegularNote;
-  note: NoteLoaded;
+  note: NoteLoaded; // TODO: do I need the whole note here, or just id?
   text: string;
 }
 
@@ -71,7 +73,7 @@ export interface NoteTitleEditorEditingTemplateNote {
 
 export interface NoteTitleEditorEditingRegularNote {
   state: NoteTitleEditorState.EditingRegularNote;
-  note: NoteLoaded;
+  note: NoteLoaded; // TODO: do I need the whole note here, or just id?
   text: string;
 }
 

@@ -98,3 +98,24 @@ Once the changes are saved, the new empty note should appear allowing me to cont
 Test:
 - notes loaded in a random order are rendered in the order the are returned
 - start loading second page before the first page notes have finished loading
+
+
+
+Rules for overwriting on save:
+
+Existing note
+
+V text updated -> always overwrite (PUT file)
+title updated -> 
+	- V new title is empty, generate unique path (and that is where the old condition checking title was useful), then
+	- V try to rename
+	- V if conflicts, make unique and rename again (POST rename)
+	- inform UI
+
+New note
+
+V text updated -> generate unique path, overwrite (PUT file)
+title updated -> 
+	- V try to save, not overwrite (POST files)
+	- V if conflicts, make unique and save with overwrite (PUT file)
+	- inform UI

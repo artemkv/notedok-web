@@ -1,12 +1,12 @@
-import { decodePathFileSystemFriendly } from "./util";
+import {
+  decodePathFileSystemFriendly,
+  encodePathFileSystemFriendly,
+} from "./util";
 
 const TITLE_POSTFIX_SEPARATOR = "~~";
 
 export const getTitleFromPath = (path: string) => {
-  const filename = path.substring(path.lastIndexOf("/") + 1);
-  const fileNameWithoutExtension = filename.slice(0, -4);
-
-  let title = fileNameWithoutExtension;
+  let title = path.slice(0, -4);
 
   const separatorIndex = title.lastIndexOf(TITLE_POSTFIX_SEPARATOR);
   if (separatorIndex >= 0) {
@@ -20,10 +20,10 @@ export const getTitleFromPath = (path: string) => {
 
 export const generatePathFromTitle = (title: string, ensureUniqie: boolean) => {
   let postfix = "";
-  if (ensureUniqie || !title) {
+  if (ensureUniqie) {
     const date = new Date();
     const n = date.getTime();
     postfix = TITLE_POSTFIX_SEPARATOR + n;
   }
-  return "/" + decodePathFileSystemFriendly(title) + postfix + ".txt";
+  return encodePathFileSystemFriendly(title) + postfix + ".txt";
 };

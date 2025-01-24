@@ -63,7 +63,7 @@ export interface TemplateNoteTextUpdatedEvent {
 
 export interface RegularNoteStartTextEditingEvent {
   type: EventType.RegularNoteStartTextEditing;
-  note: NoteLoaded;
+  note: NoteLoaded; // TODO: do I need the whole note here, or just id?
 }
 
 export interface RegularNoteTextUpdatedEvent {

@@ -1,5 +1,10 @@
 import { AppCommand, DoNothing } from "./commands";
-import { RenameNote, SaveNoteText } from "./commands/storage";
+import {
+  CreateNewNoteWithText,
+  CreateNewNoteWithTitle,
+  RenameNote,
+  SaveNoteText,
+} from "./commands/storage";
 import { generatePathFromTitle, getTitleFromPath } from "./conversion";
 import {
   NoteLoaded,
@@ -115,7 +120,7 @@ export const finishNoteTitleEditing = (
     return [noteList, DoNothing];
   }
 
-  // New note with updated text
+  // New note with updated title
   const newNote = {
     ...note,
     title: newTitle,
@@ -131,7 +136,7 @@ export const finishNoteTitleEditing = (
   };
 
   // TODO: is async, just like in the older version, but in the future I could add saving indicators
-  const command = RenameNote(noteTitleEditor.note, noteTitleEditor.text);
+  const command = RenameNote(newNote);
 
   return [newNoteList, command];
 };
@@ -165,7 +170,7 @@ export const finishNoteTextEditing = (
   };
 
   // TODO: is async, just like in the older version, but in the future I could add saving indicators
-  const command = SaveNoteText(noteTextEditor.note, noteTextEditor.text);
+  const command = SaveNoteText(newNote);
 
   return [newNoteList, command];
 };
@@ -188,8 +193,8 @@ export const convertToRegularNoteOnTitleUpdated = (
     ];
   }
 
-  const path = generatePathFromTitle(newTitle, false);
-
+  // Initialize new note
+  const path = generatePathFromTitle(newTitle, false); // impure
   const newNote = createNoteNotLoaded(noteList.lastUsedNoteId + 1, path);
   const newNoteAsLoaded = convertToNoteLoaded(newNote, "");
 
@@ -207,11 +212,11 @@ export const convertToRegularNoteOnTitleUpdated = (
   const newTextEditor = {
     state: NoteTextEditorState.EditingRegularNote,
     note: newNoteAsLoaded,
-    text: "",
+    text: newNoteAsLoaded.text,
   };
 
   // TODO: is async, just like in the older version, but in the future I could add saving indicators
-  const command = SaveNoteText(newNoteAsLoaded, ""); // TODO: is new true, what does it do???
+  const command = CreateNewNoteWithTitle(newNoteAsLoaded);
 
   return [newNoteList, newTextEditor, command];
 };
@@ -228,8 +233,8 @@ export const convertToRegularNoteOnTextUpdated = (
     return [noteList, DoNothing];
   }
 
-  const path = generatePathFromTitle("", true);
-
+  // Initialize new note
+  const path = generatePathFromTitle("", true); // impure
   const newNote = createNoteNotLoaded(noteList.lastUsedNoteId + 1, path);
   const newNoteAsLoaded = convertToNoteLoaded(newNote, newText);
 
@@ -244,7 +249,7 @@ export const convertToRegularNoteOnTextUpdated = (
   };
 
   // TODO: is async, just like in the older version, but in the future I could add saving indicators
-  const command = SaveNoteText(newNoteAsLoaded, newText); // TODO: is new true, what does it do???
+  const command = CreateNewNoteWithText(newNoteAsLoaded);
 
   return [newNoteList, command];
 };

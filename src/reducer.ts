@@ -27,9 +27,9 @@ export const Reducer = (
   state: AppState,
   event: AppEvent
 ): [AppState, AppCommand] => {
-  /*console.log(
+  console.log(
     `Reducing event '${EventType[event.type]} ${JSON.stringify(event)}'`
-  );*/
+  );
 
   if (event.type === EventType.TemplateNoteTitleEditorTextChanged) {
     const newState: AppState = {
