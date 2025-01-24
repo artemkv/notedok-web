@@ -4,7 +4,7 @@ import {
   CreateNewNoteWithTextCommand,
   CreateNewNoteWithTitleCommand,
   LoadNotesContentCommand,
-  RenameNoteCommand,
+  RenameNoteFromTitleCommand,
   RetrieveFileListCommand,
   SaveNoteTextCommand,
 } from "../commands";
@@ -90,8 +90,10 @@ export const LoadNextPage = (
   },
 });
 
-export const RenameNote = (note: NoteLoaded): RenameNoteCommand => ({
-  type: CommandType.RenameNote,
+export const RenameNoteRenameNoteFromTitle = (
+  note: NoteLoaded
+): RenameNoteFromTitleCommand => ({
+  type: CommandType.RenameNoteFromTitle,
   note,
   execute: async (dispatch) => {
     const newPath = generatePathFromTitle(note.title, note.title === ""); // TODO: inform UI about change

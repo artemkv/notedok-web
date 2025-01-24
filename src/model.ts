@@ -44,7 +44,7 @@ export interface NoteTextEditorEditingTemplateNote {
 
 export interface NoteTextEditorEditingRegularNote {
   state: NoteTextEditorState.EditingRegularNote;
-  note: NoteLoaded; // TODO: do I need the whole note here, or just id?
+  note: NoteLoaded;
   text: string;
 }
 
@@ -72,7 +72,7 @@ export interface NoteTitleEditorEditingTemplateNote {
 
 export interface NoteTitleEditorEditingRegularNote {
   state: NoteTitleEditorState.EditingRegularNote;
-  note: NoteLoaded; // TODO: do I need the whole note here, or just id?
+  note: NoteLoaded;
   text: string;
 }
 

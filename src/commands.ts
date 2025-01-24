@@ -6,7 +6,7 @@ export enum CommandType {
   DoNothing,
   RetrieveFileList,
   LoadNextPage,
-  RenameNote,
+  RenameNoteFromTitle,
   SaveNoteText,
   CreateNewNoteWithTitle,
   CreateNewNoteWithText,
@@ -25,8 +25,8 @@ export interface LoadNotesContentCommand extends Command<AppEvent> {
   notes: Array<NoteNotLoaded>;
 }
 
-export interface RenameNoteCommand extends Command<AppEvent> {
-  type: CommandType.RenameNote;
+export interface RenameNoteFromTitleCommand extends Command<AppEvent> {
+  type: CommandType.RenameNoteFromTitle;
   note: NoteLoaded;
 }
 
@@ -49,7 +49,7 @@ export type AppCommand =
   | DoNothingCommand
   | RetrieveFileListCommand
   | LoadNotesContentCommand
-  | RenameNoteCommand
+  | RenameNoteFromTitleCommand
   | SaveNoteTextCommand
   | CreateNewNoteWithTitleCommand
   | CreateNewNoteWithTextCommand;
