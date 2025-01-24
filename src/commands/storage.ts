@@ -90,7 +90,7 @@ export const LoadNextPage = (
   },
 });
 
-export const RenameNoteRenameNoteFromTitle = (
+export const RenameNoteFromTitle = (
   note: NoteLoaded
 ): RenameNoteFromTitleCommand => ({
   type: CommandType.RenameNoteFromTitle,

@@ -2,7 +2,7 @@ import { AppCommand, DoNothing } from "./commands";
 import {
   CreateNewNoteWithText,
   CreateNewNoteWithTitle,
-  RenameNoteRenameNoteFromTitle,
+  RenameNoteFromTitle,
   SaveNoteText,
 } from "./commands/storage";
 import { generatePathFromTitle, getTitleFromPath } from "./conversion";
@@ -136,7 +136,7 @@ export const finishNoteTitleEditing = (
   };
 
   // TODO: is async, just like in the older version, but in the future I could add saving indicators
-  const command = RenameNoteRenameNoteFromTitle(newNote);
+  const command = RenameNoteFromTitle(newNote);
 
   return [newNoteList, command];
 };
