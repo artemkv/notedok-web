@@ -245,20 +245,21 @@ export const Reducer = (
     return [newState, LoadNextPage(notesToLoad, fileListVersion)];
   }
 
-  // TODO: losing the editor on template note title save
   if (event.type === EventType.NoteSavedOnNewPath) {
-    const noteList = state.noteList;
-    if (noteList.state === NoteListState.FileListRetrieved) {
-      const newNoteList = updateNotePath(noteList, event.note, event.newPath);
+    const [newNoteList, newNoteTitleEditor, newNoteTextEditor] = updateNotePath(
+      state,
+      event.note,
+      event.newPath
+    );
 
-      const newState: AppState = {
-        ...state,
-        noteList: newNoteList,
-      };
+    const newState: AppState = {
+      ...state,
+      noteTitleEditor: newNoteTitleEditor,
+      noteTextEditor: newNoteTextEditor,
+      noteList: newNoteList,
+    };
 
-      return JustState(newState);
-    }
-    return JustState(state);
+    return JustState(newState);
   }
 
   if (event.type === EventType.LoadNoteContentSuccess) {
@@ -294,6 +295,8 @@ export const Reducer = (
 
       return [newState, LoadNextPage(notesToLoad, noteList.fileListVersion)];
     }
+
+    return JustState(state);
   }
 
   if (event.type === EventType.RestApiError) {

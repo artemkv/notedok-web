@@ -18,6 +18,10 @@ import {
   NoteTitleEditorEditingTemplateNote,
   NoteTextEditor,
   NoteTextEditorState,
+  NoteTitleEditor,
+  AppState,
+  NoteTitleEditorState,
+  NoteList,
 } from "./model";
 
 const NOTES_ON_PAGE = 5;
@@ -255,26 +259,56 @@ export const convertToRegularNoteOnTextUpdated = (
 };
 
 export const updateNotePath = (
-  noteList: NoteListFileListRetrieved,
+  state: AppState,
   note: NoteLoaded,
   newPath: string
-): NoteListFileListRetrieved => {
-  // New note with updated text
-  const newNote = {
-    ...note,
-    path: newPath,
-  };
+): [NoteList, NoteTitleEditor, NoteTextEditor] => {
+  const noteTitleEditor = state.noteTitleEditor;
+  const noteTextEditor = state.noteTextEditor;
+  const noteList = state.noteList;
 
-  // Update the note list with the updated one
-  const newNotes = noteList.notes.map((n) => (n.id === note.id ? newNote : n)); // TODO: time to move to helper method?
+  if (noteList.state === NoteListState.FileListRetrieved) {
+    // New note with updated text
+    const newNote = {
+      ...note,
+      path: newPath,
+    };
 
-  // New state
-  const newNoteList: NoteListFileListRetrieved = {
-    ...noteList,
-    notes: newNotes,
-  };
+    // Update the note list with the updated one
+    const newNotes = noteList.notes.map((n) =>
+      n.id === note.id ? newNote : n
+    ); // TODO: time to move to helper method?
 
-  return newNoteList;
+    // New state
+    const newNoteList: NoteListFileListRetrieved = {
+      ...noteList,
+      notes: newNotes,
+    };
+
+    let newNoteTextEditor = noteTextEditor;
+    if (noteTextEditor.state === NoteTextEditorState.EditingRegularNote) {
+      if (noteTextEditor.note === note) {
+        newNoteTextEditor = {
+          ...noteTextEditor,
+          note: newNote,
+        };
+      }
+    }
+
+    let newNoteTitleEditor = noteTitleEditor;
+    if (noteTitleEditor.state === NoteTitleEditorState.EditingRegularNote) {
+      if (noteTitleEditor.note === note) {
+        newNoteTitleEditor = {
+          ...noteTitleEditor,
+          note: newNote,
+        };
+      }
+    }
+
+    return [newNoteList, newNoteTitleEditor, newNoteTextEditor];
+  }
+
+  return [noteList, noteTitleEditor, noteTextEditor];
 };
 
 export const createNoteNotLoaded = (
