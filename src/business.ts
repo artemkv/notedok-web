@@ -262,7 +262,6 @@ export const createNoteNotLoaded = (
     type: NoteType.NotLoaded,
     id: "note_" + id.toString(),
     path,
-    title: getTitleFromPath(path),
   };
 
   return note;
@@ -276,7 +275,7 @@ export const convertToNoteLoaded = (
     type: NoteType.Loaded,
     id: note.id,
     path: note.path,
-    title: note.title,
+    title: getTitleFromPath(note.path),
     text,
   };
 

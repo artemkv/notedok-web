@@ -11,7 +11,6 @@ export interface NoteNotLoaded {
   type: NoteType.NotLoaded;
   id: string;
   path: string;
-  title: string; // TODO: this is probably useless at this point
 }
 
 // TODO: could make it not editable while saving, so that is only editable again once we know the new path
