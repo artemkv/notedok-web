@@ -10,7 +10,7 @@ import {
 import AppContext from "../AppContext";
 import { htmlEscape, renderNoteTextHtml } from "../ui";
 import { EventType } from "../events";
-import { countLines } from "../util";
+import { countLines, selectionIsNotEmpty } from "../util";
 
 function RegularNote(props: {
   note: NoteLoaded;
@@ -62,6 +62,10 @@ function RegularNote(props: {
 
   const onStartNoteTextEditing = () => {
     // TODO: somehow detect if clicked on a hyperlink inside the div
+
+    if (selectionIsNotEmpty()) {
+      return;
+    }
 
     dispatch({
       type: EventType.RegularNoteStartTextEditing,

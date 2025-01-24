@@ -50,3 +50,11 @@ export const countLines = (text: string) => {
 
   return linesTotal;
 };
+
+export const selectionIsNotEmpty = (): boolean => {
+  return (
+    window.getSelection() !== null &&
+    window.getSelection()!.toString() !== "" &&
+    window.getSelection()!.toString() !== null
+  );
+};
