@@ -38,8 +38,11 @@ interface FileDataWithDate {
   etag: string;
 }
 
-export const RetrieveFileList: RetrieveFileListCommand = {
+export const RetrieveFileList = (
+  fileListVersion: number
+): RetrieveFileListCommand => ({
   type: CommandType.RetrieveFileList,
+  fileListVersion,
   execute: async (dispatch) => {
     const getFilesResponse: GetFilesResponse = await getFiles(100, "");
     const files: FileDataWithDate[] = getFilesResponse.files.map((f) => ({
@@ -51,10 +54,11 @@ export const RetrieveFileList: RetrieveFileListCommand = {
 
     dispatch({
       type: EventType.RetrieveFileListSuccess,
+      fileListVersion,
       fileList: files.map((f) => f.fileName),
     });
   },
-};
+});
 
 export const LoadNextPage = (
   notes: Array<NoteNotLoaded>,
@@ -63,8 +67,6 @@ export const LoadNextPage = (
   type: CommandType.LoadNextPage,
   notes,
   execute: (dispatch) => {
-    // TODO: Only complete the rendering if the file list is still the same
-
     let notesReversed: Array<NoteNotLoaded> = [];
 
     notes.forEach((note) => {
@@ -84,7 +86,7 @@ export const LoadNextPage = (
           dispatch({
             type: EventType.LoadNoteContentSuccess,
             note: noteLoaded,
-            fileListVersion, // TODO:
+            fileListVersion,
           });
         });
     });

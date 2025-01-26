@@ -216,33 +216,29 @@ export const Reducer = (
   }
 
   if (event.type === EventType.RetrieveFileListSuccess) {
-    const fileList = event.fileList;
+    if (
+      state.noteList.state === NoteListState.RetrievingFileList &&
+      state.noteList.fileListVersion === event.fileListVersion
+    ) {
+      const noteList: NoteListFileListRetrieved = {
+        state: NoteListState.FileListRetrieved,
+        fileListVersion: event.fileListVersion,
+        unprocessedFiles: event.fileList,
+        lastUsedNoteId: 0,
+        renderingQueue: [],
+        notes: [],
+      };
 
-    // TODO: this is the wrong place to do it.
-    // File list version should increase every time we issue the command to retrieve file list
-    // So it should be stored 1 level up, and we should skip rendering if the version does not match
-    let fileListVersion = 0;
-    if (state.noteList.state === NoteListState.FileListRetrieved) {
-      fileListVersion = state.noteList.fileListVersion + 1;
+      const [newNoteList, notesToLoad] = shiftNotesToLoadForNextPage(noteList);
+
+      const newState: AppState = {
+        ...state,
+        noteList: newNoteList,
+      };
+
+      return [newState, LoadNextPage(notesToLoad, event.fileListVersion)];
     }
-
-    const noteList: NoteListFileListRetrieved = {
-      state: NoteListState.FileListRetrieved,
-      fileListVersion,
-      unprocessedFiles: fileList,
-      lastUsedNoteId: 0,
-      renderingQueue: [],
-      notes: [],
-    };
-
-    const [newNoteList, notesToLoad] = shiftNotesToLoadForNextPage(noteList);
-
-    const newState: AppState = {
-      ...state,
-      noteList: newNoteList,
-    };
-
-    return [newState, LoadNextPage(notesToLoad, fileListVersion)];
+    return JustState(state);
   }
 
   if (event.type === EventType.NoteSavedOnNewPath) {
@@ -267,8 +263,6 @@ export const Reducer = (
     const fileListVersion = event.fileListVersion;
 
     if (state.noteList.state === NoteListState.FileListRetrieved) {
-      // TODO: so yes, this is the second place the version is checked
-      // I think this is correct, but need to be reviewed when the version check moves up
       if (state.noteList.fileListVersion === fileListVersion) {
         const newNoteList = handleLoadedNode(state.noteList, note);
 

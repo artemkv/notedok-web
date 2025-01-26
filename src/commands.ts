@@ -19,6 +19,7 @@ export interface DoNothingCommand extends Command<AppEvent> {
 
 export interface RetrieveFileListCommand extends Command<AppEvent> {
   type: CommandType.RetrieveFileList;
+  fileListVersion: number;
 }
 
 export interface LoadNotesContentCommand extends Command<AppEvent> {

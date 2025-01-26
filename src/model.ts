@@ -91,6 +91,7 @@ export enum NoteListState {
 
 export interface NoteListRetrievingFileList {
   state: NoteListState.RetrievingFileList;
+  fileListVersion: number;
 }
 
 export interface NoteListFileListRetrieved {
@@ -115,6 +116,8 @@ export interface AppState {
 
 // Initial state
 
+const INITIAL_FILE_LIST_VERSION = 0;
+
 export const IntialState: AppState = {
   noteTextEditor: {
     state: NoteTextEditorState.NotActive,
@@ -124,8 +127,9 @@ export const IntialState: AppState = {
   },
   noteList: {
     state: NoteListState.RetrievingFileList,
+    fileListVersion: INITIAL_FILE_LIST_VERSION,
   },
 };
 
 // Initial command - here to avoid circular refs
-export const InitialCommand = RetrieveFileList;
+export const InitialCommand = RetrieveFileList(INITIAL_FILE_LIST_VERSION);
