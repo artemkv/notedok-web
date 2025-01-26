@@ -95,6 +95,12 @@ Once the changes are saved, the new empty note should appear allowing me to cont
 
 
 
+TODO:
+- tab does not stop on control area buttons
+- encoding of filenames for url
+- utf-8
+
+
 Test:
 - notes loaded in a random order are rendered in the order the are returned
 - start loading second page before the first page notes have finished loading
