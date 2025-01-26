@@ -47,13 +47,15 @@ export const Reducer = (
 
   if (event.type === EventType.TemplateNoteTitleUpdated) {
     // TODO: what if updated before file list is retrieved?
-
-    const noteList = state.noteList;
-    const noteTitleEditor = state.noteTitleEditor;
-    if (noteList.state === NoteListState.FileListRetrieved) {
-      if (noteTitleEditor.state === NoteTitleEditorState.EditingTemplateNote) {
+    if (state.noteList.state === NoteListState.FileListRetrieved) {
+      if (
+        state.noteTitleEditor.state === NoteTitleEditorState.EditingTemplateNote
+      ) {
         const [newNoteList, newTextEditor, command] =
-          convertToRegularNoteOnTitleUpdated(noteList, noteTitleEditor);
+          convertToRegularNoteOnTitleUpdated(
+            state.noteList,
+            state.noteTitleEditor
+          );
 
         const newState: AppState = {
           noteList: newNoteList,
@@ -84,13 +86,13 @@ export const Reducer = (
   }
 
   if (event.type === EventType.RegularNoteTitleUpdated) {
-    const noteList = state.noteList;
-    const noteTitleEditor = state.noteTitleEditor;
-    if (noteList.state === NoteListState.FileListRetrieved) {
-      if (noteTitleEditor.state === NoteTitleEditorState.EditingRegularNote) {
+    if (state.noteList.state === NoteListState.FileListRetrieved) {
+      if (
+        state.noteTitleEditor.state === NoteTitleEditorState.EditingRegularNote
+      ) {
         const [newNoteList, command] = finishNoteTitleEditing(
-          noteList,
-          noteTitleEditor
+          state.noteList,
+          state.noteTitleEditor
         );
 
         const newState: AppState = {
@@ -152,14 +154,13 @@ export const Reducer = (
 
   if (event.type === EventType.TemplateNoteTextUpdated) {
     // TODO: what if updated before file list is retrieved?
-
-    const noteList = state.noteList;
-    const noteTextEditor = state.noteTextEditor;
-    if (noteList.state === NoteListState.FileListRetrieved) {
-      if (noteTextEditor.state === NoteTextEditorState.EditingTemplateNote) {
+    if (state.noteList.state === NoteListState.FileListRetrieved) {
+      if (
+        state.noteTextEditor.state === NoteTextEditorState.EditingTemplateNote
+      ) {
         const [newNoteList, command] = convertToRegularNoteOnTextUpdated(
-          noteList,
-          noteTextEditor
+          state.noteList,
+          state.noteTextEditor
         );
 
         const newState: AppState = {
@@ -191,13 +192,13 @@ export const Reducer = (
   }
 
   if (event.type === EventType.RegularNoteTextUpdated) {
-    const noteList = state.noteList;
-    const noteTextEditor = state.noteTextEditor;
-    if (noteList.state === NoteListState.FileListRetrieved) {
-      if (noteTextEditor.state === NoteTextEditorState.EditingRegularNote) {
+    if (state.noteList.state === NoteListState.FileListRetrieved) {
+      if (
+        state.noteTextEditor.state === NoteTextEditorState.EditingRegularNote
+      ) {
         const [newNoteList, command] = finishNoteTextEditing(
-          noteList,
-          noteTextEditor
+          state.noteList,
+          state.noteTextEditor
         );
 
         const newState: AppState = {
@@ -259,12 +260,9 @@ export const Reducer = (
   }
 
   if (event.type === EventType.LoadNoteContentSuccess) {
-    const note = event.note;
-    const fileListVersion = event.fileListVersion;
-
     if (state.noteList.state === NoteListState.FileListRetrieved) {
-      if (state.noteList.fileListVersion === fileListVersion) {
-        const newNoteList = handleLoadedNode(state.noteList, note);
+      if (state.noteList.fileListVersion === event.fileListVersion) {
+        const newNoteList = handleLoadedNode(state.noteList, event.note);
 
         const newState: AppState = {
           ...state,
@@ -278,16 +276,20 @@ export const Reducer = (
   }
 
   if (event.type === EventType.LoadNextPage) {
-    const noteList = state.noteList;
-    if (noteList.state === NoteListState.FileListRetrieved) {
-      const [newNoteList, notesToLoad] = shiftNotesToLoadForNextPage(noteList);
+    if (state.noteList.state === NoteListState.FileListRetrieved) {
+      const [newNoteList, notesToLoad] = shiftNotesToLoadForNextPage(
+        state.noteList
+      );
 
       const newState: AppState = {
         ...state,
         noteList: newNoteList,
       };
 
-      return [newState, LoadNextPage(notesToLoad, noteList.fileListVersion)];
+      return [
+        newState,
+        LoadNextPage(notesToLoad, state.noteList.fileListVersion),
+      ];
     }
 
     return JustState(state);
