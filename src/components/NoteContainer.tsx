@@ -8,6 +8,7 @@ import {
 } from "../model";
 import ProgressIndicator from "./ProgressIndicator";
 import RegularNote from "./RegularNote";
+import DeletedNote from "./DeletedNote";
 
 function NoteContainer(props: {
   noteTitleEditor: NoteTitleEditor;
@@ -29,14 +30,18 @@ function NoteContainer(props: {
           <ProgressIndicator />
         ) : (
           <div>
-            {noteList.notes.map((note) => (
-              <RegularNote
-                key={note.id}
-                note={note}
-                noteTitleEditor={noteTitleEditor}
-                noteTextEditor={noteTextEditor}
-              />
-            ))}
+            {noteList.notes.map((note) =>
+              note.isDeleted ? (
+                <DeletedNote key={note.id} note={note} />
+              ) : (
+                <RegularNote
+                  key={note.id}
+                  note={note}
+                  noteTitleEditor={noteTitleEditor}
+                  noteTextEditor={noteTextEditor}
+                />
+              )
+            )}
           </div>
         )}
       </div>

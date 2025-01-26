@@ -108,6 +108,13 @@ function RegularNote(props: {
     });
   };
 
+  const onDeleteNote = () => {
+    dispatch({
+      type: EventType.NoteDeleteTriggered,
+      note,
+    });
+  };
+
   const focusTextarea = () => {
     if (textareaRef.current) {
       textareaRef.current.focus();
@@ -175,6 +182,9 @@ function RegularNote(props: {
       <div className="note-controlarea">
         <a className="note-button" onClick={onStartNoteTextEditing}>
           {uistrings.EditButtonText}
+        </a>
+        <a className="note-button" onClick={onDeleteNote}>
+          {uistrings.DeleteButtonText}
         </a>
       </div>
     );

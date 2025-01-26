@@ -1,6 +1,7 @@
 import {
   convertToRegularNoteOnTextUpdated,
   convertToRegularNoteOnTitleUpdated,
+  deleteNote,
   finishNoteTextEditing,
   finishNoteTitleEditing,
   handleLoadedNode,
@@ -24,7 +25,6 @@ const JustState = (state: AppState): [AppState, AppCommand] => [
   DoNothing,
 ];
 
-// TODO: see if I really need optics
 export const Reducer = (
   state: AppState,
   event: AppEvent
@@ -216,6 +216,20 @@ export const Reducer = (
     return JustState(state);
   }
 
+  if (event.type === EventType.NoteDeleteTriggered) {
+    if (state.noteList.state === NoteListState.FileListRetrieved) {
+      const newNoteList = deleteNote(state.noteList, event.note);
+
+      const newState: AppState = {
+        ...state,
+        noteList: newNoteList,
+      };
+
+      return JustState(newState);
+    }
+    return JustState(state);
+  }
+
   if (event.type === EventType.RetrieveFileListSuccess) {
     if (
       state.noteList.state === NoteListState.RetrievingFileList &&
@@ -299,7 +313,9 @@ export const Reducer = (
     return [state, ReportError(event.err)];
   }
 
-  console.error(`Unknown event '${JSON.stringify(event)}'`);
+  console.error(
+    `Unknown event ${EventType[event.type]} '${JSON.stringify(event)}'`
+  );
 
   return JustState(state);
 };

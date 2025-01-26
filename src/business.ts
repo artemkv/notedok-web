@@ -311,6 +311,28 @@ export const updateNotePath = (
   return [noteList, noteTitleEditor, noteTextEditor];
 };
 
+export const deleteNote = (
+  noteList: NoteListFileListRetrieved,
+  note: NoteLoaded
+): NoteListFileListRetrieved => {
+  // New note as deleted
+  const newNote = {
+    ...note,
+    isDeleted: true,
+  };
+
+  // Update the note list with the updated one
+  const newNotes = noteList.notes.map((n) => (n.id === note.id ? newNote : n));
+
+  // New state
+  const newNoteList: NoteListFileListRetrieved = {
+    ...noteList,
+    notes: newNotes,
+  };
+
+  return newNoteList;
+};
+
 export const createNoteNotLoaded = (
   id: number,
   path: string

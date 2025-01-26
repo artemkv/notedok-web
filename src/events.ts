@@ -16,6 +16,9 @@ export enum EventType {
   RegularNoteStartTextEditing,
   RegularNoteTextUpdated,
 
+  NoteDeleteTriggered,
+  NoteRestoreTriggered,
+
   NoteSavedOnNewPath,
 
   RetrieveFileListSuccess, // TODO: handle failure
@@ -76,6 +79,16 @@ export interface RegularNoteTextUpdatedEvent {
   newText: string;
 }
 
+export interface NoteDeleteTriggeredEvent {
+  type: EventType.NoteDeleteTriggered;
+  note: NoteLoaded;
+}
+
+export interface NoteRestoreTriggeredEvent {
+  type: EventType.NoteRestoreTriggered;
+  note: NoteLoaded;
+}
+
 export interface RetrieveFileListSuccessEvent {
   type: EventType.RetrieveFileListSuccess;
   fileListVersion: number;
@@ -114,6 +127,8 @@ export type AppEvent =
   | TemplateNoteTextUpdatedEvent
   | RegularNoteStartTextEditingEvent
   | RegularNoteTextUpdatedEvent
+  | NoteDeleteTriggeredEvent
+  | NoteRestoreTriggeredEvent
   | NoteSavedOnNewPathEvent
   | RetrieveFileListSuccessEvent
   | LoadNoteContentSuccessEvent
