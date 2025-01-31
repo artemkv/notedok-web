@@ -12,7 +12,7 @@ export enum CommandType {
   DoNothing,
   DoMany,
   RetrieveFileList,
-  LoadNotesText,
+  LoadNoteText,
   RenameNoteFromTitle,
   SaveNoteText,
   CreateNewNoteWithTitle,
@@ -40,8 +40,8 @@ export interface RetrieveFileListCommand extends Command<AppEvent> {
   fileListVersion: number;
 }
 
-export interface LoadNotesTextCommand extends Command<AppEvent> {
-  type: CommandType.LoadNotesText;
+export interface LoadNoteTextCommand extends Command<AppEvent> {
+  type: CommandType.LoadNoteText;
   notes: NoteRef[];
 }
 
@@ -84,7 +84,7 @@ export type AppCommand =
   | DoNothingCommand
   | DoManyCommand
   | RetrieveFileListCommand
-  | LoadNotesTextCommand
+  | LoadNoteTextCommand
   | RenameNoteFromTitleCommand
   | SaveNoteTextCommand
   | CreateNewNoteWithTitleCommand

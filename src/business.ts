@@ -29,6 +29,7 @@ import {
   NotePendingPathUpdate,
   NoteDeleted,
   NoteDeletable,
+  Note,
 } from "./model";
 import {
   createNewNoteFromText,
@@ -101,9 +102,10 @@ export const handleLoadedNote = (
   const newNote = noteRefToSynced(note, text);
 
   // Update the note on the queue with the loaded one
-  const newQueue = queue.map((n) => (n.id === newNote.id ? newNote : n));
+  const newQueue = replaceOnQueue(queue, newNote);
 
-  // Find out which notes can already be rendered
+  // Find out which notes are ready to be shown
+  // (I.e. all the notes visible notes at the beginning of the rendering queue)
   const readyNotes: NoteVisible[] = [];
   let firstNotReadyNoteIdx = 0;
   while (firstNotReadyNoteIdx < newQueue.length) {
@@ -148,21 +150,9 @@ export const finishNoteTitleEditing = (
     return [noteList, DoNothing];
   }
 
-  // New note with updated title
   const newNote = noteTitleSaveableToSyncing(note, newTitle);
-
-  // Update the note list with the updated one
-  const newNotes = noteList.notes.map((n) => (n.id === note.id ? newNote : n));
-
-  // New state
-  const newNoteList: NoteListFileListRetrieved = {
-    ...noteList,
-    notes: newNotes,
-  };
-
-  // TODO: is async, just like in the older version, but in the future I could add saving indicators
+  const newNoteList = replaceNote(noteList, newNote);
   const command = RenameNoteFromTitle(newNote);
-
   return [newNoteList, command];
 };
 
@@ -179,21 +169,9 @@ export const finishNoteTextEditing = (
     return [noteList, DoNothing];
   }
 
-  // New note with updated text
   const newNote = noteTextSaveableToSyncing(note, newText);
-
-  // Update the note list with the updated one
-  const newNotes = noteList.notes.map((n) => (n.id === note.id ? newNote : n));
-
-  // New state
-  const newNoteList: NoteListFileListRetrieved = {
-    ...noteList,
-    notes: newNotes,
-  };
-
-  // TODO: is async, just like in the older version, but in the future I could add saving indicators
+  const newNoteList = replaceNote(noteList, newNote);
   const command = SaveNoteText(newNote);
-
   return [newNoteList, command];
 };
 
@@ -218,7 +196,7 @@ export const convertToRegularNoteOnTitleUpdated = (
   // Initialize new note
   const newNote = createNewNoteFromTitle(noteList.lastUsedNoteId + 1, newTitle);
 
-  // Update the note list with the updated one
+  // Update the note list with the new note
   const newNotes = [newNote, ...noteList.notes];
 
   // New note list
@@ -235,7 +213,6 @@ export const convertToRegularNoteOnTitleUpdated = (
     text: "",
   };
 
-  // TODO: is async, just like in the older version, but in the future I could add saving indicators
   const command = CreateNewNoteWithTitle(newNote);
 
   return [newNoteList, newTextEditor, command];
@@ -256,7 +233,7 @@ export const convertToRegularNoteOnTextUpdated = (
   // Initialize new note
   const newNote = createNewNoteFromText(noteList.lastUsedNoteId + 1, newText);
 
-  // Update the note list with the updated one
+  // Update the note list with the new note
   const newNotes = [newNote, ...noteList.notes];
 
   // New state
@@ -266,7 +243,6 @@ export const convertToRegularNoteOnTextUpdated = (
     lastUsedNoteId: noteList.lastUsedNoteId + 1,
   };
 
-  // TODO: is async, just like in the older version, but in the future I could add saving indicators
   const command = CreateNewNoteWithText(newNote);
 
   return [newNoteList, command];
@@ -282,20 +258,11 @@ export const updateNotePath = (
   const noteList = state.noteList;
 
   if (noteList.state === NoteListState.FileListRetrieved) {
-    // New note with updated path
+    // New note with an updated path
     const newNote: NoteSynced = notePendingPathUpdateToSynced(note, newPath);
+    const newNoteList = replaceNote(noteList, newNote);
 
-    // Update the note list with the updated one
-    const newNotes = noteList.notes.map((n) =>
-      n.id === note.id ? newNote : n
-    ); // TODO: time to move to helper method?
-
-    // New state
-    const newNoteList: NoteListFileListRetrieved = {
-      ...noteList,
-      notes: newNotes,
-    };
-
+    // Update editors to make sure they reference up-to-date note
     let newNoteTextEditor = noteTextEditor;
     if (noteTextEditor.state === NoteTextEditorState.EditingRegularNote) {
       if (noteTextEditor.note.id === note.id) {
@@ -305,7 +272,6 @@ export const updateNotePath = (
         };
       }
     }
-
     let newNoteTitleEditor = noteTitleEditor;
     if (noteTitleEditor.state === NoteTitleEditorState.EditingRegularNote) {
       if (noteTitleEditor.note.id === note.id) {
@@ -333,18 +299,9 @@ export const updateNoteAsSynced = (
   if (noteList.state === NoteListState.FileListRetrieved) {
     // New note with the same path
     const newNote: NoteSynced = noteSyncingToSynced(note);
+    const newNoteList = replaceNote(noteList, newNote);
 
-    // Update the note list with the updated one
-    const newNotes = noteList.notes.map((n) =>
-      n.id === note.id ? newNote : n
-    ); // TODO: time to move to helper method?
-
-    // New state
-    const newNoteList: NoteListFileListRetrieved = {
-      ...noteList,
-      notes: newNotes,
-    };
-
+    // Update editors to make sure they reference up-to-date note
     let newNoteTextEditor = noteTextEditor;
     if (noteTextEditor.state === NoteTextEditorState.EditingRegularNote) {
       if (noteTextEditor.note.id === note.id) {
@@ -354,7 +311,6 @@ export const updateNoteAsSynced = (
         };
       }
     }
-
     let newNoteTitleEditor = noteTitleEditor;
     if (noteTitleEditor.state === NoteTitleEditorState.EditingRegularNote) {
       if (noteTitleEditor.note.id === note.id) {
@@ -378,10 +334,10 @@ export const deleteNote = (
   // New note as deleted
   const newNote = noteDeletableToDeleted(note);
 
-  // Update the note list with the updated one
+  // delete all already deleted notes from UI and update the note list
   const newNotes = noteList.notes
-    .filter((n) => !(n.state === NoteState.Deleted)) // delete all already deleted notes from UI
-    .map((n) => (n.id === note.id ? newNote : n));
+    .filter((n) => !(n.state === NoteState.Deleted))
+    .map((n) => (n.id === newNote.id ? newNote : n));
 
   // Load and render one more note from the list (if exists),
   // so the number of displayed notes stays the same
@@ -402,17 +358,23 @@ export const restoreNote = (
 ): [NoteListFileListRetrieved, NoteSyncing] => {
   // Undelete the note
   const newNote = noteDeletedToSyncing(note);
-
-  // Update the note list with the updated note
-  const newNotes = noteList.notes.map((n) => (n.id === note.id ? newNote : n));
-
-  // New state
-  const newNoteList: NoteListFileListRetrieved = {
-    ...noteList,
-    notes: newNotes,
-  };
+  const newNoteList = replaceNote(noteList, newNote);
 
   return [newNoteList, newNote];
+};
+
+const replaceOnQueue = (queue: Note[], note: Note): Note[] => {
+  return queue.map((n) => (n.id === note.id ? note : n));
+};
+
+const replaceNote = (
+  noteList: NoteListFileListRetrieved,
+  note: NoteVisible
+): NoteListFileListRetrieved => {
+  return {
+    ...noteList,
+    notes: noteList.notes.map((n) => (n.id === note.id ? note : n)),
+  };
 };
 
 const noteTitleSaveableToSyncing = (

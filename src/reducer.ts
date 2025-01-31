@@ -13,7 +13,7 @@ import {
 } from "./business";
 import { AppCommand, DoMany, DoNothing } from "./commands";
 import { ReportError } from "./commands/alerts";
-import { DeleteNote, LoadNotesText, RestoreNote } from "./commands/storage";
+import { DeleteNote, LoadNoteText, RestoreNote } from "./commands/storage";
 import { AppEvent, EventType } from "./events";
 import {
   AppState,
@@ -239,7 +239,7 @@ export const Reducer = (
 
       const command = DoMany([
         DeleteNote(noteDeleted),
-        LoadNotesText(notesToLoad, state.noteList.fileListVersion),
+        LoadNoteText(notesToLoad, state.noteList.fileListVersion),
       ]);
 
       return [newState, command];
@@ -288,7 +288,7 @@ export const Reducer = (
         noteList: newNoteList,
       };
 
-      return [newState, LoadNotesText(notesToLoad, event.fileListVersion)];
+      return [newState, LoadNoteText(notesToLoad, event.fileListVersion)];
     }
     return JustState(state);
   }
@@ -358,10 +358,25 @@ export const Reducer = (
 
       return [
         newState,
-        LoadNotesText(notesToLoad, state.noteList.fileListVersion),
+        LoadNoteText(notesToLoad, state.noteList.fileListVersion),
       ];
     }
 
+    return JustState(state);
+  }
+
+  if (event.type === EventType.NoteSyncFailed) {
+    // TODO:
+    return JustState(state);
+  }
+
+  if (event.type === EventType.NoteCreationFromTitleFailed) {
+    // TODO:
+    return JustState(state);
+  }
+
+  if (event.type === EventType.NoteCreationFromTextFailed) {
+    // TODO:
     return JustState(state);
   }
 

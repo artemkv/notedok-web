@@ -1,4 +1,6 @@
 import {
+  NoteCreatingFromText,
+  NoteCreatingFromTitle,
   NoteDeletable,
   NoteDeleted,
   NotePendingPathUpdate,
@@ -36,8 +38,12 @@ export enum EventType {
   LoadNoteTextSuccess,
   LoadNextPage,
 
-  NoteSyncFailed, // Note-related errors (or whatever we treat as such)
-  RestApiError, // Generic errors
+  // Note-related errors (or whatever we treat as such)
+  NoteSyncFailed,
+  NoteCreationFromTitleFailed,
+  NoteCreationFromTextFailed,
+
+  RestApiError, // Generic errors, includes failing to delete note
 }
 
 export interface TemplateNoteTitleEditorTextChangedEvent {
@@ -129,9 +135,21 @@ export interface NoteSavedEvent {
   note: NoteSyncing;
 }
 
-export interface NoteSyncFailed {
+export interface NoteSyncFailedEvent {
   type: EventType.NoteSyncFailed;
   note: NoteSyncing;
+  err: string;
+}
+
+export interface NoteCreationFromTitleFailed {
+  type: EventType.NoteCreationFromTitleFailed;
+  note: NoteCreatingFromTitle;
+  err: string;
+}
+
+export interface NoteCreationFromTextFailed {
+  type: EventType.NoteCreationFromTextFailed;
+  note: NoteCreatingFromText;
   err: string;
 }
 
@@ -158,5 +176,7 @@ export type AppEvent =
   | RetrieveFileListSuccessEvent
   | LoadNoteTextSuccessEvent
   | LoadNextPageEvent
-  | NoteSyncFailed
+  | NoteSyncFailedEvent
+  | NoteCreationFromTitleFailed
+  | NoteCreationFromTextFailed
   | RestApiErrorEvent;

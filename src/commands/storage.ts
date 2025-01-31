@@ -3,7 +3,7 @@ import {
   CreateNewNoteWithTextCommand,
   CreateNewNoteWithTitleCommand,
   DeleteNoteCommand,
-  LoadNotesTextCommand,
+  LoadNoteTextCommand,
   RenameNoteFromTitleCommand,
   RestoreNoteCommand,
   RetrieveFileListCommand,
@@ -68,21 +68,14 @@ export const RetrieveFileList = (
   },
 });
 
-// TODO: maybe rename more grammaticaly correct
-export const LoadNotesText = (
+export const LoadNoteText = (
   notes: NoteRef[],
   fileListVersion: number
-): LoadNotesTextCommand => ({
-  type: CommandType.LoadNotesText,
+): LoadNoteTextCommand => ({
+  type: CommandType.LoadNoteText,
   notes,
   execute: (dispatch) => {
-    let notesReversed: NoteRef[] = [];
-
     notes.forEach((note) => {
-      notesReversed = [note, ...notesReversed];
-    });
-
-    notesReversed.forEach((note) => {
       // TODO: one file failing to fetch is blocking the rest
       // TODO: handle errors
       getFile(note.path) // TODO: url-encode
@@ -98,7 +91,6 @@ export const LoadNotesText = (
   },
 });
 
-// TODO: return note-related errors, now all the errors are RestApiError
 export const RenameNoteFromTitle = (
   note: NoteSyncing
 ): RenameNoteFromTitleCommand => ({
@@ -107,7 +99,7 @@ export const RenameNoteFromTitle = (
   execute: async (dispatch) => {
     // First time try with path derived from title
     // Unless title is empty, in which case we immediately ask for a unique one
-    const newPath = generatePathFromTitle(note.title, note.title === ""); // TODO: inform UI about change
+    const newPath = generatePathFromTitle(note.title, note.title === "");
     try {
       await renameFile(note.path, newPath);
       dispatch({
@@ -120,7 +112,7 @@ export const RenameNoteFromTitle = (
         // Regenerate path from title, this time focing uniqueness
         const newPath = generatePathFromTitle(note.title, true);
         try {
-          await renameFile(note.path, newPath); // TODO: handle error
+          await renameFile(note.path, newPath);
           dispatch({
             type: EventType.NoteSavedOnNewPath,
             note,
@@ -128,13 +120,15 @@ export const RenameNoteFromTitle = (
           });
         } catch (err) {
           dispatch({
-            type: EventType.RestApiError,
+            type: EventType.NoteSyncFailed,
+            note,
             err: `${err}`,
           });
         }
       } else {
         dispatch({
-          type: EventType.RestApiError,
+          type: EventType.NoteSyncFailed,
+          note,
           err: `${err}`,
         });
       }
@@ -155,7 +149,8 @@ export const SaveNoteText = (note: NoteSyncing): SaveNoteTextCommand => ({
       });
     } catch (err) {
       dispatch({
-        type: EventType.RestApiError,
+        type: EventType.NoteSyncFailed,
+        note,
         err: `${err}`,
       });
     }
@@ -191,13 +186,15 @@ export const CreateNewNoteWithTitle = (
           });
         } catch (err) {
           dispatch({
-            type: EventType.RestApiError,
+            type: EventType.NoteCreationFromTitleFailed,
+            note,
             err: `${err}`,
           });
         }
       } else {
         dispatch({
-          type: EventType.RestApiError,
+          type: EventType.NoteCreationFromTitleFailed,
+          note,
           err: `${err}`,
         });
       }
@@ -223,7 +220,8 @@ export const CreateNewNoteWithText = (
       });
     } catch (err) {
       dispatch({
-        type: EventType.RestApiError,
+        type: EventType.NoteCreationFromTextFailed,
+        note,
         err: `${err}`,
       });
     }
@@ -260,7 +258,8 @@ export const RestoreNote = (note: NoteSyncing): RestoreNoteCommand => ({
       });
     } catch (err) {
       dispatch({
-        type: EventType.RestApiError,
+        type: EventType.NoteSyncFailed,
+        note,
         err: `${err}`,
       });
     }
