@@ -1,4 +1,3 @@
-import { convertToNoteLoaded } from "../business";
 import {
   CommandType,
   CreateNewNoteWithTextCommand,
@@ -12,7 +11,13 @@ import {
 } from "../commands";
 import { generatePathFromTitle } from "../conversion";
 import { EventType } from "../events";
-import { NoteLoaded, NoteNotLoaded } from "../model";
+import {
+  NoteCreatingFromText,
+  NoteCreatingFromTitle,
+  NoteDeleted,
+  NoteRef,
+  NoteSyncing,
+} from "../model";
 import { ApiError } from "../restapi";
 import {
   getFiles,
@@ -65,13 +70,13 @@ export const RetrieveFileList = (
 
 // TODO: maybe rename more grammaticaly correct
 export const LoadNotesContent = (
-  notes: Array<NoteNotLoaded>,
+  notes: NoteRef[],
   fileListVersion: number
 ): LoadNotesContentCommand => ({
   type: CommandType.LoadNotesContent,
   notes,
   execute: (dispatch) => {
-    let notesReversed: Array<NoteNotLoaded> = [];
+    let notesReversed: NoteRef[] = [];
 
     notes.forEach((note) => {
       notesReversed = [note, ...notesReversed];
@@ -82,14 +87,10 @@ export const LoadNotesContent = (
       // TODO: handle errors
       getFile(note.path) // TODO: url-encode
         .then((content: string) => {
-          // TODO: maybe push to helper method
-          const noteLoaded = convertToNoteLoaded(note, content);
-          return noteLoaded;
-        })
-        .then((noteLoaded: NoteLoaded) => {
           dispatch({
             type: EventType.LoadNoteContentSuccess,
-            note: noteLoaded,
+            note,
+            content,
             fileListVersion,
           });
         });
@@ -97,8 +98,9 @@ export const LoadNotesContent = (
   },
 });
 
+// TODO: return note-related errors, now all the errors are RestApiError
 export const RenameNoteFromTitle = (
-  note: NoteLoaded
+  note: NoteSyncing
 ): RenameNoteFromTitleCommand => ({
   type: CommandType.RenameNoteFromTitle,
   note,
@@ -127,37 +129,41 @@ export const RenameNoteFromTitle = (
         } catch (err) {
           dispatch({
             type: EventType.RestApiError,
-            err,
+            err: `${err}`,
           });
         }
       } else {
         dispatch({
           type: EventType.RestApiError,
-          err,
+          err: `${err}`,
         });
       }
     }
   },
 });
 
-export const SaveNoteText = (note: NoteLoaded): SaveNoteTextCommand => ({
+export const SaveNoteText = (note: NoteSyncing): SaveNoteTextCommand => ({
   type: CommandType.SaveNoteText,
   note,
   execute: async (dispatch) => {
     try {
       // Store at the exact path we loaded from
       await putFile(note.path, note.text);
+      dispatch({
+        type: EventType.NoteSaved,
+        note,
+      });
     } catch (err) {
       dispatch({
         type: EventType.RestApiError,
-        err,
+        err: `${err}`,
       });
     }
   },
 });
 
 export const CreateNewNoteWithTitle = (
-  note: NoteLoaded
+  note: NoteCreatingFromTitle
 ): CreateNewNoteWithTitleCommand => ({
   type: CommandType.CreateNewNoteWithTitle,
   note,
@@ -166,7 +172,7 @@ export const CreateNewNoteWithTitle = (
     const path = generatePathFromTitle(note.title, false);
     try {
       // Don't overwrite, in case not unique
-      await postFile(path, note.text);
+      await postFile(path, "");
       dispatch({
         type: EventType.NoteSavedOnNewPath,
         note,
@@ -177,7 +183,7 @@ export const CreateNewNoteWithTitle = (
         // Regenerate path from title, this time enfocing uniqueness
         const newPath = generatePathFromTitle(note.title, true);
         try {
-          await putFile(newPath, note.text);
+          await putFile(newPath, "");
           dispatch({
             type: EventType.NoteSavedOnNewPath,
             note,
@@ -186,13 +192,13 @@ export const CreateNewNoteWithTitle = (
         } catch (err) {
           dispatch({
             type: EventType.RestApiError,
-            err,
+            err: `${err}`,
           });
         }
       } else {
         dispatch({
           type: EventType.RestApiError,
-          err,
+          err: `${err}`,
         });
       }
     }
@@ -200,14 +206,14 @@ export const CreateNewNoteWithTitle = (
 });
 
 export const CreateNewNoteWithText = (
-  note: NoteLoaded
+  note: NoteCreatingFromText
 ): CreateNewNoteWithTextCommand => ({
   type: CommandType.CreateNewNoteWithText,
   note,
   execute: async (dispatch) => {
     // Here we know that title is empty, so no need to even try storing it with an original path
     // Immediately ask for a unique (empty) path
-    const path = generatePathFromTitle(note.title, true);
+    const path = generatePathFromTitle("", true);
     try {
       await putFile(path, note.text);
       dispatch({
@@ -218,13 +224,13 @@ export const CreateNewNoteWithText = (
     } catch (err) {
       dispatch({
         type: EventType.RestApiError,
-        err,
+        err: `${err}`,
       });
     }
   },
 });
 
-export const DeleteNote = (note: NoteLoaded): DeleteNoteCommand => ({
+export const DeleteNote = (note: NoteDeleted): DeleteNoteCommand => ({
   type: CommandType.DeleteNote,
   note,
   execute: async (dispatch) => {
@@ -233,13 +239,13 @@ export const DeleteNote = (note: NoteLoaded): DeleteNoteCommand => ({
     } catch (err) {
       dispatch({
         type: EventType.RestApiError,
-        err,
+        err: `${err}`,
       });
     }
   },
 });
 
-export const RestoreNote = (note: NoteLoaded): RestoreNoteCommand => ({
+export const RestoreNote = (note: NoteSyncing): RestoreNoteCommand => ({
   type: CommandType.RestoreNote,
   note,
   execute: async (dispatch) => {
@@ -248,10 +254,14 @@ export const RestoreNote = (note: NoteLoaded): RestoreNoteCommand => ({
       // TODO: so now, if restores into the path that suddenly is taken, will fail and show 2 notes in UI
       // TODO: maybe I should actually do the same thing as when storing new note from title, why not? just ensure the uniqueness and then update path
       await postFile(note.path, note.text);
+      dispatch({
+        type: EventType.NoteSaved,
+        note,
+      });
     } catch (err) {
       dispatch({
         type: EventType.RestApiError,
-        err,
+        err: `${err}`,
       });
     }
   },

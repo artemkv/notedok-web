@@ -1,6 +1,12 @@
 import { AppEvent } from "./events";
 import { Command } from "./hooks/useReducer";
-import { NoteLoaded, NoteNotLoaded } from "./model";
+import {
+  NoteCreatingFromText,
+  NoteCreatingFromTitle,
+  NoteDeleted,
+  NoteRef,
+  NoteSyncing,
+} from "./model";
 
 export enum CommandType {
   DoNothing,
@@ -30,40 +36,39 @@ export interface RetrieveFileListCommand extends Command<AppEvent> {
   fileListVersion: number;
 }
 
-// TODO: replace Array<> with [] everywhere
 export interface LoadNotesContentCommand extends Command<AppEvent> {
   type: CommandType.LoadNotesContent;
-  notes: Array<NoteNotLoaded>;
+  notes: NoteRef[];
 }
 
 export interface RenameNoteFromTitleCommand extends Command<AppEvent> {
   type: CommandType.RenameNoteFromTitle;
-  note: NoteLoaded;
+  note: NoteSyncing;
 }
 
 export interface SaveNoteTextCommand extends Command<AppEvent> {
   type: CommandType.SaveNoteText;
-  note: NoteLoaded;
+  note: NoteSyncing;
 }
 
 export interface CreateNewNoteWithTitleCommand extends Command<AppEvent> {
   type: CommandType.CreateNewNoteWithTitle;
-  note: NoteLoaded;
+  note: NoteCreatingFromTitle;
 }
 
 export interface CreateNewNoteWithTextCommand extends Command<AppEvent> {
   type: CommandType.CreateNewNoteWithText;
-  note: NoteLoaded;
+  note: NoteCreatingFromText;
 }
 
 export interface DeleteNoteCommand extends Command<AppEvent> {
   type: CommandType.DeleteNote;
-  note: NoteLoaded;
+  note: NoteDeleted;
 }
 
 export interface RestoreNoteCommand extends Command<AppEvent> {
   type: CommandType.RestoreNote;
-  note: NoteLoaded;
+  note: NoteSyncing;
 }
 
 export interface ReportErrorCommand extends Command<AppEvent> {

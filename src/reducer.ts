@@ -4,10 +4,11 @@ import {
   deleteNote,
   finishNoteTextEditing,
   finishNoteTitleEditing,
-  handleLoadedNode,
+  handleLoadedNote,
   NOTES_ON_PAGE,
   restoreNote,
   shiftNotesToLoad,
+  updateNoteAsSynced,
   updateNotePath,
 } from "./business";
 import { AppCommand, DoMany, DoNothing } from "./commands";
@@ -20,6 +21,7 @@ import {
   NoteListFileListRetrieved,
   NoteTextEditorState,
   NoteTitleEditorState,
+  NoteState,
 } from "./model";
 
 const JustState = (state: AppState): [AppState, AppCommand] => [
@@ -94,6 +96,7 @@ export const Reducer = (
       ) {
         const [newNoteList, command] = finishNoteTitleEditing(
           state.noteList,
+          event.note,
           state.noteTitleEditor
         );
 
@@ -186,7 +189,10 @@ export const Reducer = (
       noteTextEditor: {
         state: NoteTextEditorState.EditingRegularNote,
         note: event.note,
-        text: event.note.text,
+        text:
+          event.note.state === NoteState.CreatingFromTitle
+            ? ""
+            : event.note.text,
       },
     };
 
@@ -200,6 +206,7 @@ export const Reducer = (
       ) {
         const [newNoteList, command] = finishNoteTextEditing(
           state.noteList,
+          event.note,
           state.noteTextEditor
         );
 
@@ -220,7 +227,10 @@ export const Reducer = (
 
   if (event.type === EventType.NoteDeleteTriggered) {
     if (state.noteList.state === NoteListState.FileListRetrieved) {
-      const [newNoteList, notesToLoad] = deleteNote(state.noteList, event.note);
+      const [newNoteList, noteDeleted, notesToLoad] = deleteNote(
+        state.noteList,
+        event.note
+      );
 
       const newState: AppState = {
         ...state,
@@ -228,7 +238,7 @@ export const Reducer = (
       };
 
       const command = DoMany([
-        DeleteNote(event.note),
+        DeleteNote(noteDeleted),
         LoadNotesContent(notesToLoad, state.noteList.fileListVersion),
       ]);
 
@@ -239,14 +249,17 @@ export const Reducer = (
 
   if (event.type === EventType.NoteRestoreTriggered) {
     if (state.noteList.state === NoteListState.FileListRetrieved) {
-      const newNoteList = restoreNote(state.noteList, event.note);
+      const [newNoteList, noteSyncing] = restoreNote(
+        state.noteList,
+        event.note
+      );
 
       const newState: AppState = {
         ...state,
         noteList: newNoteList,
       };
 
-      return [newState, RestoreNote(event.note)];
+      return [newState, RestoreNote(noteSyncing)];
     }
     return JustState(state);
   }
@@ -297,10 +310,28 @@ export const Reducer = (
     return JustState(newState);
   }
 
+  if (event.type === EventType.NoteSaved) {
+    const [newNoteList, newNoteTitleEditor, newNoteTextEditor] =
+      updateNoteAsSynced(state, event.note);
+
+    const newState: AppState = {
+      ...state,
+      noteTitleEditor: newNoteTitleEditor,
+      noteTextEditor: newNoteTextEditor,
+      noteList: newNoteList,
+    };
+
+    return JustState(newState);
+  }
+
   if (event.type === EventType.LoadNoteContentSuccess) {
     if (state.noteList.state === NoteListState.FileListRetrieved) {
       if (state.noteList.fileListVersion === event.fileListVersion) {
-        const newNoteList = handleLoadedNode(state.noteList, event.note);
+        const newNoteList = handleLoadedNote(
+          state.noteList,
+          event.note,
+          event.content
+        );
 
         const newState: AppState = {
           ...state,

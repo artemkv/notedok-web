@@ -3,17 +3,24 @@ import { useContext, useEffect, useRef } from "react";
 import {
   NoteTextEditor,
   NoteTextEditorState,
-  NoteLoaded,
+  NoteRegular,
   NoteTitleEditor,
   NoteTitleEditorState,
+  NoteState,
+  isTitleEditable,
+  isTitleSaveable,
+  isTextEditable,
+  isTextSaveable,
+  isDeletable,
 } from "../model";
 import AppContext from "../AppContext";
 import { htmlEscape, renderNoteTextHtml } from "../ui";
 import { EventType } from "../events";
 import { countLines, selectionIsNotEmpty } from "../util";
 
+// TODO: adjust to all new note types
 function RegularNote(props: {
-  note: NoteLoaded;
+  note: NoteRegular;
   noteTitleEditor: NoteTitleEditor;
   noteTextEditor: NoteTextEditor;
 }) {
@@ -30,6 +37,9 @@ function RegularNote(props: {
         return noteTitleEditor.text;
       }
     }
+    if (note.state === NoteState.CreatingFromText) {
+      return "";
+    }
     return note.title;
   };
   const noteTitle = getNoteTitle();
@@ -44,20 +54,32 @@ function RegularNote(props: {
   };
   const [isEditingText, editedText] = getTextEditorState();
 
+  const getReadOnlyText = (): string => {
+    if (note.state === NoteState.CreatingFromTitle) {
+      return "";
+    }
+    return note.text;
+  };
+  const noteText = getReadOnlyText();
+
   const noteTitleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({
-      type: EventType.RegularNoteTitleEditorTextChanged,
-      note,
-      newText: e.target.value,
-    });
+    if (isTitleEditable(note)) {
+      dispatch({
+        type: EventType.RegularNoteTitleEditorTextChanged,
+        note,
+        newText: e.target.value,
+      });
+    }
   };
 
   const noteTitleOnBlur = () => {
-    dispatch({
-      type: EventType.RegularNoteTitleUpdated,
-      note,
-      newTitle: noteTitle,
-    });
+    if (isTitleSaveable(note)) {
+      dispatch({
+        type: EventType.RegularNoteTitleUpdated,
+        note,
+        newTitle: noteTitle,
+      });
+    }
   };
 
   const noteTextOnClick = (e: React.SyntheticEvent) => {
@@ -73,25 +95,31 @@ function RegularNote(props: {
       return;
     }
 
-    dispatch({
-      type: EventType.RegularNoteStartTextEditing,
-      note,
-    });
+    if (isTextEditable(note)) {
+      dispatch({
+        type: EventType.RegularNoteStartTextEditing,
+        note,
+      });
+    }
   };
 
   const noteTextOnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    dispatch({
-      type: EventType.NoteTextEditorTextChanged,
-      newText: e.target.value,
-    });
+    if (isTextEditable(note)) {
+      dispatch({
+        type: EventType.NoteTextEditorTextChanged,
+        newText: e.target.value,
+      });
+    }
   };
 
   const noteTextOnBlur = () => {
-    dispatch({
-      type: EventType.RegularNoteTextUpdated,
-      note,
-      newText: editedText,
-    });
+    if (isTextSaveable(note)) {
+      dispatch({
+        type: EventType.RegularNoteTextUpdated,
+        note,
+        newText: editedText,
+      });
+    }
   };
 
   const onCancelNoteTextEditing = () => {
@@ -101,18 +129,22 @@ function RegularNote(props: {
   };
 
   const onSaveUpdatedNoteText = () => {
-    dispatch({
-      type: EventType.RegularNoteTextUpdated,
-      note,
-      newText: editedText,
-    });
+    if (isTextSaveable(note)) {
+      dispatch({
+        type: EventType.RegularNoteTextUpdated,
+        note,
+        newText: editedText,
+      });
+    }
   };
 
   const onDeleteNote = () => {
-    dispatch({
-      type: EventType.NoteDeleteTriggered,
-      note,
-    });
+    if (isDeletable(note)) {
+      dispatch({
+        type: EventType.NoteDeleteTriggered,
+        note,
+      });
+    }
   };
 
   const focusTextarea = () => {
@@ -126,6 +158,10 @@ function RegularNote(props: {
   });
 
   const isLongText = () => {
+    if (note.state === NoteState.CreatingFromTitle) {
+      return false;
+    }
+
     return countLines(note.text) > 10;
   };
 
@@ -137,13 +173,13 @@ function RegularNote(props: {
     );
   };
 
-  const noteText = () => {
+  const noteTextReadonly = () => {
     return (
       <div
         className="note-text"
         tabIndex={0}
         dangerouslySetInnerHTML={{
-          __html: renderNoteTextHtml(htmlEscape(note.text)),
+          __html: renderNoteTextHtml(htmlEscape(noteText)),
         }}
         onClick={noteTextOnClick}
       ></div>
@@ -217,8 +253,8 @@ function RegularNote(props: {
         />
         {isEditingText
           ? textEditor()
-          : note.text
-          ? noteText()
+          : noteText
+          ? noteTextReadonly()
           : noteTextPlaceholder()}
         {isEditingText ? editingNoteControlArea() : readonlyNoteControlArea()}
       </div>

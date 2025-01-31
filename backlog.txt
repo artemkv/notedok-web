@@ -99,6 +99,7 @@ TODO:
 - tab does not stop on control area buttons
 - encoding of filenames for url
 - utf-8
+- TODO: replace Array<> with [] everywhere
 
 
 Test:
@@ -125,3 +126,16 @@ title updated ->
 	- V try to save, not overwrite (POST files)
 	- V if conflicts, make unique and save with overwrite (PUT file)
 	- inform UI
+
+
+
+/*
+export interface NoteLoaded {
+  type: NoteType.Loaded;
+  id: string;
+  path: string; // can be empty if the note was created on UI and haven't been yet saved
+  title: string;
+  text: string;
+  isDeleted: boolean; // TODO: begins to clash with path
+}
+*/

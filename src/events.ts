@@ -1,4 +1,14 @@
-import { NoteLoaded } from "./model";
+import {
+  NoteDeletable,
+  NoteDeleted,
+  NotePendingPathUpdate,
+  NoteRef,
+  NoteSyncing,
+  NoteTextEditable,
+  NoteTextSaveable,
+  NoteTitleEditable,
+  NoteTitleSaveable,
+} from "./model";
 
 export enum EventType {
   TemplateNoteTitleEditorTextChanged,
@@ -19,13 +29,16 @@ export enum EventType {
   NoteDeleteTriggered,
   NoteRestoreTriggered,
 
+  // TODO: considering these 2, is Syncing really a good state?
   NoteSavedOnNewPath,
+  NoteSaved,
 
   RetrieveFileListSuccess, // TODO: handle failure
   LoadNoteContentSuccess, // TODO: handle failure
   LoadNextPage,
 
-  RestApiError,
+  NoteSyncFailed, // Note-related errors
+  RestApiError, // Generic errors
 }
 
 export interface TemplateNoteTitleEditorTextChangedEvent {
@@ -40,13 +53,13 @@ export interface TemplateNoteTitleUpdatedEvent {
 
 export interface RegularNoteTitleEditorTextChangedEvent {
   type: EventType.RegularNoteTitleEditorTextChanged;
-  note: NoteLoaded;
+  note: NoteTitleEditable;
   newText: string;
 }
 
 export interface RegularNoteTitleUpdatedEvent {
   type: EventType.RegularNoteTitleUpdated;
-  note: NoteLoaded;
+  note: NoteTitleSaveable;
   newTitle: string;
 }
 
@@ -70,23 +83,23 @@ export interface TemplateNoteTextUpdatedEvent {
 
 export interface RegularNoteStartTextEditingEvent {
   type: EventType.RegularNoteStartTextEditing;
-  note: NoteLoaded;
+  note: NoteTextEditable;
 }
 
 export interface RegularNoteTextUpdatedEvent {
   type: EventType.RegularNoteTextUpdated;
-  note: NoteLoaded;
+  note: NoteTextSaveable;
   newText: string;
 }
 
 export interface NoteDeleteTriggeredEvent {
   type: EventType.NoteDeleteTriggered;
-  note: NoteLoaded;
+  note: NoteDeletable;
 }
 
 export interface NoteRestoreTriggeredEvent {
   type: EventType.NoteRestoreTriggered;
-  note: NoteLoaded;
+  note: NoteDeleted;
 }
 
 export interface RetrieveFileListSuccessEvent {
@@ -97,7 +110,8 @@ export interface RetrieveFileListSuccessEvent {
 
 export interface LoadNoteContentSuccessEvent {
   type: EventType.LoadNoteContentSuccess;
-  note: NoteLoaded;
+  note: NoteRef;
+  content: string;
   fileListVersion: number;
 }
 
@@ -107,13 +121,24 @@ export interface LoadNextPageEvent {
 
 export interface NoteSavedOnNewPathEvent {
   type: EventType.NoteSavedOnNewPath;
-  note: NoteLoaded;
+  note: NotePendingPathUpdate;
   newPath: string;
+}
+
+export interface NoteSavedEvent {
+  type: EventType.NoteSaved;
+  note: NoteSyncing;
+}
+
+export interface NoteSyncFailed {
+  type: EventType.NoteSyncFailed;
+  note: NoteSyncing;
+  err: string;
 }
 
 export interface RestApiErrorEvent {
   type: EventType.RestApiError;
-  err: unknown;
+  err: string;
 }
 
 export type AppEvent =
@@ -130,7 +155,9 @@ export type AppEvent =
   | NoteDeleteTriggeredEvent
   | NoteRestoreTriggeredEvent
   | NoteSavedOnNewPathEvent
+  | NoteSavedEvent
   | RetrieveFileListSuccessEvent
   | LoadNoteContentSuccessEvent
   | LoadNextPageEvent
+  | NoteSyncFailed
   | RestApiErrorEvent;

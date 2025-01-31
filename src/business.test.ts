@@ -3,7 +3,7 @@ import { NoteListState, NoteListFileListRetrieved } from "./model";
 import {
   convertToNoteLoaded,
   createNoteNotLoaded,
-  handleLoadedNode,
+  handleLoadedNote,
   shiftNotesToLoadForNextPage,
 } from "./business";
 
@@ -71,7 +71,7 @@ test("First note loaded first", () => {
     createNoteNotLoaded(0, "file1.txt"),
     "text"
   );
-  const newNoteListState = handleLoadedNode(noteListState, NoteLoaded);
+  const newNoteListState = handleLoadedNote(noteListState, NoteLoaded);
 
   // TODO: check properly
   expect(newNoteListState.renderingQueue.length).toEqual(4);
@@ -98,7 +98,7 @@ test("Second note loaded first", () => {
     createNoteNotLoaded(1, "file2.txt"),
     "text"
   );
-  const newNoteListState = handleLoadedNode(noteListState, NoteLoaded);
+  const newNoteListState = handleLoadedNote(noteListState, NoteLoaded);
 
   // TODO: check properly
   expect(newNoteListState.renderingQueue.length).toEqual(5);
@@ -125,7 +125,7 @@ test("First note loads after second note", () => {
     createNoteNotLoaded(0, "file1.txt"),
     "text"
   );
-  const newNoteListState = handleLoadedNode(noteListState, NoteLoaded);
+  const newNoteListState = handleLoadedNote(noteListState, NoteLoaded);
 
   // TODO: check properly
   expect(newNoteListState.renderingQueue.length).toEqual(3);

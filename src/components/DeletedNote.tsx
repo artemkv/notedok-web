@@ -1,10 +1,10 @@
 import "./DeletedNote.css";
 import { useContext } from "react";
-import { NoteLoaded } from "../model";
+import { NoteDeleted } from "../model";
 import AppContext from "../AppContext";
 import { EventType } from "../events";
 
-function DeletedNote(props: { note: NoteLoaded }) {
+function DeletedNote(props: { note: NoteDeleted }) {
   const { uistrings, dispatch } = useContext(AppContext);
 
   const note = props.note;
