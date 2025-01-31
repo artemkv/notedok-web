@@ -160,6 +160,20 @@ function putText(endpoint: string, text: string, session?: string) {
     .then(toText);
 }
 
+function deleteObject(endpoint: string, session?: string) {
+  const headers: StringMap = {};
+  if (session) {
+    headers["x-session"] = session;
+  }
+
+  return fetch(baseUrl + endpoint, {
+    method: "DELETE",
+    mode: "cors",
+    cache: "no-cache",
+    headers,
+  }).then(handleErrors);
+}
+
 export const signIn = (idToken: string) => {
   return postJson("/signin", { id_token: idToken });
 };
@@ -198,4 +212,8 @@ export const renameFile = (
   };
 
   return postJson(`/rename`, body, session); // TODO: fails as the response does not return data
+};
+
+export const deleteFile = (session: string, filename: string) => {
+  return deleteObject(`/files/${filename}`, session);
 };

@@ -3,8 +3,10 @@ import {
   CommandType,
   CreateNewNoteWithTextCommand,
   CreateNewNoteWithTitleCommand,
+  DeleteNoteCommand,
   LoadNotesContentCommand,
   RenameNoteFromTitleCommand,
+  RestoreNoteCommand,
   RetrieveFileListCommand,
   SaveNoteTextCommand,
 } from "../commands";
@@ -18,6 +20,7 @@ import {
   putFile,
   postFile,
   renameFile,
+  deleteFile,
 } from "../sessionapi";
 
 interface FileData {
@@ -60,11 +63,12 @@ export const RetrieveFileList = (
   },
 });
 
-export const LoadNextPage = (
+// TODO: maybe rename more grammaticaly correct
+export const LoadNotesContent = (
   notes: Array<NoteNotLoaded>,
   fileListVersion: number
 ): LoadNotesContentCommand => ({
-  type: CommandType.LoadNextPage,
+  type: CommandType.LoadNotesContent,
   notes,
   execute: (dispatch) => {
     let notesReversed: Array<NoteNotLoaded> = [];
@@ -211,6 +215,39 @@ export const CreateNewNoteWithText = (
         note,
         newPath: path,
       });
+    } catch (err) {
+      dispatch({
+        type: EventType.RestApiError,
+        err,
+      });
+    }
+  },
+});
+
+export const DeleteNote = (note: NoteLoaded): DeleteNoteCommand => ({
+  type: CommandType.DeleteNote,
+  note,
+  execute: async (dispatch) => {
+    try {
+      await deleteFile(note.path);
+    } catch (err) {
+      dispatch({
+        type: EventType.RestApiError,
+        err,
+      });
+    }
+  },
+});
+
+export const RestoreNote = (note: NoteLoaded): RestoreNoteCommand => ({
+  type: CommandType.RestoreNote,
+  note,
+  execute: async (dispatch) => {
+    try {
+      // Try to restore with exactly the same path as before, don't overwrite
+      // TODO: so now, if restores into the path that suddenly is taken, will fail and show 2 notes in UI
+      // TODO: maybe I should actually do the same thing as when storing new note from title, why not? just ensure the uniqueness and then update path
+      await postFile(note.path, note.text);
     } catch (err) {
       dispatch({
         type: EventType.RestApiError,

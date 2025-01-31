@@ -5,12 +5,14 @@ import {
   finishNoteTextEditing,
   finishNoteTitleEditing,
   handleLoadedNode,
-  shiftNotesToLoadForNextPage,
+  NOTES_ON_PAGE,
+  restoreNote,
+  shiftNotesToLoad,
   updateNotePath,
 } from "./business";
-import { AppCommand, DoNothing } from "./commands";
+import { AppCommand, DoMany, DoNothing } from "./commands";
 import { ReportError } from "./commands/alerts";
-import { LoadNextPage } from "./commands/storage";
+import { DeleteNote, LoadNotesContent, RestoreNote } from "./commands/storage";
 import { AppEvent, EventType } from "./events";
 import {
   AppState,
@@ -218,14 +220,33 @@ export const Reducer = (
 
   if (event.type === EventType.NoteDeleteTriggered) {
     if (state.noteList.state === NoteListState.FileListRetrieved) {
-      const newNoteList = deleteNote(state.noteList, event.note);
+      const [newNoteList, notesToLoad] = deleteNote(state.noteList, event.note);
 
       const newState: AppState = {
         ...state,
         noteList: newNoteList,
       };
 
-      return JustState(newState);
+      const command = DoMany([
+        DeleteNote(event.note),
+        LoadNotesContent(notesToLoad, state.noteList.fileListVersion),
+      ]);
+
+      return [newState, command];
+    }
+    return JustState(state);
+  }
+
+  if (event.type === EventType.NoteRestoreTriggered) {
+    if (state.noteList.state === NoteListState.FileListRetrieved) {
+      const newNoteList = restoreNote(state.noteList, event.note);
+
+      const newState: AppState = {
+        ...state,
+        noteList: newNoteList,
+      };
+
+      return [newState, RestoreNote(event.note)];
     }
     return JustState(state);
   }
@@ -244,14 +265,17 @@ export const Reducer = (
         notes: [],
       };
 
-      const [newNoteList, notesToLoad] = shiftNotesToLoadForNextPage(noteList);
+      const [newNoteList, notesToLoad] = shiftNotesToLoad(
+        noteList,
+        NOTES_ON_PAGE
+      );
 
       const newState: AppState = {
         ...state,
         noteList: newNoteList,
       };
 
-      return [newState, LoadNextPage(notesToLoad, event.fileListVersion)];
+      return [newState, LoadNotesContent(notesToLoad, event.fileListVersion)];
     }
     return JustState(state);
   }
@@ -291,8 +315,9 @@ export const Reducer = (
 
   if (event.type === EventType.LoadNextPage) {
     if (state.noteList.state === NoteListState.FileListRetrieved) {
-      const [newNoteList, notesToLoad] = shiftNotesToLoadForNextPage(
-        state.noteList
+      const [newNoteList, notesToLoad] = shiftNotesToLoad(
+        state.noteList,
+        NOTES_ON_PAGE
       );
 
       const newState: AppState = {
@@ -302,7 +327,7 @@ export const Reducer = (
 
       return [
         newState,
-        LoadNextPage(notesToLoad, state.noteList.fileListVersion),
+        LoadNotesContent(notesToLoad, state.noteList.fileListVersion),
       ];
     }
 

@@ -24,26 +24,25 @@ import {
   NoteList,
 } from "./model";
 
-const NOTES_ON_PAGE = 5;
+export const NOTES_ON_PAGE = 5;
 
-export const shiftNotesToLoadForNextPage = (
-  noteList: NoteListFileListRetrieved
+export const shiftNotesToLoad = (
+  noteList: NoteListFileListRetrieved,
+  notesToShift: number
 ): [NoteListFileListRetrieved, Array<NoteNotLoaded>] => {
-  let pageSize = NOTES_ON_PAGE;
-
   // Shortcuts to inner props
   const unprocessedFiles = noteList.unprocessedFiles;
   const renderingQueue = noteList.renderingQueue;
 
-  // Detect an actual page size
-  if (unprocessedFiles.length < pageSize) {
-    pageSize = unprocessedFiles.length;
+  // Adjust the amount of notes to shift in case not enough notes
+  if (unprocessedFiles.length < notesToShift) {
+    notesToShift = unprocessedFiles.length;
   }
 
-  // Split out the files for the first page
-  const filesToLoad = unprocessedFiles.slice(0, pageSize);
+  // Split out the files for the notes to load
+  const filesToLoad = unprocessedFiles.slice(0, notesToShift);
   const filesRemaining = unprocessedFiles.slice(
-    pageSize,
+    notesToShift,
     unprocessedFiles.length
   );
 
@@ -52,7 +51,7 @@ export const shiftNotesToLoadForNextPage = (
     return createNoteNotLoaded(noteList.lastUsedNoteId + idx, path);
   });
 
-  // Keep track of the order
+  // Put on a rendering queue to keep track of the order
   const newRenderingQueue = [...renderingQueue, ...notesToLoad];
 
   // New state
@@ -60,7 +59,7 @@ export const shiftNotesToLoadForNextPage = (
     state: NoteListState.FileListRetrieved,
     fileListVersion: noteList.fileListVersion,
     unprocessedFiles: filesRemaining,
-    lastUsedNoteId: noteList.lastUsedNoteId + pageSize,
+    lastUsedNoteId: noteList.lastUsedNoteId + notesToShift,
     renderingQueue: newRenderingQueue,
     notes: noteList.notes,
   };
@@ -314,7 +313,7 @@ export const updateNotePath = (
 export const deleteNote = (
   noteList: NoteListFileListRetrieved,
   note: NoteLoaded
-): NoteListFileListRetrieved => {
+): [NoteListFileListRetrieved, Array<NoteNotLoaded>] => {
   // New note as deleted
   const newNote = {
     ...note,
@@ -322,6 +321,34 @@ export const deleteNote = (
   };
 
   // Update the note list with the updated one
+  const newNotes = noteList.notes
+    .filter((n) => !n.isDeleted) // delete all already deleted notes from UI
+    .map((n) => (n.id === note.id ? newNote : n));
+
+  // Load and render one more note from the list (if exists),
+  // so the number of displayed notes stays the same
+  const [noteListShifted, notesToLoad] = shiftNotesToLoad(noteList, 1);
+
+  // New state
+  const newNoteList: NoteListFileListRetrieved = {
+    ...noteListShifted,
+    notes: newNotes,
+  };
+
+  return [newNoteList, notesToLoad];
+};
+
+export const restoreNote = (
+  noteList: NoteListFileListRetrieved,
+  note: NoteLoaded
+): NoteListFileListRetrieved => {
+  // Undelete the note
+  const newNote = {
+    ...note,
+    isDeleted: false,
+  };
+
+  // Update the note list with the updated note
   const newNotes = noteList.notes.map((n) => (n.id === note.id ? newNote : n));
 
   // New state
@@ -354,6 +381,7 @@ export const convertToNoteLoaded = (
     path: note.path,
     title: getTitleFromPath(note.path),
     text,
+    isDeleted: false,
   };
 };
 
@@ -368,5 +396,6 @@ export const createNewNoteLoaded = (
     path: "",
     title,
     text,
+    isDeleted: false,
   };
 };

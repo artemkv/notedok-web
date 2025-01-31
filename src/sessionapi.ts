@@ -109,3 +109,9 @@ export const renameFile = (filename: string, newFilename: string) => {
   return api.renameFile(getSession(), filename, newFilename);
   //});
 };
+
+export const deleteFile = (filename: string) => {
+  //return callApi(() => {
+  return api.deleteFile(getSession(), filename);
+  //});
+};
