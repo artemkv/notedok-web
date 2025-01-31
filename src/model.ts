@@ -2,25 +2,30 @@ import { RetrieveFileList } from "./commands/storage";
 
 // note
 
-// TODO: look for those: NoteNotLoaded, Loaded
-
 export enum NoteState {
-  // Invisible, needs to get synced
+  // Invisible, needs to be retrieved from storage
   Ref, // -> Synced
-  // Can be edited, renamed or deleted
+  // Fully aligned with the storage. Can be edited, renamed or deleted
   Synced, // -> Syncing, Deleted
+  // Has been changed from UI and is updating back to storage
   // Cannot edit, rename or delete (TODO: gray out controls, do not remove)
   Syncing, // -> Synced | OutOfSync
-  // Can be edited, renamed or deleted (TODO: make sure everything is restored as before, to allow re-do the operation)
+  // Has failed the sync attempt, and is not anymore aligned with storage
+  // Can be edited, renamed or deleted, to allow the user to solve the issue
+  // TODO: make sure everything is restored as before, to allow re-do the operation
   // TODO: show error next to the note
   OutOfSync, // -> Syncing, Deleted
-  // Cannot edit or rename, only restore (actual delete happens in background)
+  // Was deleted in UI (can still be pending deletion in the storage, which is done in a background)
+  // Cannot edit or rename, only restore
   // TODO: cannot restore until delete completes, so probably I do need to queue the API calls
+  // TODO: or I need an actual status deleting and gray out restore button until fully deleted
   Deleted, // -> Syncing
-  // Allows editing text immediately after creating a new note from title, but not renaming or deleting
+  // Was created in UI from the template note by editing title, currently pending creation in the storage
+  // Text is immediately editable, but cannot rename or delete until is synced
   // TODO: make sure cannot save the edits until created successfully
   // TODO: maybe by blocking save, maybe by queuing the API call
   CreatingFromTitle, // -> Synced, OutOfSync
+  // Was created in UI from the template note by editing text, currently pending creation in the storage
   // Cannot edit, rename or delete (TODO: gray out controls, do not remove)
   CreatingFromText, // -> Synced, OutOfSync
 }
@@ -61,7 +66,7 @@ export interface NoteOutOfSync {
   title: string; // TODO: make sure that after unsuccessful rename, the next rename will use the old path
   text: string;
 
-  err: string;
+  err: string; // Here would could allow retrying the failed action
 }
 
 export interface NoteDeleted {
@@ -87,7 +92,9 @@ export interface NoteCreatingFromText {
   text: string;
 }
 
-export type NoteFull =
+export type NoteInvisible = NoteRef;
+
+export type NoteVisible =
   | NoteSynced
   | NoteSyncing
   | NoteOutOfSync
@@ -95,11 +102,11 @@ export type NoteFull =
   | NoteCreatingFromTitle
   | NoteCreatingFromText;
 
-export const isFullNote = (note: Note) => {
+export const isVisible = (note: Note) => {
   return note.state !== NoteState.Ref;
 };
 
-export type Note = NoteRef | NoteFull;
+export type Note = NoteInvisible | NoteVisible;
 
 export type NoteTextEditable =
   | NoteSynced
@@ -143,14 +150,13 @@ export type NotePendingPathUpdate =
   | NoteCreatingFromTitle
   | NoteCreatingFromText;
 
+// Basically, there are 2 "special" notes, from the point of view of UI: template note and deleted note
 export type NoteRegular =
   | NoteSynced
   | NoteSyncing
   | NoteOutOfSync
   | NoteCreatingFromTitle
   | NoteCreatingFromText;
-
-// TODO: ----------------------------------------------------------------------------
 
 // note text editor
 
@@ -226,7 +232,7 @@ export interface NoteListFileListRetrieved {
   unprocessedFiles: string[]; // We don't load notes until they need to made visible
   lastUsedNoteId: number; // Note ids are only unique within the same fileListVersion
   renderingQueue: Note[]; // This ensures notes are displayed in order, even if loaded out of order
-  notes: NoteFull[]; // These are all currently visible notes
+  notes: NoteVisible[]; // These are all currently visible notes
 }
 
 export type NoteList = NoteListRetrievingFileList | NoteListFileListRetrieved;

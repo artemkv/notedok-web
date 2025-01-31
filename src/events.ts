@@ -29,15 +29,14 @@ export enum EventType {
   NoteDeleteTriggered,
   NoteRestoreTriggered,
 
-  // TODO: considering these 2, is Syncing really a good state?
   NoteSavedOnNewPath,
   NoteSaved,
 
-  RetrieveFileListSuccess, // TODO: handle failure
-  LoadNoteContentSuccess, // TODO: handle failure
+  RetrieveFileListSuccess,
+  LoadNoteTextSuccess,
   LoadNextPage,
 
-  NoteSyncFailed, // Note-related errors
+  NoteSyncFailed, // Note-related errors (or whatever we treat as such)
   RestApiError, // Generic errors
 }
 
@@ -108,10 +107,10 @@ export interface RetrieveFileListSuccessEvent {
   fileList: Array<string>;
 }
 
-export interface LoadNoteContentSuccessEvent {
-  type: EventType.LoadNoteContentSuccess;
+export interface LoadNoteTextSuccessEvent {
+  type: EventType.LoadNoteTextSuccess;
   note: NoteRef;
-  content: string;
+  text: string;
   fileListVersion: number;
 }
 
@@ -157,7 +156,7 @@ export type AppEvent =
   | NoteSavedOnNewPathEvent
   | NoteSavedEvent
   | RetrieveFileListSuccessEvent
-  | LoadNoteContentSuccessEvent
+  | LoadNoteTextSuccessEvent
   | LoadNextPageEvent
   | NoteSyncFailed
   | RestApiErrorEvent;

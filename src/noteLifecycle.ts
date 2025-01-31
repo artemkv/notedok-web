@@ -10,6 +10,8 @@ import {
   NoteSyncing,
 } from "./model";
 
+// All the possible state transitions are found here
+
 export const createNewNoteRef = (id: number, path: string): NoteRef => {
   return {
     state: NoteState.Ref,
@@ -70,14 +72,24 @@ export const noteSyncedToDeleted = (note: NoteSynced): NoteDeleted => {
   };
 };
 
-export const noteSyncingToSynced = (
+export const noteSyncingToSynced = (note: NoteSyncing): NoteSynced => {
+  return {
+    state: NoteState.Synced,
+    id: note.id,
+    path: note.path,
+    title: note.title,
+    text: note.text,
+  };
+};
+
+export const noteSyncingToSyncedWithNewPath = (
   note: NoteSyncing,
-  path: string
+  newPath: string
 ): NoteSynced => {
   return {
     state: NoteState.Synced,
     id: note.id,
-    path,
+    path: newPath,
     title: note.title,
     text: note.text,
   };

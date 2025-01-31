@@ -3,7 +3,7 @@ import {
   CreateNewNoteWithTextCommand,
   CreateNewNoteWithTitleCommand,
   DeleteNoteCommand,
-  LoadNotesContentCommand,
+  LoadNotesTextCommand,
   RenameNoteFromTitleCommand,
   RestoreNoteCommand,
   RetrieveFileListCommand,
@@ -69,11 +69,11 @@ export const RetrieveFileList = (
 });
 
 // TODO: maybe rename more grammaticaly correct
-export const LoadNotesContent = (
+export const LoadNotesText = (
   notes: NoteRef[],
   fileListVersion: number
-): LoadNotesContentCommand => ({
-  type: CommandType.LoadNotesContent,
+): LoadNotesTextCommand => ({
+  type: CommandType.LoadNotesText,
   notes,
   execute: (dispatch) => {
     let notesReversed: NoteRef[] = [];
@@ -86,11 +86,11 @@ export const LoadNotesContent = (
       // TODO: one file failing to fetch is blocking the rest
       // TODO: handle errors
       getFile(note.path) // TODO: url-encode
-        .then((content: string) => {
+        .then((text: string) => {
           dispatch({
-            type: EventType.LoadNoteContentSuccess,
+            type: EventType.LoadNoteTextSuccess,
             note,
-            content,
+            text,
             fileListVersion,
           });
         });

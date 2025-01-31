@@ -20,8 +20,8 @@ import {
   NoteList,
   NoteRef,
   NoteSynced,
-  NoteFull,
-  isFullNote,
+  NoteVisible,
+  isVisible,
   NoteState,
   NoteTextSaveable,
   NoteTitleSaveable,
@@ -43,6 +43,7 @@ import {
   noteSyncedToDeleted,
   noteSyncedToSyncing,
   noteSyncingToSynced,
+  noteSyncingToSyncedWithNewPath,
 } from "./noteLifecycle";
 
 export const NOTES_ON_PAGE = 5;
@@ -103,11 +104,11 @@ export const handleLoadedNote = (
   const newQueue = queue.map((n) => (n.id === newNote.id ? newNote : n));
 
   // Find out which notes can already be rendered
-  const readyNotes: NoteFull[] = [];
+  const readyNotes: NoteVisible[] = [];
   let firstNotReadyNoteIdx = 0;
   while (firstNotReadyNoteIdx < newQueue.length) {
-    if (isFullNote(newQueue[firstNotReadyNoteIdx])) {
-      const note: NoteFull = newQueue[firstNotReadyNoteIdx] as NoteFull;
+    if (isVisible(newQueue[firstNotReadyNoteIdx])) {
+      const note: NoteVisible = newQueue[firstNotReadyNoteIdx] as NoteVisible;
       readyNotes.push(note);
       firstNotReadyNoteIdx++;
     } else {
@@ -331,7 +332,7 @@ export const updateNoteAsSynced = (
 
   if (noteList.state === NoteListState.FileListRetrieved) {
     // New note with the same path
-    const newNote: NoteSynced = noteSyncingToSynced(note, note.path);
+    const newNote: NoteSynced = noteSyncingToSynced(note);
 
     // Update the note list with the updated one
     const newNotes = noteList.notes.map((n) =>
@@ -457,7 +458,7 @@ const notePendingPathUpdateToSynced = (
   newPath: string
 ): NoteSynced => {
   if (note.state === NoteState.Syncing) {
-    return noteSyncingToSynced(note, newPath);
+    return noteSyncingToSyncedWithNewPath(note, newPath);
   }
   if (note.state === NoteState.CreatingFromTitle) {
     return noteCreatingFromTitleToSynced(note, newPath);

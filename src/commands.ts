@@ -12,7 +12,7 @@ export enum CommandType {
   DoNothing,
   DoMany,
   RetrieveFileList,
-  LoadNotesContent,
+  LoadNotesText,
   RenameNoteFromTitle,
   SaveNoteText,
   CreateNewNoteWithTitle,
@@ -21,6 +21,10 @@ export enum CommandType {
   RestoreNote,
   ReportError,
 }
+
+// The note is first updated in UI, then all the I/O happens in background
+// This is why all the commands have the note already in a "target" state
+// They, however, need to allow UI to catch up with any inconsistencies (such as path change)
 
 export interface DoNothingCommand extends Command<AppEvent> {
   type: CommandType.DoNothing;
@@ -36,8 +40,8 @@ export interface RetrieveFileListCommand extends Command<AppEvent> {
   fileListVersion: number;
 }
 
-export interface LoadNotesContentCommand extends Command<AppEvent> {
-  type: CommandType.LoadNotesContent;
+export interface LoadNotesTextCommand extends Command<AppEvent> {
+  type: CommandType.LoadNotesText;
   notes: NoteRef[];
 }
 
@@ -80,7 +84,7 @@ export type AppCommand =
   | DoNothingCommand
   | DoManyCommand
   | RetrieveFileListCommand
-  | LoadNotesContentCommand
+  | LoadNotesTextCommand
   | RenameNoteFromTitleCommand
   | SaveNoteTextCommand
   | CreateNewNoteWithTitleCommand

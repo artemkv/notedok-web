@@ -13,7 +13,7 @@ import {
 } from "./business";
 import { AppCommand, DoMany, DoNothing } from "./commands";
 import { ReportError } from "./commands/alerts";
-import { DeleteNote, LoadNotesContent, RestoreNote } from "./commands/storage";
+import { DeleteNote, LoadNotesText, RestoreNote } from "./commands/storage";
 import { AppEvent, EventType } from "./events";
 import {
   AppState,
@@ -239,7 +239,7 @@ export const Reducer = (
 
       const command = DoMany([
         DeleteNote(noteDeleted),
-        LoadNotesContent(notesToLoad, state.noteList.fileListVersion),
+        LoadNotesText(notesToLoad, state.noteList.fileListVersion),
       ]);
 
       return [newState, command];
@@ -288,7 +288,7 @@ export const Reducer = (
         noteList: newNoteList,
       };
 
-      return [newState, LoadNotesContent(notesToLoad, event.fileListVersion)];
+      return [newState, LoadNotesText(notesToLoad, event.fileListVersion)];
     }
     return JustState(state);
   }
@@ -324,13 +324,13 @@ export const Reducer = (
     return JustState(newState);
   }
 
-  if (event.type === EventType.LoadNoteContentSuccess) {
+  if (event.type === EventType.LoadNoteTextSuccess) {
     if (state.noteList.state === NoteListState.FileListRetrieved) {
       if (state.noteList.fileListVersion === event.fileListVersion) {
         const newNoteList = handleLoadedNote(
           state.noteList,
           event.note,
-          event.content
+          event.text
         );
 
         const newState: AppState = {
@@ -358,7 +358,7 @@ export const Reducer = (
 
       return [
         newState,
-        LoadNotesContent(notesToLoad, state.noteList.fileListVersion),
+        LoadNotesText(notesToLoad, state.noteList.fileListVersion),
       ];
     }
 
