@@ -8,6 +8,7 @@ import {
   NOTES_ON_PAGE,
   restoreNote,
   shiftNotesToLoad,
+  updateNoteAsOutOfSync,
   updateNoteAsSynced,
   updateNotePath,
 } from "./business";
@@ -366,18 +367,45 @@ export const Reducer = (
   }
 
   if (event.type === EventType.NoteSyncFailed) {
-    // TODO:
-    return JustState(state);
+    const [newNoteList, newNoteTitleEditor, newNoteTextEditor] =
+      updateNoteAsOutOfSync(state, event.note, event.note.path, event.err);
+
+    const newState: AppState = {
+      ...state,
+      noteTitleEditor: newNoteTitleEditor,
+      noteTextEditor: newNoteTextEditor,
+      noteList: newNoteList,
+    };
+
+    return JustState(newState);
   }
 
   if (event.type === EventType.NoteCreationFromTitleFailed) {
-    // TODO:
-    return JustState(state);
+    const [newNoteList, newNoteTitleEditor, newNoteTextEditor] =
+      updateNoteAsOutOfSync(state, event.note, event.path, event.err);
+
+    const newState: AppState = {
+      ...state,
+      noteTitleEditor: newNoteTitleEditor,
+      noteTextEditor: newNoteTextEditor,
+      noteList: newNoteList,
+    };
+
+    return JustState(newState);
   }
 
   if (event.type === EventType.NoteCreationFromTextFailed) {
-    // TODO:
-    return JustState(state);
+    const [newNoteList, newNoteTitleEditor, newNoteTextEditor] =
+      updateNoteAsOutOfSync(state, event.note, event.path, event.err);
+
+    const newState: AppState = {
+      ...state,
+      noteTitleEditor: newNoteTitleEditor,
+      noteTextEditor: newNoteTextEditor,
+      noteList: newNoteList,
+    };
+
+    return JustState(newState);
   }
 
   if (event.type === EventType.RestApiError) {

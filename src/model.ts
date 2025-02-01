@@ -145,6 +145,7 @@ export const isDeletable = (note: Note) => {
   return note.state === NoteState.Synced || note.state === NoteState.OutOfSync;
 };
 
+// TODO: re-think name, as it's not just about the path
 export type NotePendingPathUpdate =
   | NoteSyncing
   | NoteCreatingFromTitle

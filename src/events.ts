@@ -144,12 +144,14 @@ export interface NoteSyncFailedEvent {
 export interface NoteCreationFromTitleFailed {
   type: EventType.NoteCreationFromTitleFailed;
   note: NoteCreatingFromTitle;
+  path: string;
   err: string;
 }
 
 export interface NoteCreationFromTextFailed {
   type: EventType.NoteCreationFromTextFailed;
   note: NoteCreatingFromText;
+  path: string;
   err: string;
 }
 

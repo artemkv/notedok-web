@@ -164,3 +164,33 @@ export const noteCreatingFromTextToSynced = (
     text: note.text,
   };
 };
+
+export const noteCreatingFromTitleToOutOfSync = (
+  note: NoteCreatingFromTitle,
+  path: string,
+  err: string
+): NoteOutOfSync => {
+  return {
+    state: NoteState.OutOfSync,
+    id: note.id,
+    path,
+    title: note.title,
+    text: "",
+    err,
+  };
+};
+
+export const noteCreatingFromTextToOutOfSync = (
+  note: NoteCreatingFromText,
+  path: string,
+  err: string
+): NoteOutOfSync => {
+  return {
+    state: NoteState.OutOfSync,
+    id: note.id,
+    path,
+    title: "",
+    text: note.text,
+    err,
+  };
+};

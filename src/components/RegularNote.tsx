@@ -31,6 +31,8 @@ function RegularNote(props: {
   const noteTitleEditor = props.noteTitleEditor;
   const noteTextEditor = props.noteTextEditor;
 
+  const hasError = note.state === NoteState.OutOfSync;
+
   const getNoteTitle = (): string => {
     if (noteTitleEditor.state === NoteTitleEditorState.EditingRegularNote) {
       if (noteTitleEditor.note === note) {
@@ -239,8 +241,12 @@ function RegularNote(props: {
     );
   };
 
+  // TODO: design how the errors are displayed
   return (
-    <div id={note.id} className="note-outer">
+    <div
+      id={note.id}
+      className={"note-outer" + (hasError ? " note-error" : "")}
+    >
       <div className="note-inner">
         <input
           type="text"

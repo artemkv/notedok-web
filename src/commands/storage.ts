@@ -188,6 +188,7 @@ export const CreateNewNoteWithTitle = (
           dispatch({
             type: EventType.NoteCreationFromTitleFailed,
             note,
+            path,
             err: `${err}`,
           });
         }
@@ -195,6 +196,7 @@ export const CreateNewNoteWithTitle = (
         dispatch({
           type: EventType.NoteCreationFromTitleFailed,
           note,
+          path,
           err: `${err}`,
         });
       }
@@ -222,6 +224,7 @@ export const CreateNewNoteWithText = (
       dispatch({
         type: EventType.NoteCreationFromTextFailed,
         note,
+        path,
         err: `${err}`,
       });
     }

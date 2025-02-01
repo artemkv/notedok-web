@@ -30,12 +30,15 @@ import {
   NoteDeleted,
   NoteDeletable,
   Note,
+  NoteOutOfSync,
 } from "./model";
 import {
   createNewNoteFromText,
   createNewNoteFromTitle,
   createNewNoteRef,
+  noteCreatingFromTextToOutOfSync,
   noteCreatingFromTextToSynced,
+  noteCreatingFromTitleToOutOfSync,
   noteCreatingFromTitleToSynced,
   noteDeletedToSyncing,
   noteOutOfSyncToDeleted,
@@ -43,6 +46,7 @@ import {
   noteRefToSynced,
   noteSyncedToDeleted,
   noteSyncedToSyncing,
+  noteSyncingToOutOfSync,
   noteSyncingToSynced,
   noteSyncingToSyncedWithNewPath,
 } from "./noteLifecycle";
@@ -327,6 +331,51 @@ export const updateNoteAsSynced = (
   return [noteList, noteTitleEditor, noteTextEditor];
 };
 
+export const updateNoteAsOutOfSync = (
+  state: AppState,
+  note: NotePendingPathUpdate,
+  path: string,
+  err: string
+): [NoteList, NoteTitleEditor, NoteTextEditor] => {
+  const noteTitleEditor = state.noteTitleEditor;
+  const noteTextEditor = state.noteTextEditor;
+  const noteList = state.noteList;
+
+  if (noteList.state === NoteListState.FileListRetrieved) {
+    // New note with the same path
+    const newNote: NoteOutOfSync = notePendingPathUpdateToOutOfSync(
+      note,
+      path,
+      err
+    );
+    const newNoteList = replaceNote(noteList, newNote);
+
+    // Update editors to make sure they reference up-to-date note
+    let newNoteTextEditor = noteTextEditor;
+    if (noteTextEditor.state === NoteTextEditorState.EditingRegularNote) {
+      if (noteTextEditor.note.id === note.id) {
+        newNoteTextEditor = {
+          ...noteTextEditor,
+          note: newNote,
+        };
+      }
+    }
+    let newNoteTitleEditor = noteTitleEditor;
+    if (noteTitleEditor.state === NoteTitleEditorState.EditingRegularNote) {
+      if (noteTitleEditor.note.id === note.id) {
+        newNoteTitleEditor = {
+          ...noteTitleEditor,
+          note: newNote,
+        };
+      }
+    }
+
+    return [newNoteList, newNoteTitleEditor, newNoteTextEditor];
+  }
+
+  return [noteList, noteTitleEditor, noteTextEditor];
+};
+
 export const deleteNote = (
   noteList: NoteListFileListRetrieved,
   note: NoteDeletable
@@ -427,6 +476,23 @@ const notePendingPathUpdateToSynced = (
   }
   if (note.state === NoteState.CreatingFromText) {
     return noteCreatingFromTextToSynced(note, newPath);
+  }
+  throw new Error("Impossible");
+};
+
+const notePendingPathUpdateToOutOfSync = (
+  note: NotePendingPathUpdate,
+  path: string,
+  err: string
+): NoteOutOfSync => {
+  if (note.state === NoteState.Syncing) {
+    return noteSyncingToOutOfSync(note, err);
+  }
+  if (note.state === NoteState.CreatingFromTitle) {
+    return noteCreatingFromTitleToOutOfSync(note, path, err);
+  }
+  if (note.state === NoteState.CreatingFromText) {
+    return noteCreatingFromTextToOutOfSync(note, path, err);
   }
   throw new Error("Impossible");
 };

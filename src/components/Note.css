@@ -94,3 +94,8 @@ textarea.text-area-tall {
     overflow-x: auto;
     background: #fbfbfb;
 }
+
+/* TODO: style correctly */
+.note-error {
+    border-color: red;
+}
