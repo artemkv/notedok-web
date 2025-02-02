@@ -4,7 +4,7 @@ import { RetrieveFileList } from "./commands/storage";
 
 export enum NoteState {
   // Invisible, needs to be retrieved from storage
-  Ref, // -> Synced
+  Ref, // -> Synced, OutOfSync
   // Fully aligned with the storage. Can be edited, renamed or deleted
   Synced, // -> Syncing, Deleted
   // Has been changed from UI and is updating back to storage

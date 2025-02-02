@@ -43,6 +43,7 @@ import {
   noteDeletedToSyncing,
   noteOutOfSyncToDeleted,
   noteOutOfSyncToSyncing,
+  noteRefToOutOfSync,
   noteRefToSynced,
   noteSyncedToDeleted,
   noteSyncedToSyncing,
@@ -374,6 +375,15 @@ export const updateNoteAsOutOfSync = (
   }
 
   return [noteList, noteTitleEditor, noteTextEditor];
+};
+
+export const handleNoteFailedToLoad = (
+  noteList: NoteListFileListRetrieved,
+  note: NoteRef,
+  err: string
+): NoteListFileListRetrieved => {
+  const newNote: NoteOutOfSync = noteRefToOutOfSync(note, err);
+  return replaceNote(noteList, newNote);
 };
 
 export const deleteNote = (

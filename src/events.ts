@@ -39,6 +39,7 @@ export enum EventType {
   LoadNextPage,
 
   // Note-related errors (or whatever we treat as such)
+  NoteLoadFailed,
   NoteSyncFailed,
   NoteCreationFromTitleFailed,
   NoteCreationFromTextFailed,
@@ -135,6 +136,12 @@ export interface NoteSavedEvent {
   note: NoteSyncing;
 }
 
+export interface NoteLoadFailedEvent {
+  type: EventType.NoteLoadFailed;
+  note: NoteRef;
+  err: string;
+}
+
 export interface NoteSyncFailedEvent {
   type: EventType.NoteSyncFailed;
   note: NoteSyncing;
@@ -178,6 +185,7 @@ export type AppEvent =
   | RetrieveFileListSuccessEvent
   | LoadNoteTextSuccessEvent
   | LoadNextPageEvent
+  | NoteLoadFailedEvent
   | NoteSyncFailedEvent
   | NoteCreationFromTitleFailed
   | NoteCreationFromTextFailed

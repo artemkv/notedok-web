@@ -52,6 +52,20 @@ export const noteRefToSynced = (note: NoteRef, text: string): NoteSynced => {
   };
 };
 
+export const noteRefToOutOfSync = (
+  note: NoteRef,
+  err: string
+): NoteOutOfSync => {
+  return {
+    state: NoteState.OutOfSync,
+    id: note.id,
+    path: note.path,
+    title: getTitleFromPath(note.path),
+    text: "",
+    err,
+  };
+};
+
 export const noteSyncedToSyncing = (note: NoteSynced): NoteSyncing => {
   return {
     state: NoteState.Syncing,

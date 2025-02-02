@@ -46,25 +46,49 @@ interface FileDataWithDate {
   etag: string;
 }
 
+const mapToFiles = (fileData: FileData[]): FileDataWithDate[] => {
+  return fileData.map((f) => ({
+    fileName: f.fileName,
+    lastModified: new Date(f.lastModified),
+    etag: f.etag,
+  }));
+};
+
 export const RetrieveFileList = (
   fileListVersion: number
 ): RetrieveFileListCommand => ({
   type: CommandType.RetrieveFileList,
   fileListVersion,
   execute: async (dispatch) => {
-    const getFilesResponse: GetFilesResponse = await getFiles(100, "");
-    const files: FileDataWithDate[] = getFilesResponse.files.map((f) => ({
-      fileName: f.fileName,
-      lastModified: new Date(f.lastModified),
-      etag: f.etag,
-    }));
-    files.sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
+    try {
+      let files: FileDataWithDate[] = [];
 
-    dispatch({
-      type: EventType.RetrieveFileListSuccess,
-      fileListVersion,
-      fileList: files.map((f) => f.fileName),
-    });
+      // Retrieve the first batch
+      let getFilesResponse: GetFilesResponse = await getFiles(100, "");
+      files = [...files, ...mapToFiles(getFilesResponse.files)];
+
+      // Keep retrieving until all
+      while (getFilesResponse.hasMore) {
+        getFilesResponse = await getFiles(
+          100,
+          getFilesResponse.nextContinuationToken
+        );
+        files = [...files, ...mapToFiles(getFilesResponse.files)];
+      }
+
+      files.sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
+
+      dispatch({
+        type: EventType.RetrieveFileListSuccess,
+        fileListVersion,
+        fileList: files.map((f) => f.fileName),
+      });
+    } catch (err) {
+      dispatch({
+        type: EventType.RestApiError,
+        err: `${err}`,
+      });
+    }
   },
 });
 
@@ -76,17 +100,23 @@ export const LoadNoteText = (
   notes,
   execute: (dispatch) => {
     notes.forEach((note) => {
-      // TODO: one file failing to fetch is blocking the rest
-      // TODO: handle errors
-      getFile(note.path) // TODO: url-encode
-        .then((text: string) => {
-          dispatch({
-            type: EventType.LoadNoteTextSuccess,
-            note,
-            text,
-            fileListVersion,
+      try {
+        getFile(note.path) // TODO: url-encode
+          .then((text: string) => {
+            dispatch({
+              type: EventType.LoadNoteTextSuccess,
+              note,
+              text,
+              fileListVersion,
+            });
           });
+      } catch (err) {
+        dispatch({
+          type: EventType.NoteLoadFailed,
+          note,
+          err: `${err}`,
         });
+      }
     });
   },
 });

@@ -5,6 +5,7 @@ import {
   finishNoteTextEditing,
   finishNoteTitleEditing,
   handleLoadedNote,
+  handleNoteFailedToLoad,
   NOTES_ON_PAGE,
   restoreNote,
   shiftNotesToLoad,
@@ -34,9 +35,11 @@ export const Reducer = (
   state: AppState,
   event: AppEvent
 ): [AppState, AppCommand] => {
-  console.log(
+  /*console.log(
     `Reducing event '${EventType[event.type]} ${JSON.stringify(event)}'`
-  );
+  );*/
+
+  const IgnoreThisEvent = JustState(state);
 
   if (event.type === EventType.TemplateNoteTitleEditorTextChanged) {
     const newState: AppState = {
@@ -74,7 +77,7 @@ export const Reducer = (
       }
     }
 
-    return JustState(state);
+    return IgnoreThisEvent;
   }
 
   if (event.type === EventType.RegularNoteTitleEditorTextChanged) {
@@ -113,7 +116,7 @@ export const Reducer = (
       }
     }
 
-    return JustState(state);
+    return IgnoreThisEvent;
   }
 
   if (event.type === EventType.NoteTextEditorTextChanged) {
@@ -131,7 +134,7 @@ export const Reducer = (
 
       return JustState(newState);
     }
-    return JustState(state);
+    return IgnoreThisEvent;
   }
 
   // TODO: does not restore the previous text because lost focus happens first
@@ -181,7 +184,7 @@ export const Reducer = (
       }
     }
 
-    return JustState(state);
+    return IgnoreThisEvent;
   }
 
   if (event.type === EventType.RegularNoteStartTextEditing) {
@@ -223,7 +226,7 @@ export const Reducer = (
       }
     }
 
-    return JustState(state);
+    return IgnoreThisEvent;
   }
 
   if (event.type === EventType.NoteDeleteTriggered) {
@@ -245,7 +248,7 @@ export const Reducer = (
 
       return [newState, command];
     }
-    return JustState(state);
+    return IgnoreThisEvent;
   }
 
   if (event.type === EventType.NoteRestoreTriggered) {
@@ -262,7 +265,7 @@ export const Reducer = (
 
       return [newState, RestoreNote(noteSyncing)];
     }
-    return JustState(state);
+    return IgnoreThisEvent;
   }
 
   if (event.type === EventType.RetrieveFileListSuccess) {
@@ -291,7 +294,7 @@ export const Reducer = (
 
       return [newState, LoadNoteText(notesToLoad, event.fileListVersion)];
     }
-    return JustState(state);
+    return IgnoreThisEvent;
   }
 
   if (event.type === EventType.NoteSavedOnNewPath) {
@@ -342,7 +345,7 @@ export const Reducer = (
         return JustState(newState);
       }
     }
-    return JustState(state);
+    return IgnoreThisEvent;
   }
 
   if (event.type === EventType.LoadNextPage) {
@@ -363,7 +366,24 @@ export const Reducer = (
       ];
     }
 
-    return JustState(state);
+    return IgnoreThisEvent;
+  }
+
+  if (event.type === EventType.NoteLoadFailed) {
+    if (state.noteList.state === NoteListState.FileListRetrieved) {
+      const newNoteList = handleNoteFailedToLoad(
+        state.noteList,
+        event.note,
+        event.err
+      );
+
+      const newState: AppState = {
+        ...state,
+        noteList: newNoteList,
+      };
+      return JustState(newState);
+    }
+    return IgnoreThisEvent;
   }
 
   if (event.type === EventType.NoteSyncFailed) {
@@ -416,5 +436,5 @@ export const Reducer = (
     `Unknown event ${EventType[event.type]} '${JSON.stringify(event)}'`
   );
 
-  return JustState(state);
+  return IgnoreThisEvent;
 };
