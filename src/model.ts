@@ -145,11 +145,18 @@ export const isDeletable = (note: Note) => {
   return note.state === NoteState.Synced || note.state === NoteState.OutOfSync;
 };
 
-// TODO: re-think name, as it's not just about the path
-export type NotePendingPathUpdate =
+export type NotePendingStorageUpdate =
   | NoteSyncing
   | NoteCreatingFromTitle
   | NoteCreatingFromText;
+
+export const isPendingStorageUpdate = (note: Note) => {
+  return (
+    note.state === NoteState.Syncing ||
+    note.state === NoteState.CreatingFromTitle ||
+    note.state === NoteState.CreatingFromText
+  );
+};
 
 // Basically, there are 2 "special" notes, from the point of view of UI: template note and deleted note
 export type NoteRegular =

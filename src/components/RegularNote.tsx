@@ -12,11 +12,13 @@ import {
   isTextEditable,
   isTextSaveable,
   isDeletable,
+  isPendingStorageUpdate,
 } from "../model";
 import AppContext from "../AppContext";
 import { htmlEscape, renderNoteTextHtml } from "../ui";
 import { EventType } from "../events";
 import { countLines, selectionIsNotEmpty } from "../util";
+import { OrbitProgress } from "react-loading-indicators";
 
 // TODO: adjust to all new note types
 function RegularNote(props: {
@@ -31,6 +33,7 @@ function RegularNote(props: {
   const noteTitleEditor = props.noteTitleEditor;
   const noteTextEditor = props.noteTextEditor;
 
+  const isBusy = isPendingStorageUpdate(note);
   const hasError = note.state === NoteState.OutOfSync;
 
   const getNoteTitle = (): string => {
@@ -215,6 +218,40 @@ function RegularNote(props: {
           </button>
   */
 
+  const noteTextElement = () => {
+    if (isEditingText) {
+      return textEditor();
+    }
+    if (noteText) {
+      return noteTextReadonly();
+    }
+    return noteTextPlaceholder();
+  };
+
+  const controlArea = () => {
+    if (isBusy) {
+      return busyNoteControlArea();
+    }
+    if (isEditingText) {
+      return editingNoteControlArea();
+    }
+    return readonlyNoteControlArea();
+  };
+
+  const busyNoteControlArea = () => {
+    return (
+      <div className="note-progress">
+        <OrbitProgress
+          variant="dotted"
+          color="#a9a9a9"
+          style={{ fontSize: "3px" }}
+          text=""
+          textColor=""
+        />
+      </div>
+    );
+  };
+
   const readonlyNoteControlArea = () => {
     return (
       <div className="note-controlarea">
@@ -257,12 +294,8 @@ function RegularNote(props: {
           placeholder={uistrings.NoteTitlePlaceholder}
           maxLength={50}
         />
-        {isEditingText
-          ? textEditor()
-          : noteText
-          ? noteTextReadonly()
-          : noteTextPlaceholder()}
-        {isEditingText ? editingNoteControlArea() : readonlyNoteControlArea()}
+        {noteTextElement()}
+        {controlArea()}
       </div>
     </div>
   );

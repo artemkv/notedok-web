@@ -3,7 +3,7 @@ import {
   NoteCreatingFromTitle,
   NoteDeletable,
   NoteDeleted,
-  NotePendingPathUpdate,
+  NotePendingStorageUpdate,
   NoteRef,
   NoteSyncing,
   NoteTextEditable,
@@ -127,7 +127,7 @@ export interface LoadNextPageEvent {
 
 export interface NoteSavedOnNewPathEvent {
   type: EventType.NoteSavedOnNewPath;
-  note: NotePendingPathUpdate;
+  note: NotePendingStorageUpdate;
   newPath: string;
 }
 

@@ -26,7 +26,7 @@ import {
   NoteTextSaveable,
   NoteTitleSaveable,
   NoteSyncing,
-  NotePendingPathUpdate,
+  NotePendingStorageUpdate,
   NoteDeleted,
   NoteDeletable,
   Note,
@@ -255,7 +255,7 @@ export const convertToRegularNoteOnTextUpdated = (
 
 export const updateNotePath = (
   state: AppState,
-  note: NotePendingPathUpdate,
+  note: NotePendingStorageUpdate,
   newPath: string
 ): [NoteList, NoteTitleEditor, NoteTextEditor] => {
   const noteTitleEditor = state.noteTitleEditor;
@@ -264,7 +264,7 @@ export const updateNotePath = (
 
   if (noteList.state === NoteListState.FileListRetrieved) {
     // New note with an updated path
-    const newNote: NoteSynced = notePendingPathUpdateToSynced(note, newPath);
+    const newNote: NoteSynced = notePendingStorageUpdateToSynced(note, newPath);
     const newNoteList = replaceNote(noteList, newNote);
 
     // Update editors to make sure they reference up-to-date note
@@ -334,7 +334,7 @@ export const updateNoteAsSynced = (
 
 export const updateNoteAsOutOfSync = (
   state: AppState,
-  note: NotePendingPathUpdate,
+  note: NotePendingStorageUpdate,
   path: string,
   err: string
 ): [NoteList, NoteTitleEditor, NoteTextEditor] => {
@@ -344,7 +344,7 @@ export const updateNoteAsOutOfSync = (
 
   if (noteList.state === NoteListState.FileListRetrieved) {
     // New note with the same path
-    const newNote: NoteOutOfSync = notePendingPathUpdateToOutOfSync(
+    const newNote: NoteOutOfSync = notePendingStorageUpdateToOutOfSync(
       note,
       path,
       err
@@ -474,8 +474,8 @@ const noteTextSaveableToSyncing = (
   throw new Error("Impossible");
 };
 
-const notePendingPathUpdateToSynced = (
-  note: NotePendingPathUpdate,
+const notePendingStorageUpdateToSynced = (
+  note: NotePendingStorageUpdate,
   newPath: string
 ): NoteSynced => {
   if (note.state === NoteState.Syncing) {
@@ -490,8 +490,8 @@ const notePendingPathUpdateToSynced = (
   throw new Error("Impossible");
 };
 
-const notePendingPathUpdateToOutOfSync = (
-  note: NotePendingPathUpdate,
+const notePendingStorageUpdateToOutOfSync = (
+  note: NotePendingStorageUpdate,
   path: string,
   err: string
 ): NoteOutOfSync => {
