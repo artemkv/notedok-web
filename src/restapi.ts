@@ -100,6 +100,26 @@ function postJson(endpoint: string, data: any, session?: string) {
     .then(toData);
 }
 
+// TODO: These methods were working fine when I had purely JSON-based APIs, now there is too much variations
+// TODO: So maybe I need a neat library for this
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function postJsonNoResponse(endpoint: string, data: any, session?: string) {
+  const headers: StringMap = {
+    "Content-Type": "application/json",
+  };
+  if (session) {
+    headers["x-session"] = session;
+  }
+
+  return fetch(baseUrl + endpoint, {
+    method: "POST",
+    mode: "cors",
+    cache: "no-cache",
+    headers,
+    body: data ? JSON.stringify(data) : null,
+  }).then(handleErrors);
+}
+
 function postText(endpoint: string, text: string, session?: string) {
   const headers: StringMap = {
     "Content-Type": "text/plain; charset=utf-8",
@@ -211,7 +231,7 @@ export const renameFile = (
     newFileName: newFilename,
   };
 
-  return postJson(`/rename`, body, session); // TODO: fails as the response does not return data
+  return postJsonNoResponse(`/rename`, body, session);
 };
 
 export const deleteFile = (session: string, filename: string) => {
