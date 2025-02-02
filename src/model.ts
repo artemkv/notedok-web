@@ -8,12 +8,10 @@ export enum NoteState {
   // Fully aligned with the storage. Can be edited, renamed or deleted
   Synced, // -> Syncing, Deleted
   // Has been changed from UI and is updating back to storage
-  // Cannot edit, rename or delete (TODO: gray out controls, do not remove)
+  // Cannot edit, rename or delete
   Syncing, // -> Synced | OutOfSync
   // Has failed the sync attempt, and is not anymore aligned with storage
   // Can be edited, renamed or deleted, to allow the user to solve the issue
-  // TODO: make sure everything is restored as before, to allow re-do the operation
-  // TODO: show error next to the note
   OutOfSync, // -> Syncing, Deleted
   // Was deleted in UI (can still be pending deletion in the storage, which is done in a background)
   // Cannot edit or rename, only restore
@@ -22,11 +20,9 @@ export enum NoteState {
   Deleted, // -> Syncing
   // Was created in UI from the template note by editing title, currently pending creation in the storage
   // Text is immediately editable, but cannot rename or delete until is synced
-  // TODO: make sure cannot save the edits until created successfully
-  // TODO: maybe by blocking save, maybe by queuing the API call
   CreatingFromTitle, // -> Synced, OutOfSync
   // Was created in UI from the template note by editing text, currently pending creation in the storage
-  // Cannot edit, rename or delete (TODO: gray out controls, do not remove)
+  // Cannot edit, rename or delete
   CreatingFromText, // -> Synced, OutOfSync
 }
 
@@ -62,8 +58,8 @@ export interface NoteOutOfSync {
   state: NoteState.OutOfSync;
 
   id: string;
-  path: string; // TODO: make sure failed creation actually reports the path
-  title: string; // TODO: make sure that after unsuccessful rename, the next rename will use the old path
+  path: string;
+  title: string;
   text: string;
 
   err: string; // Here would could allow retrying the failed action
