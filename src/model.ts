@@ -245,6 +245,7 @@ export type NoteList = NoteListRetrievingFileList | NoteListFileListRetrieved;
 
 // TODO: having editors at this level allows editing before the notes are loaded, check that this is possible
 export interface AppState {
+  searchText: string;
   // It is possible to start editing template note even before we load all the notes
   noteTextEditor: NoteTextEditor;
   noteTitleEditor: NoteTitleEditor;
@@ -256,6 +257,7 @@ export interface AppState {
 const INITIAL_FILE_LIST_VERSION = 0;
 
 export const IntialState: AppState = {
+  searchText: "",
   noteTextEditor: {
     state: NoteTextEditorState.NotActive,
   },

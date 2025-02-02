@@ -1,21 +1,40 @@
-import { useContext } from "react";
 import "./SearchPanel.css";
+import { useContext } from "react";
 import AppContext from "../AppContext";
+import { EventType } from "../events";
 
-function SearchPanel() {
-  const { uistrings } = useContext(AppContext);
+function SearchPanel(props: { searchText: string }) {
+  const { uistrings, dispatch } = useContext(AppContext);
 
-  // TODO: react on search textbox text submitten
-  // TODO: handling keyup 13 doesn't work on tablets/mobile
+  const searchText = props.searchText;
+
+  const searchTextOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({
+      type: EventType.SearchTextChanged,
+      newText: e.target.value,
+    });
+  };
+
+  const onSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    dispatch({
+      type: EventType.SearchTextSubmitted,
+    });
+    e.preventDefault();
+  };
+
   return (
     <div className="search-outer">
       <div className="search-inner">
         <div className="search-panel">
-          <input
-            type="text"
-            className="search-textbox"
-            placeholder={uistrings.SearchTextBoxPlaceholder}
-          />
+          <form onSubmit={onSearchSubmit}>
+            <input
+              type="text"
+              value={searchText}
+              onChange={searchTextOnChange}
+              className="search-textbox"
+              placeholder={uistrings.SearchTextBoxPlaceholder}
+            />
+          </form>
         </div>
       </div>
     </div>

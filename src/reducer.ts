@@ -15,7 +15,12 @@ import {
 } from "./business";
 import { AppCommand, DoMany, DoNothing } from "./commands";
 import { ReportError } from "./commands/alerts";
-import { DeleteNote, LoadNoteText, RestoreNote } from "./commands/storage";
+import {
+  DeleteNote,
+  LoadNoteText,
+  RestoreNote,
+  RetrieveFileList,
+} from "./commands/storage";
 import { AppEvent, EventType } from "./events";
 import {
   AppState,
@@ -40,6 +45,35 @@ export const Reducer = (
   );*/
 
   const IgnoreThisEvent = JustState(state);
+
+  if (event.type === EventType.SearchTextSubmitted) {
+    const newFileListVersion = state.noteList.fileListVersion + 1;
+
+    const newState: AppState = {
+      searchText: "",
+      noteTextEditor: {
+        state: NoteTextEditorState.NotActive,
+      },
+      noteTitleEditor: {
+        state: NoteTitleEditorState.NotActive,
+      },
+      noteList: {
+        state: NoteListState.RetrievingFileList,
+        fileListVersion: newFileListVersion,
+      },
+    };
+
+    return [newState, RetrieveFileList(newFileListVersion)];
+  }
+
+  if (event.type === EventType.SearchTextChanged) {
+    const newState: AppState = {
+      ...state,
+      searchText: event.newText,
+    };
+
+    return JustState(newState);
+  }
 
   if (event.type === EventType.TemplateNoteTitleEditorTextChanged) {
     const newState: AppState = {
@@ -66,6 +100,7 @@ export const Reducer = (
           );
 
         const newState: AppState = {
+          ...state,
           noteList: newNoteList,
           noteTitleEditor: {
             state: NoteTitleEditorState.NotActive,

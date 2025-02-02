@@ -13,6 +13,9 @@ import {
 } from "./model";
 
 export enum EventType {
+  SearchTextChanged,
+  SearchTextSubmitted,
+
   TemplateNoteTitleEditorTextChanged,
   TemplateNoteTitleUpdated,
 
@@ -45,6 +48,15 @@ export enum EventType {
   NoteCreationFromTextFailed,
 
   RestApiError, // Generic errors, includes failing to delete note
+}
+
+export interface SearchTextChangedEvent {
+  type: EventType.SearchTextChanged;
+  newText: string;
+}
+
+export interface SearchTextSubmittedEvent {
+  type: EventType.SearchTextSubmitted;
 }
 
 export interface TemplateNoteTitleEditorTextChangedEvent {
@@ -168,6 +180,8 @@ export interface RestApiErrorEvent {
 }
 
 export type AppEvent =
+  | SearchTextChangedEvent
+  | SearchTextSubmittedEvent
   | TemplateNoteTitleEditorTextChangedEvent
   | TemplateNoteTitleUpdatedEvent
   | RegularNoteTitleEditorTextChangedEvent

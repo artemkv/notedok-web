@@ -5,6 +5,7 @@ import NoteContainer from "./NoteContainer";
 import SearchPanel from "./SearchPanel";
 
 function ClientArea(props: { state: AppState }) {
+  const searchText = props.state.searchText;
   const noteTitleEditor = props.state.noteTitleEditor;
   const noteTextEditor = props.state.noteTextEditor;
   const noteList = props.state.noteList;
@@ -12,7 +13,7 @@ function ClientArea(props: { state: AppState }) {
   return (
     <div className="client-area-outer">
       <div className="client-area-inner">
-        <SearchPanel />
+        <SearchPanel searchText={searchText} />
         <NoteContainer
           noteTitleEditor={noteTitleEditor}
           noteTextEditor={noteTextEditor}
