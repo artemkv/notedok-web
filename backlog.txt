@@ -56,7 +56,7 @@ As a regular user, I want to make sure the changes I did are saved
 
 * TODO: When title/text textbox loses focus, changes are saved to the S3
 * Changes should be saved asynchronously
-* TODO: If title left empty, generate the file name
+* If title left empty, generate the file name
 * When title is updated (manually or when auto-generated), the file should be renamed
 * TODO: Title can be invalid file name. The app should make a best effort to replace the invalid characters as follows:
 / becomes (sl)
@@ -78,7 +78,7 @@ As a regular user, when I want to add a new note, I want to be able to type righ
 
 * Render template note as a first note displayed
 * Title should be rendered as a watermark "New note"
-* TODO: Auto-generated file names should be rendered as empty
+* Auto-generated file names should be rendered as empty
 
 
 ! Create a note
@@ -99,7 +99,6 @@ TODO:
 - tab does not stop on control area buttons
 - encoding of filenames for url
 - utf-8
-- TODO: replace Array<> with [] everywhere
 
 
 Test:

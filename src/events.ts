@@ -111,7 +111,7 @@ export interface NoteRestoreTriggeredEvent {
 export interface RetrieveFileListSuccessEvent {
   type: EventType.RetrieveFileListSuccess;
   fileListVersion: number;
-  fileList: Array<string>;
+  fileList: string[];
 }
 
 export interface LoadNoteTextSuccessEvent {
