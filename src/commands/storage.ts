@@ -212,7 +212,7 @@ export const CreateNewNoteWithTitle = (
           dispatch({
             type: EventType.NoteSavedOnNewPath,
             note,
-            newPath: path,
+            newPath,
           });
         } catch (err) {
           dispatch({
@@ -282,19 +282,37 @@ export const RestoreNote = (note: NoteSyncing): RestoreNoteCommand => ({
   execute: async (dispatch) => {
     try {
       // Try to restore with exactly the same path as before, don't overwrite
-      // TODO: so now, if restores into the path that suddenly is taken, will fail and show 2 notes in UI
-      // TODO: maybe I should actually do the same thing as when storing new note from title, why not? just ensure the uniqueness and then update path
       await postFile(note.path, note.text);
       dispatch({
         type: EventType.NoteSaved,
         note,
       });
     } catch (err) {
-      dispatch({
-        type: EventType.NoteSyncFailed,
-        note,
-        err: `${err}`,
-      });
+      if ((err as ApiError).statusCode === 409) {
+        // The path that suddenly is taken (almost unrealistic)
+        // Regenerate path from title, this time enfocing uniqueness
+        const newPath = generatePathFromTitle(note.title, true);
+        try {
+          await putFile(newPath, "");
+          dispatch({
+            type: EventType.NoteSavedOnNewPath,
+            note,
+            newPath,
+          });
+        } catch (err) {
+          dispatch({
+            type: EventType.NoteSyncFailed,
+            note,
+            err: `${err}`,
+          });
+        }
+      } else {
+        dispatch({
+          type: EventType.NoteSyncFailed,
+          note,
+          err: `${err}`,
+        });
+      }
     }
   },
 });

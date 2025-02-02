@@ -381,7 +381,7 @@ export const Reducer = (
         ...state,
         noteList: newNoteList,
       };
-      return JustState(newState);
+      return [newState, ReportError(event.err)];
     }
     return IgnoreThisEvent;
   }
@@ -397,7 +397,7 @@ export const Reducer = (
       noteList: newNoteList,
     };
 
-    return JustState(newState);
+    return [newState, ReportError(event.err)];
   }
 
   if (event.type === EventType.NoteCreationFromTitleFailed) {
@@ -411,7 +411,7 @@ export const Reducer = (
       noteList: newNoteList,
     };
 
-    return JustState(newState);
+    return [newState, ReportError(event.err)];
   }
 
   if (event.type === EventType.NoteCreationFromTextFailed) {
@@ -425,7 +425,7 @@ export const Reducer = (
       noteList: newNoteList,
     };
 
-    return JustState(newState);
+    return [newState, ReportError(event.err)];
   }
 
   if (event.type === EventType.RestApiError) {
