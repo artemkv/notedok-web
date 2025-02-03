@@ -21,6 +21,31 @@
     text-overflow: ellipsis;
 }
 
+.note-error {
+    margin-top: 4px;
+    margin-bottom: 4px;
+    padding: 4px 8px 2px 8px;
+    border: none;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.note-error-text {
+    margin-left: 16px;
+    color: #e92967;
+    border: none;
+    outline: none;
+    font-family: "Segoe UI", arial, sans-serif;
+    font-weight: 400;
+    font-size: 18px;
+    flex: 2;
+    text-overflow: ellipsis;
+}
+
 .note-progress {
     margin-top: 8px;
     margin-left: 8px;
@@ -101,9 +126,4 @@ textarea.text-area-tall {
     font-family: monospace;
     overflow-x: auto;
     background: #fbfbfb;
-}
-
-/* TODO: style correctly */
-.note-error {
-    border-color: red;
 }

@@ -19,6 +19,8 @@ import { htmlEscape, renderNoteTextHtml } from "../ui";
 import { EventType } from "../events";
 import { countLines, selectionIsNotEmpty } from "../util";
 import { OrbitProgress } from "react-loading-indicators";
+import ErrorIcon from "../assets/error_outline.svg";
+import Empty from "./Empty";
 
 // TODO: adjust to all new note types
 function RegularNote(props: {
@@ -35,6 +37,7 @@ function RegularNote(props: {
 
   const isBusy = isPendingStorageUpdate(note);
   const hasError = note.state === NoteState.OutOfSync;
+  const errorText = hasError ? note.err : "";
 
   const getNoteTitle = (): string => {
     if (noteTitleEditor.state === NoteTitleEditorState.EditingRegularNote) {
@@ -278,12 +281,26 @@ function RegularNote(props: {
     );
   };
 
+  // TODO: maybe better tooltip
+  // TODO: maybe allow copying the error
+  const noteError = () => {
+    return (
+      <div className="note-error">
+        <img className="note-error-icon" src={ErrorIcon} title={errorText} />
+        <input
+          type="text"
+          className="note-error-text"
+          value={errorText}
+          readOnly
+        />
+      </div>
+    );
+  };
+
   // TODO: design how the errors are displayed
   return (
-    <div
-      id={note.id}
-      className={"note-outer" + (hasError ? " note-error" : "")}
-    >
+    <div id={note.id} className="note-outer">
+      {hasError ? noteError() : Empty()}
       <div className="note-inner">
         <input
           type="text"

@@ -101,6 +101,8 @@ TODO:
 - encoding of filenames for url
 - utf-8
 - use etags to avoid getting content if didn't change
+- allowing to edit failed note may lead to displayed title not matching the path. Should I re-derive it?
+- there is something wrong with errors from API (TypeError: Failed to fetch)
 
 
 Test:
