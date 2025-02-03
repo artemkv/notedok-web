@@ -50,7 +50,7 @@ export const Reducer = (
     const newFileListVersion = state.noteList.fileListVersion + 1;
 
     const newState: AppState = {
-      searchText: "",
+      ...state,
       noteTextEditor: {
         state: NoteTextEditorState.NotActive,
       },
@@ -63,7 +63,7 @@ export const Reducer = (
       },
     };
 
-    return [newState, RetrieveFileList(newFileListVersion)];
+    return [newState, RetrieveFileList(state.searchText, newFileListVersion)];
   }
 
   if (event.type === EventType.SearchTextChanged) {

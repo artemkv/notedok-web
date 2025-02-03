@@ -55,6 +55,7 @@ const mapToFiles = (fileData: FileData[]): FileDataWithDate[] => {
 };
 
 export const RetrieveFileList = (
+  searchString: string,
   fileListVersion: number
 ): RetrieveFileListCommand => ({
   type: CommandType.RetrieveFileList,
@@ -76,6 +77,9 @@ export const RetrieveFileList = (
         files = [...files, ...mapToFiles(getFilesResponse.files)];
       }
 
+      files = files.filter((f) =>
+        f.fileName.toLowerCase().includes(searchString.toLowerCase())
+      );
       files.sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
 
       dispatch({

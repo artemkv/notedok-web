@@ -271,4 +271,4 @@ export const IntialState: AppState = {
 };
 
 // Initial command - here to avoid circular refs
-export const InitialCommand = RetrieveFileList(INITIAL_FILE_LIST_VERSION);
+export const InitialCommand = RetrieveFileList("", INITIAL_FILE_LIST_VERSION);
