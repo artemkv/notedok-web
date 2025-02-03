@@ -3,7 +3,7 @@ import { Command } from "./hooks/useReducer";
 import {
   NoteCreatingFromText,
   NoteCreatingFromTitle,
-  NoteDeleted,
+  NoteDeleting,
   NoteRef,
   NoteSyncing,
 } from "./model";
@@ -67,7 +67,7 @@ export interface CreateNewNoteWithTextCommand extends Command<AppEvent> {
 
 export interface DeleteNoteCommand extends Command<AppEvent> {
   type: CommandType.DeleteNote;
-  note: NoteDeleted;
+  note: NoteDeleting;
 }
 
 export interface RestoreNoteCommand extends Command<AppEvent> {

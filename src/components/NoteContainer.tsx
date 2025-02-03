@@ -32,6 +32,7 @@ function NoteContainer(props: {
         ) : (
           <div>
             {noteList.notes.map((note) =>
+              note.state === NoteState.Deleting ||
               note.state === NoteState.Deleted ? (
                 <DeletedNote key={note.id} note={note} />
               ) : (

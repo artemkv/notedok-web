@@ -9,6 +9,7 @@ import {
   NOTES_ON_PAGE,
   restoreNote,
   shiftNotesToLoad,
+  updateNoteAsDeleted,
   updateNoteAsOutOfSync,
   updateNoteAsSynced,
   updateNotePath,
@@ -266,7 +267,7 @@ export const Reducer = (
 
   if (event.type === EventType.NoteDeleteTriggered) {
     if (state.noteList.state === NoteListState.FileListRetrieved) {
-      const [newNoteList, noteDeleted, notesToLoad] = deleteNote(
+      const [newNoteList, noteDeleting, notesToLoad] = deleteNote(
         state.noteList,
         event.note
       );
@@ -277,11 +278,25 @@ export const Reducer = (
       };
 
       const command = DoMany([
-        DeleteNote(noteDeleted),
+        DeleteNote(noteDeleting),
         LoadNoteText(notesToLoad, state.noteList.fileListVersion),
       ]);
 
       return [newState, command];
+    }
+    return IgnoreThisEvent;
+  }
+
+  if (event.type === EventType.NoteDeleted) {
+    if (state.noteList.state === NoteListState.FileListRetrieved) {
+      const newNoteList = updateNoteAsDeleted(state.noteList, event.note);
+
+      const newState: AppState = {
+        ...state,
+        noteList: newNoteList,
+      };
+
+      return JustState(newState);
     }
     return IgnoreThisEvent;
   }

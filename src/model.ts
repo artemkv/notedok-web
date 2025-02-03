@@ -6,17 +6,18 @@ export enum NoteState {
   // Invisible, needs to be retrieved from storage
   Ref, // -> Synced, OutOfSync
   // Fully aligned with the storage. Can be edited, renamed or deleted
-  Synced, // -> Syncing, Deleted
+  Synced, // -> Syncing, Deleting
   // Has been changed from UI and is updating back to storage
   // Cannot edit, rename or delete
   Syncing, // -> Synced | OutOfSync
   // Has failed the sync attempt, and is not anymore aligned with storage
   // Can be edited, renamed or deleted, to allow the user to solve the issue
-  OutOfSync, // -> Syncing, Deleted
-  // Was deleted in UI (can still be pending deletion in the storage, which is done in a background)
+  OutOfSync, // -> Syncing, Deleting
+  // Was deleted in UI, and is pending deletion in the storage
+  // Cannot edit, rename or delete
+  Deleting, // -> Deleted, OutOfSync
+  // Completely deleted from storage
   // Cannot edit or rename, only restore
-  // TODO: cannot restore until delete completes, so probably I do need to queue the API calls
-  // TODO: or I need an actual status deleting and gray out restore button until fully deleted
   Deleted, // -> Syncing
   // Was created in UI from the template note by editing title, currently pending creation in the storage
   // Text is immediately editable, but cannot rename or delete until is synced
@@ -65,6 +66,15 @@ export interface NoteOutOfSync {
   err: string; // Here would could allow retrying the failed action
 }
 
+export interface NoteDeleting {
+  state: NoteState.Deleting;
+
+  id: string;
+  path: string;
+  title: string;
+  text: string;
+}
+
 export interface NoteDeleted {
   state: NoteState.Deleted;
 
@@ -94,6 +104,7 @@ export type NoteVisible =
   | NoteSynced
   | NoteSyncing
   | NoteOutOfSync
+  | NoteDeleting
   | NoteDeleted
   | NoteCreatingFromTitle
   | NoteCreatingFromText;

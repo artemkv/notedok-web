@@ -14,7 +14,7 @@ import { EventType } from "../events";
 import {
   NoteCreatingFromText,
   NoteCreatingFromTitle,
-  NoteDeleted,
+  NoteDeleting,
   NoteRef,
   NoteSyncing,
 } from "../model";
@@ -265,14 +265,19 @@ export const CreateNewNoteWithText = (
   },
 });
 
-export const DeleteNote = (note: NoteDeleted): DeleteNoteCommand => ({
+export const DeleteNote = (note: NoteDeleting): DeleteNoteCommand => ({
   type: CommandType.DeleteNote,
   note,
   execute: async (dispatch) => {
     try {
       await deleteFile(note.path);
+      dispatch({
+        type: EventType.NoteDeleted,
+        note,
+      });
     } catch (err) {
       dispatch({
+        // This is questionable. Do I want to move note to out of sync in this case?
         type: EventType.RestApiError,
         err: `${err}`,
       });

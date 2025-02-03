@@ -31,6 +31,7 @@ import {
   NoteDeletable,
   Note,
   NoteOutOfSync,
+  NoteDeleting,
 } from "./model";
 import {
   createNewNoteFromText,
@@ -41,11 +42,12 @@ import {
   noteCreatingFromTitleToOutOfSync,
   noteCreatingFromTitleToSynced,
   noteDeletedToSyncing,
-  noteOutOfSyncToDeleted,
+  noteDeletingToDeleted,
+  noteOutOfSyncToDeleting,
   noteOutOfSyncToSyncing,
   noteRefToOutOfSync,
   noteRefToSynced,
-  noteSyncedToDeleted,
+  noteSyncedToDeleting,
   noteSyncedToSyncing,
   noteSyncingToOutOfSync,
   noteSyncingToSynced,
@@ -389,13 +391,15 @@ export const handleNoteFailedToLoad = (
 export const deleteNote = (
   noteList: NoteListFileListRetrieved,
   note: NoteDeletable
-): [NoteListFileListRetrieved, NoteDeleted, NoteRef[]] => {
+): [NoteListFileListRetrieved, NoteDeleting, NoteRef[]] => {
   // New note as deleted
-  const newNote = noteDeletableToDeleted(note);
+  const newNote = noteDeletableToDeleting(note);
 
   // delete all already deleted notes from UI and update the note list
   const newNotes = noteList.notes
-    .filter((n) => !(n.state === NoteState.Deleted))
+    .filter(
+      (n) => !(n.state === NoteState.Deleting || n.state === NoteState.Deleted)
+    )
     .map((n) => (n.id === newNote.id ? newNote : n));
 
   // Load and render one more note from the list (if exists),
@@ -409,6 +413,17 @@ export const deleteNote = (
   };
 
   return [newNoteList, newNote, notesToLoad];
+};
+
+export const updateNoteAsDeleted = (
+  noteList: NoteListFileListRetrieved,
+  note: NoteDeleting
+): NoteListFileListRetrieved => {
+  // Undelete the note
+  const newNote = noteDeletingToDeleted(note);
+  const newNoteList = replaceNote(noteList, newNote);
+
+  return newNoteList;
 };
 
 export const restoreNote = (
@@ -507,12 +522,12 @@ const notePendingStorageUpdateToOutOfSync = (
   throw new Error("Impossible");
 };
 
-export const noteDeletableToDeleted = (note: NoteDeletable) => {
+export const noteDeletableToDeleting = (note: NoteDeletable): NoteDeleting => {
   if (note.state === NoteState.Synced) {
-    return noteSyncedToDeleted(note);
+    return noteSyncedToDeleting(note);
   }
   if (note.state === NoteState.OutOfSync) {
-    return noteOutOfSyncToDeleted(note);
+    return noteOutOfSyncToDeleting(note);
   }
   throw new Error("Impossible");
 };

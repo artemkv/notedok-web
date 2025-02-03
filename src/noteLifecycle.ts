@@ -3,6 +3,7 @@ import {
   NoteCreatingFromText,
   NoteCreatingFromTitle,
   NoteDeleted,
+  NoteDeleting,
   NoteOutOfSync,
   NoteRef,
   NoteState,
@@ -76,7 +77,17 @@ export const noteSyncedToSyncing = (note: NoteSynced): NoteSyncing => {
   };
 };
 
-export const noteSyncedToDeleted = (note: NoteSynced): NoteDeleted => {
+export const noteSyncedToDeleting = (note: NoteSynced): NoteDeleting => {
+  return {
+    state: NoteState.Deleting,
+    id: note.id,
+    path: note.path,
+    title: note.title,
+    text: note.text,
+  };
+};
+
+export const noteDeletingToDeleted = (note: NoteDeleting): NoteDeleted => {
   return {
     state: NoteState.Deleted,
     id: note.id,
@@ -133,9 +144,9 @@ export const noteOutOfSyncToSyncing = (note: NoteOutOfSync): NoteSyncing => {
   };
 };
 
-export const noteOutOfSyncToDeleted = (note: NoteOutOfSync): NoteDeleted => {
+export const noteOutOfSyncToDeleting = (note: NoteOutOfSync): NoteDeleting => {
   return {
-    state: NoteState.Deleted,
+    state: NoteState.Deleting,
     id: note.id,
     path: note.path,
     title: note.title,

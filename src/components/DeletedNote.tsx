@@ -1,19 +1,54 @@
 import "./DeletedNote.css";
 import { useContext } from "react";
-import { NoteDeleted } from "../model";
+import { NoteDeleted, NoteDeleting, NoteState } from "../model";
 import AppContext from "../AppContext";
 import { EventType } from "../events";
+import { OrbitProgress } from "react-loading-indicators";
 
-function DeletedNote(props: { note: NoteDeleted }) {
+function DeletedNote(props: { note: NoteDeleting | NoteDeleted }) {
   const { uistrings, dispatch } = useContext(AppContext);
 
   const note = props.note;
+  const isDeleting = note.state === NoteState.Deleting;
 
   const onRestoreNote = () => {
-    dispatch({
-      type: EventType.NoteRestoreTriggered,
-      note,
-    });
+    if (note.state === NoteState.Deleted) {
+      dispatch({
+        type: EventType.NoteRestoreTriggered,
+        note,
+      });
+    }
+  };
+
+  const controlArea = () => {
+    if (isDeleting) {
+      return deletingNoteControlArea();
+    }
+    return deletedNoteControlArea();
+  };
+
+  const deletingNoteControlArea = () => {
+    return (
+      <div className="note-progress">
+        <OrbitProgress
+          variant="dotted"
+          color="#a9a9a9"
+          style={{ fontSize: "3px" }}
+          text=""
+          textColor=""
+        />
+      </div>
+    );
+  };
+
+  const deletedNoteControlArea = () => {
+    return (
+      <div className="note-controlarea">
+        <a className="note-button" onClick={onRestoreNote}>
+          {uistrings.RestoreButtonText}
+        </a>
+      </div>
+    );
   };
 
   return (
@@ -22,11 +57,7 @@ function DeletedNote(props: { note: NoteDeleted }) {
         <del>
           <div className="note-title">{note.title}</div>
         </del>
-        <div className="note-controlarea">
-          <a className="note-button" onClick={onRestoreNote}>
-            {uistrings.RestoreButtonText}
-          </a>
-        </div>
+        {controlArea()}
       </div>
     </div>
   );

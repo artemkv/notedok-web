@@ -3,6 +3,7 @@ import {
   NoteCreatingFromTitle,
   NoteDeletable,
   NoteDeleted,
+  NoteDeleting,
   NotePendingStorageUpdate,
   NoteRef,
   NoteSyncing,
@@ -32,6 +33,7 @@ export enum EventType {
   RegularNoteTextUpdated,
 
   NoteDeleteTriggered,
+  NoteDeleted,
   NoteRestoreTriggered,
 
   NoteSavedOnNewPath,
@@ -115,6 +117,11 @@ export interface NoteDeleteTriggeredEvent {
   note: NoteDeletable;
 }
 
+export interface NoteDeletedEvent {
+  type: EventType.NoteDeleted;
+  note: NoteDeleting;
+}
+
 export interface NoteRestoreTriggeredEvent {
   type: EventType.NoteRestoreTriggered;
   note: NoteDeleted;
@@ -193,6 +200,7 @@ export type AppEvent =
   | RegularNoteStartTextEditingEvent
   | RegularNoteTextUpdatedEvent
   | NoteDeleteTriggeredEvent
+  | NoteDeletedEvent
   | NoteRestoreTriggeredEvent
   | NoteSavedOnNewPathEvent
   | NoteSavedEvent
