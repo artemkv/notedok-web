@@ -53,7 +53,6 @@ export const Reducer = (
     return handleTemplateNoteTitleEditorTextChanged(state, event);
   }
 
-  // TODO: what if updated before file list is retrieved?
   if (event.type === EventType.TemplateNoteTitleUpdated) {
     return handleTemplateNoteTitleUpdated(state);
   }
@@ -79,7 +78,6 @@ export const Reducer = (
     return handleTemplateNoteStartTextEditing(state);
   }
 
-  // TODO: what if updated before file list is retrieved?
   if (event.type === EventType.TemplateNoteTextUpdated) {
     return handleTemplateNoteTextUpdated(state);
   }

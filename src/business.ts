@@ -160,7 +160,14 @@ export const handleTemplateNoteTitleUpdated = (
     }
   }
 
-  return JustState(state);
+  // If the file list wasnt't retrieved, ignore the change
+  const newState: AppState = {
+    ...state,
+    noteTitleEditor: {
+      state: NoteTitleEditorState.NotActive,
+    },
+  };
+  return JustState(newState);
 };
 
 export const handleRegularNoteTitleEditorTextChanged = (
@@ -274,7 +281,15 @@ export const handleTemplateNoteTextUpdated = (
       return [newState, command];
     }
   }
-  return JustState(state);
+
+  // If the file list wasnt't retrieved, ignore the change
+  const newState: AppState = {
+    ...state,
+    noteTextEditor: {
+      state: NoteTextEditorState.NotActive,
+    },
+  };
+  return JustState(newState);
 };
 
 export const handleRegularNoteStartTextEditing = (

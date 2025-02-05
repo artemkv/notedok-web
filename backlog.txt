@@ -98,7 +98,6 @@ Once the changes are saved, the new empty note should appear allowing me to cont
 
 TODO:
 - tab does not stop on control area buttons
-- encoding of filenames for url
 - utf-8
 - use etags to avoid getting content if didn't change
 - allowing to edit failed note may lead to displayed title not matching the path. Should I re-derive it?
