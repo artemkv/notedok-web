@@ -22,7 +22,6 @@ import { OrbitProgress } from "react-loading-indicators";
 import ErrorIcon from "../assets/error_outline.svg";
 import Empty from "./Empty";
 
-// TODO: adjust to all new note types
 function RegularNote(props: {
   note: NoteRegular;
   noteTitleEditor: NoteTitleEditor;
@@ -194,7 +193,6 @@ function RegularNote(props: {
     );
   };
 
-  // TODO: should I html escape??
   // TODO: cancel editing by esc
   // TODO: Before you had to click anywhere outside of the textarea to finish editing
   //   , now it happens on blur. See if I can restore the old behavior, and if it's actually better
@@ -297,7 +295,6 @@ function RegularNote(props: {
     );
   };
 
-  // TODO: design how the errors are displayed
   return (
     <div id={note.id} className="note-outer">
       {hasError ? noteError() : Empty()}
