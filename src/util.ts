@@ -11,6 +11,7 @@ export const decodePathFileSystemFriendly = (path: string): string => {
   path = path.replace(/\(pipe\)/g, "|");
   path = path.replace(/\(dqt\)/g, '"');
   path = path.replace(/\(crt\)/g, "^");
+  path = path.replace(/\(pct\)/g, "%");
   return path;
 };
 
@@ -25,6 +26,7 @@ export const encodePathFileSystemFriendly = (path: string): string => {
   path = path.replace(/\|/g, "(pipe)");
   path = path.replace(/"/g, "(dqt)");
   path = path.replace(/\^/g, "(crt)");
+  path = path.replace(/%/g, "(pct)");
 
   if (path[0] === ".") {
     path = "_" + path;

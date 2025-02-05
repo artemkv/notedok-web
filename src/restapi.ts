@@ -210,15 +210,17 @@ export const getFiles = (
 };
 
 export const getFile = (session: string, filename: string) => {
-  return getText(`/files/${filename}`, session);
+  return getText(`/files/${encodeURIComponent(filename)}`, session);
 };
 
 export const postFile = (session: string, filename: string, text: string) => {
-  return postText(`/files/${filename}`, text, session);
+  console.log(`/files/${encodeURIComponent(filename)}`);
+
+  return postText(`/files/${encodeURIComponent(filename)}`, text, session);
 };
 
 export const putFile = (session: string, filename: string, text: string) => {
-  return putText(`/files/${filename}`, text, session);
+  return putText(`/files/${encodeURIComponent(filename)}`, text, session);
 };
 
 export const renameFile = (
@@ -227,13 +229,13 @@ export const renameFile = (
   newFilename: string
 ) => {
   const body = {
-    fileName: filename,
-    newFileName: newFilename,
+    fileName: encodeURIComponent(filename),
+    newFileName: encodeURIComponent(newFilename),
   };
 
   return postJsonNoResponse(`/rename`, body, session);
 };
 
 export const deleteFile = (session: string, filename: string) => {
-  return deleteObject(`/files/${filename}`, session);
+  return deleteObject(`/files/${encodeURIComponent(filename)}`, session);
 };
