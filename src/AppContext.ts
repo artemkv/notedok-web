@@ -6,11 +6,11 @@ import { Dispatch } from "./hooks/useReducer";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const nop: Dispatch<AppEvent> = (_: AppEvent) => {};
 
-const deafultContext = {
+const defaultContext = {
   uistrings: uistrings,
   dispatch: nop,
 };
 
-const AppContext = createContext(deafultContext);
+const AppContext = createContext(defaultContext);
 
 export default AppContext;

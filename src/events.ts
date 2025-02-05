@@ -14,6 +14,10 @@ import {
 } from "./model";
 
 export enum EventType {
+  // "Never" event is never triggered in the app
+  // this is just to make TS happy
+  Never,
+
   SearchTextChanged,
   SearchTextSubmitted,
 
@@ -50,6 +54,10 @@ export enum EventType {
   NoteCreationFromTextFailed,
 
   RestApiError, // Generic errors, includes failing to delete note
+}
+
+export interface NeverEvent {
+  type: EventType.Never;
 }
 
 export interface SearchTextChangedEvent {
@@ -167,14 +175,14 @@ export interface NoteSyncFailedEvent {
   err: string;
 }
 
-export interface NoteCreationFromTitleFailed {
+export interface NoteCreationFromTitleFailedEvent {
   type: EventType.NoteCreationFromTitleFailed;
   note: NoteCreatingFromTitle;
   path: string;
   err: string;
 }
 
-export interface NoteCreationFromTextFailed {
+export interface NoteCreationFromTextFailedEvent {
   type: EventType.NoteCreationFromTextFailed;
   note: NoteCreatingFromText;
   path: string;
@@ -187,6 +195,7 @@ export interface RestApiErrorEvent {
 }
 
 export type AppEvent =
+  | NeverEvent
   | SearchTextChangedEvent
   | SearchTextSubmittedEvent
   | TemplateNoteTitleEditorTextChangedEvent
@@ -209,6 +218,6 @@ export type AppEvent =
   | LoadNextPageEvent
   | NoteLoadFailedEvent
   | NoteSyncFailedEvent
-  | NoteCreationFromTitleFailed
-  | NoteCreationFromTextFailed
+  | NoteCreationFromTitleFailedEvent
+  | NoteCreationFromTextFailedEvent
   | RestApiErrorEvent;

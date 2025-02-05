@@ -1,10 +1,36 @@
-import { AppCommand, DoNothing } from "./commands";
+import { AppCommand, DoMany, DoNothing } from "./commands";
+import { ReportError } from "./commands/alerts";
 import {
   CreateNewNoteWithText,
   CreateNewNoteWithTitle,
+  DeleteNote,
+  LoadNoteText,
   RenameNoteFromTitle,
+  RestoreNote,
+  RetrieveFileList,
   SaveNoteText,
 } from "./commands/storage";
+import {
+  LoadNoteTextSuccessEvent,
+  NoteCreationFromTextFailedEvent,
+  NoteCreationFromTitleFailedEvent,
+  NoteDeletedEvent,
+  NoteDeleteTriggeredEvent,
+  NoteLoadFailedEvent,
+  NoteRestoreTriggeredEvent,
+  NoteSavedEvent,
+  NoteSavedOnNewPathEvent,
+  NoteSyncFailedEvent,
+  NoteTextEditorTextChangedEvent,
+  RegularNoteStartTextEditingEvent,
+  RegularNoteTextUpdatedEvent,
+  RegularNoteTitleEditorTextChangedEvent,
+  RegularNoteTitleUpdatedEvent,
+  RestApiErrorEvent,
+  RetrieveFileListSuccessEvent,
+  SearchTextChangedEvent,
+  TemplateNoteTitleEditorTextChangedEvent,
+} from "./events";
 import {
   NoteListState,
   NoteListFileListRetrieved,
@@ -56,7 +82,479 @@ import {
 
 export const NOTES_ON_PAGE = 5;
 
-export const shiftNotesToLoad = (
+export const JustState = (state: AppState): [AppState, AppCommand] => [
+  state,
+  DoNothing,
+];
+
+export const handleSearchTextSubmitted = (
+  state: AppState
+): [AppState, AppCommand] => {
+  const newFileListVersion = state.noteList.fileListVersion + 1;
+
+  const newState: AppState = {
+    ...state,
+    noteTextEditor: {
+      state: NoteTextEditorState.NotActive,
+    },
+    noteTitleEditor: {
+      state: NoteTitleEditorState.NotActive,
+    },
+    noteList: {
+      state: NoteListState.RetrievingFileList,
+      fileListVersion: newFileListVersion,
+    },
+  };
+
+  return [newState, RetrieveFileList(state.searchText, newFileListVersion)];
+};
+
+export const handleSearchTextChanged = (
+  state: AppState,
+  event: SearchTextChangedEvent
+): [AppState, AppCommand] => {
+  const newState: AppState = {
+    ...state,
+    searchText: event.newText,
+  };
+  return JustState(newState);
+};
+
+export const handleTemplateNoteTitleEditorTextChanged = (
+  state: AppState,
+  event: TemplateNoteTitleEditorTextChangedEvent
+): [AppState, AppCommand] => {
+  const newState: AppState = {
+    ...state,
+    noteTitleEditor: {
+      state: NoteTitleEditorState.EditingTemplateNote,
+      text: event.newText,
+    },
+  };
+  return JustState(newState);
+};
+
+export const handleTemplateNoteTitleUpdated = (
+  state: AppState
+): [AppState, AppCommand] => {
+  if (state.noteList.state === NoteListState.FileListRetrieved) {
+    if (
+      state.noteTitleEditor.state === NoteTitleEditorState.EditingTemplateNote
+    ) {
+      const [newNoteList, newTextEditor, command] =
+        convertToRegularNoteOnTitleUpdated(
+          state.noteList,
+          state.noteTitleEditor
+        );
+
+      const newState: AppState = {
+        ...state,
+        noteList: newNoteList,
+        noteTitleEditor: {
+          state: NoteTitleEditorState.NotActive,
+        },
+        noteTextEditor: newTextEditor,
+      };
+
+      return [newState, command];
+    }
+  }
+
+  return JustState(state);
+};
+
+export const handleRegularNoteTitleEditorTextChanged = (
+  state: AppState,
+  event: RegularNoteTitleEditorTextChangedEvent
+): [AppState, AppCommand] => {
+  const newState: AppState = {
+    ...state,
+    noteTitleEditor: {
+      state: NoteTitleEditorState.EditingRegularNote,
+      note: event.note,
+      text: event.newText,
+    },
+  };
+  return JustState(newState);
+};
+
+export const handleRegularNoteTitleUpdated = (
+  state: AppState,
+  event: RegularNoteTitleUpdatedEvent
+): [AppState, AppCommand] => {
+  if (state.noteList.state === NoteListState.FileListRetrieved) {
+    if (
+      state.noteTitleEditor.state === NoteTitleEditorState.EditingRegularNote
+    ) {
+      const [newNoteList, command] = finishNoteTitleEditing(
+        state.noteList,
+        event.note,
+        state.noteTitleEditor
+      );
+
+      const newState: AppState = {
+        ...state,
+        noteList: newNoteList,
+        noteTitleEditor: {
+          state: NoteTitleEditorState.NotActive,
+        },
+      };
+
+      return [newState, command];
+    }
+  }
+  return JustState(state);
+};
+
+export const handleNoteTextEditorTextChanged = (
+  state: AppState,
+  event: NoteTextEditorTextChangedEvent
+): [AppState, AppCommand] => {
+  if (
+    state.noteTextEditor.state === NoteTextEditorState.EditingRegularNote ||
+    state.noteTextEditor.state === NoteTextEditorState.EditingTemplateNote
+  ) {
+    const newState: AppState = {
+      ...state,
+      noteTextEditor: {
+        ...state.noteTextEditor,
+        text: event.newText,
+      },
+    };
+    return JustState(newState);
+  }
+  return JustState(state);
+};
+
+export const handleNoteTextEditorCancelEdit = (
+  state: AppState
+): [AppState, AppCommand] => {
+  const newState: AppState = {
+    ...state,
+    noteTextEditor: {
+      state: NoteTextEditorState.NotActive,
+    },
+  };
+  return JustState(newState);
+};
+
+export const handleTemplateNoteStartTextEditing = (
+  state: AppState
+): [AppState, AppCommand] => {
+  const newState: AppState = {
+    ...state,
+    noteTextEditor: {
+      state: NoteTextEditorState.EditingTemplateNote,
+      text: "",
+    },
+  };
+  return JustState(newState);
+};
+
+export const handleTemplateNoteTextUpdated = (
+  state: AppState
+): [AppState, AppCommand] => {
+  if (state.noteList.state === NoteListState.FileListRetrieved) {
+    if (
+      state.noteTextEditor.state === NoteTextEditorState.EditingTemplateNote
+    ) {
+      const [newNoteList, command] = convertToRegularNoteOnTextUpdated(
+        state.noteList,
+        state.noteTextEditor
+      );
+
+      const newState: AppState = {
+        ...state,
+        noteList: newNoteList,
+        noteTextEditor: {
+          state: NoteTextEditorState.NotActive,
+        },
+      };
+
+      return [newState, command];
+    }
+  }
+  return JustState(state);
+};
+
+export const handleRegularNoteStartTextEditing = (
+  state: AppState,
+  event: RegularNoteStartTextEditingEvent
+): [AppState, AppCommand] => {
+  const newState: AppState = {
+    ...state,
+    noteTextEditor: {
+      state: NoteTextEditorState.EditingRegularNote,
+      note: event.note,
+      text:
+        event.note.state === NoteState.CreatingFromTitle ? "" : event.note.text,
+    },
+  };
+  return JustState(newState);
+};
+
+export const handleRegularNoteTextUpdated = (
+  state: AppState,
+  event: RegularNoteTextUpdatedEvent
+): [AppState, AppCommand] => {
+  if (state.noteList.state === NoteListState.FileListRetrieved) {
+    if (state.noteTextEditor.state === NoteTextEditorState.EditingRegularNote) {
+      const [newNoteList, command] = finishNoteTextEditing(
+        state.noteList,
+        event.note,
+        state.noteTextEditor
+      );
+
+      const newState: AppState = {
+        ...state,
+        noteList: newNoteList,
+        noteTextEditor: {
+          state: NoteTextEditorState.NotActive,
+        },
+      };
+
+      return [newState, command];
+    }
+  }
+  return JustState(state);
+};
+
+export const handleNoteDeleteTriggered = (
+  state: AppState,
+  event: NoteDeleteTriggeredEvent
+): [AppState, AppCommand] => {
+  if (state.noteList.state === NoteListState.FileListRetrieved) {
+    const [newNoteList, noteDeleting, notesToLoad] = deleteNote(
+      state.noteList,
+      event.note
+    );
+
+    const newState: AppState = {
+      ...state,
+      noteList: newNoteList,
+    };
+
+    const command = DoMany([
+      DeleteNote(noteDeleting),
+      LoadNoteText(notesToLoad, state.noteList.fileListVersion),
+    ]);
+
+    return [newState, command];
+  }
+  return JustState(state);
+};
+
+export const handleNoteDeleted = (
+  state: AppState,
+  event: NoteDeletedEvent
+): [AppState, AppCommand] => {
+  if (state.noteList.state === NoteListState.FileListRetrieved) {
+    const newNoteList = updateNoteAsDeleted(state.noteList, event.note);
+    const newState: AppState = {
+      ...state,
+      noteList: newNoteList,
+    };
+    return JustState(newState);
+  }
+  return JustState(state);
+};
+
+export const handleNoteRestoreTriggered = (
+  state: AppState,
+  event: NoteRestoreTriggeredEvent
+): [AppState, AppCommand] => {
+  if (state.noteList.state === NoteListState.FileListRetrieved) {
+    const [newNoteList, noteSyncing] = restoreNote(state.noteList, event.note);
+    const newState: AppState = {
+      ...state,
+      noteList: newNoteList,
+    };
+    return [newState, RestoreNote(noteSyncing)];
+  }
+  return JustState(state);
+};
+
+export const handleRetrieveFileListSuccess = (
+  state: AppState,
+  event: RetrieveFileListSuccessEvent
+): [AppState, AppCommand] => {
+  if (
+    state.noteList.state === NoteListState.RetrievingFileList &&
+    state.noteList.fileListVersion === event.fileListVersion
+  ) {
+    const noteList: NoteListFileListRetrieved = {
+      state: NoteListState.FileListRetrieved,
+      fileListVersion: event.fileListVersion,
+      unprocessedFiles: event.fileList,
+      lastUsedNoteId: 0,
+      renderingQueue: [],
+      notes: [],
+    };
+
+    const [newNoteList, notesToLoad] = shiftNotesToLoad(
+      noteList,
+      NOTES_ON_PAGE
+    );
+
+    const newState: AppState = {
+      ...state,
+      noteList: newNoteList,
+    };
+
+    return [newState, LoadNoteText(notesToLoad, event.fileListVersion)];
+  }
+  return JustState(state);
+};
+
+export const handleNoteSavedOnNewPath = (
+  state: AppState,
+  event: NoteSavedOnNewPathEvent
+): [AppState, AppCommand] => {
+  const [newNoteList, newNoteTitleEditor, newNoteTextEditor] = updateNotePath(
+    state,
+    event.note,
+    event.newPath
+  );
+  const newState: AppState = {
+    ...state,
+    noteTitleEditor: newNoteTitleEditor,
+    noteTextEditor: newNoteTextEditor,
+    noteList: newNoteList,
+  };
+  return JustState(newState);
+};
+
+export const handleNoteSaved = (
+  state: AppState,
+  event: NoteSavedEvent
+): [AppState, AppCommand] => {
+  const [newNoteList, newNoteTitleEditor, newNoteTextEditor] =
+    updateNoteAsSynced(state, event.note);
+  const newState: AppState = {
+    ...state,
+    noteTitleEditor: newNoteTitleEditor,
+    noteTextEditor: newNoteTextEditor,
+    noteList: newNoteList,
+  };
+  return JustState(newState);
+};
+
+export const handleLoadNoteTextSuccess = (
+  state: AppState,
+  event: LoadNoteTextSuccessEvent
+): [AppState, AppCommand] => {
+  if (state.noteList.state === NoteListState.FileListRetrieved) {
+    if (state.noteList.fileListVersion === event.fileListVersion) {
+      const newNoteList = handleLoadedNote(
+        state.noteList,
+        event.note,
+        event.text
+      );
+
+      const newState: AppState = {
+        ...state,
+        noteList: newNoteList,
+      };
+
+      return JustState(newState);
+    }
+  }
+  return JustState(state);
+};
+
+export const handleLoadNextPage = (state: AppState): [AppState, AppCommand] => {
+  if (state.noteList.state === NoteListState.FileListRetrieved) {
+    const [newNoteList, notesToLoad] = shiftNotesToLoad(
+      state.noteList,
+      NOTES_ON_PAGE
+    );
+
+    const newState: AppState = {
+      ...state,
+      noteList: newNoteList,
+    };
+
+    return [
+      newState,
+      LoadNoteText(notesToLoad, state.noteList.fileListVersion),
+    ];
+  }
+  return JustState(state);
+};
+
+export const handleNoteLoadFailed = (
+  state: AppState,
+  event: NoteLoadFailedEvent
+): [AppState, AppCommand] => {
+  if (state.noteList.state === NoteListState.FileListRetrieved) {
+    const newNoteList = handleNoteFailedToLoad(
+      state.noteList,
+      event.note,
+      event.err
+    );
+
+    const newState: AppState = {
+      ...state,
+      noteList: newNoteList,
+    };
+    return [newState, ReportError(event.err)];
+  }
+  return JustState(state);
+};
+
+export const handleNoteSyncFailed = (
+  state: AppState,
+  event: NoteSyncFailedEvent
+): [AppState, AppCommand] => {
+  const [newNoteList, newNoteTitleEditor, newNoteTextEditor] =
+    updateNoteAsOutOfSync(state, event.note, event.note.path, event.err);
+  const newState: AppState = {
+    ...state,
+    noteTitleEditor: newNoteTitleEditor,
+    noteTextEditor: newNoteTextEditor,
+    noteList: newNoteList,
+  };
+  return [newState, ReportError(event.err)];
+};
+
+export const handleNoteCreationFromTitleFailed = (
+  state: AppState,
+  event: NoteCreationFromTitleFailedEvent
+): [AppState, AppCommand] => {
+  const [newNoteList, newNoteTitleEditor, newNoteTextEditor] =
+    updateNoteAsOutOfSync(state, event.note, event.path, event.err);
+  const newState: AppState = {
+    ...state,
+    noteTitleEditor: newNoteTitleEditor,
+    noteTextEditor: newNoteTextEditor,
+    noteList: newNoteList,
+  };
+  return [newState, ReportError(event.err)];
+};
+
+export const handleNoteCreationFromTextFailed = (
+  state: AppState,
+  event: NoteCreationFromTextFailedEvent
+): [AppState, AppCommand] => {
+  const [newNoteList, newNoteTitleEditor, newNoteTextEditor] =
+    updateNoteAsOutOfSync(state, event.note, event.path, event.err);
+  const newState: AppState = {
+    ...state,
+    noteTitleEditor: newNoteTitleEditor,
+    noteTextEditor: newNoteTextEditor,
+    noteList: newNoteList,
+  };
+  return [newState, ReportError(event.err)];
+};
+
+export const handleRestApiError = (
+  state: AppState,
+  event: RestApiErrorEvent
+): [AppState, AppCommand] => {
+  return [state, ReportError(event.err)];
+};
+
+const shiftNotesToLoad = (
   noteList: NoteListFileListRetrieved,
   notesToShift: number
 ): [NoteListFileListRetrieved, NoteRef[]] => {
@@ -97,7 +595,7 @@ export const shiftNotesToLoad = (
   return [newNoteList, notesToLoad];
 };
 
-export const handleLoadedNote = (
+const handleLoadedNote = (
   noteList: NoteListFileListRetrieved,
   note: NoteRef,
   text: string
@@ -144,7 +642,7 @@ export const handleLoadedNote = (
   return newNoteList;
 };
 
-export const finishNoteTitleEditing = (
+const finishNoteTitleEditing = (
   noteList: NoteListFileListRetrieved,
   note: NoteTitleSaveable,
   noteTitleEditor: NoteTitleEditorEditingRegularNote
@@ -163,7 +661,7 @@ export const finishNoteTitleEditing = (
   return [newNoteList, command];
 };
 
-export const finishNoteTextEditing = (
+const finishNoteTextEditing = (
   noteList: NoteListFileListRetrieved,
   note: NoteTextSaveable,
   noteTextEditor: NoteTextEditorEditingRegularNote
@@ -182,7 +680,7 @@ export const finishNoteTextEditing = (
   return [newNoteList, command];
 };
 
-export const convertToRegularNoteOnTitleUpdated = (
+const convertToRegularNoteOnTitleUpdated = (
   noteList: NoteListFileListRetrieved,
   noteTitleEditor: NoteTitleEditorEditingTemplateNote
 ): [NoteListFileListRetrieved, NoteTextEditor, AppCommand] => {
@@ -225,7 +723,7 @@ export const convertToRegularNoteOnTitleUpdated = (
   return [newNoteList, newTextEditor, command];
 };
 
-export const convertToRegularNoteOnTextUpdated = (
+const convertToRegularNoteOnTextUpdated = (
   noteList: NoteListFileListRetrieved,
   noteTextEditor: NoteTextEditorEditingTemplateNote
 ): [NoteListFileListRetrieved, AppCommand] => {
@@ -255,7 +753,7 @@ export const convertToRegularNoteOnTextUpdated = (
   return [newNoteList, command];
 };
 
-export const updateNotePath = (
+const updateNotePath = (
   state: AppState,
   note: NotePendingStorageUpdate,
   newPath: string
@@ -295,7 +793,7 @@ export const updateNotePath = (
   return [noteList, noteTitleEditor, noteTextEditor];
 };
 
-export const updateNoteAsSynced = (
+const updateNoteAsSynced = (
   state: AppState,
   note: NoteSyncing
 ): [NoteList, NoteTitleEditor, NoteTextEditor] => {
@@ -334,7 +832,7 @@ export const updateNoteAsSynced = (
   return [noteList, noteTitleEditor, noteTextEditor];
 };
 
-export const updateNoteAsOutOfSync = (
+const updateNoteAsOutOfSync = (
   state: AppState,
   note: NotePendingStorageUpdate,
   path: string,
@@ -379,7 +877,7 @@ export const updateNoteAsOutOfSync = (
   return [noteList, noteTitleEditor, noteTextEditor];
 };
 
-export const handleNoteFailedToLoad = (
+const handleNoteFailedToLoad = (
   noteList: NoteListFileListRetrieved,
   note: NoteRef,
   err: string
@@ -388,7 +886,7 @@ export const handleNoteFailedToLoad = (
   return replaceNote(noteList, newNote);
 };
 
-export const deleteNote = (
+const deleteNote = (
   noteList: NoteListFileListRetrieved,
   note: NoteDeletable
 ): [NoteListFileListRetrieved, NoteDeleting, NoteRef[]] => {
@@ -415,7 +913,7 @@ export const deleteNote = (
   return [newNoteList, newNote, notesToLoad];
 };
 
-export const updateNoteAsDeleted = (
+const updateNoteAsDeleted = (
   noteList: NoteListFileListRetrieved,
   note: NoteDeleting
 ): NoteListFileListRetrieved => {
@@ -426,7 +924,7 @@ export const updateNoteAsDeleted = (
   return newNoteList;
 };
 
-export const restoreNote = (
+const restoreNote = (
   noteList: NoteListFileListRetrieved,
   note: NoteDeleted
 ): [NoteListFileListRetrieved, NoteSyncing] => {
@@ -522,7 +1020,7 @@ const notePendingStorageUpdateToOutOfSync = (
   throw new Error("Impossible");
 };
 
-export const noteDeletableToDeleting = (note: NoteDeletable): NoteDeleting => {
+const noteDeletableToDeleting = (note: NoteDeletable): NoteDeleting => {
   if (note.state === NoteState.Synced) {
     return noteSyncedToDeleting(note);
   }
