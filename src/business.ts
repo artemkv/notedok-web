@@ -1,5 +1,6 @@
 import { AppCommand, DoMany, DoNothing } from "./commands";
 import { ReportError } from "./commands/alerts";
+import { StartUserSession } from "./commands/auth";
 import {
   CreateNewNoteWithText,
   CreateNewNoteWithTitle,
@@ -30,6 +31,7 @@ import {
   RetrieveFileListSuccessEvent,
   SearchTextChangedEvent,
   TemplateNoteTitleEditorTextChangedEvent,
+  UserAuthenticatedEvent,
 } from "./events";
 import {
   NoteListState,
@@ -58,6 +60,9 @@ import {
   Note,
   NoteOutOfSync,
   NoteDeleting,
+  AuthenticationStatus,
+  AppStateAuthenticated,
+  AppStateUnauthenticated,
 } from "./model";
 import {
   createNewNoteFromText,
@@ -82,17 +87,45 @@ import {
 
 export const NOTES_ON_PAGE = 5;
 
-export const JustState = (state: AppState): [AppState, AppCommand] => [
-  state,
-  DoNothing,
-];
+export const JustStateAuthenticated = (
+  state: AppStateAuthenticated
+): [AppStateAuthenticated, AppCommand] => [state, DoNothing];
+
+export const handleUserAuthenticated = (
+  state: AppStateUnauthenticated,
+  event: UserAuthenticatedEvent
+): [AppState, AppCommand] => {
+  return [state, StartUserSession(event.idToken)];
+};
+
+export const handleUserSessionCreated = (): [
+  AppStateAuthenticated,
+  AppCommand
+] => {
+  const newState: AppStateAuthenticated = {
+    auth: AuthenticationStatus.Authenticated,
+    searchText: "",
+    noteTextEditor: {
+      state: NoteTextEditorState.NotActive,
+    },
+    noteTitleEditor: {
+      state: NoteTitleEditorState.NotActive,
+    },
+    noteList: {
+      state: NoteListState.RetrievingFileList,
+      fileListVersion: 0,
+    },
+  };
+
+  return [newState, RetrieveFileList("", 0)];
+};
 
 export const handleSearchTextSubmitted = (
-  state: AppState
-): [AppState, AppCommand] => {
+  state: AppStateAuthenticated
+): [AppStateAuthenticated, AppCommand] => {
   const newFileListVersion = state.noteList.fileListVersion + 1;
 
-  const newState: AppState = {
+  const newState: AppStateAuthenticated = {
     ...state,
     noteTextEditor: {
       state: NoteTextEditorState.NotActive,
@@ -110,33 +143,33 @@ export const handleSearchTextSubmitted = (
 };
 
 export const handleSearchTextChanged = (
-  state: AppState,
+  state: AppStateAuthenticated,
   event: SearchTextChangedEvent
-): [AppState, AppCommand] => {
-  const newState: AppState = {
+): [AppStateAuthenticated, AppCommand] => {
+  const newState: AppStateAuthenticated = {
     ...state,
     searchText: event.newText,
   };
-  return JustState(newState);
+  return JustStateAuthenticated(newState);
 };
 
 export const handleTemplateNoteTitleEditorTextChanged = (
-  state: AppState,
+  state: AppStateAuthenticated,
   event: TemplateNoteTitleEditorTextChangedEvent
-): [AppState, AppCommand] => {
-  const newState: AppState = {
+): [AppStateAuthenticated, AppCommand] => {
+  const newState: AppStateAuthenticated = {
     ...state,
     noteTitleEditor: {
       state: NoteTitleEditorState.EditingTemplateNote,
       text: event.newText,
     },
   };
-  return JustState(newState);
+  return JustStateAuthenticated(newState);
 };
 
 export const handleTemplateNoteTitleUpdated = (
-  state: AppState
-): [AppState, AppCommand] => {
+  state: AppStateAuthenticated
+): [AppStateAuthenticated, AppCommand] => {
   if (state.noteList.state === NoteListState.FileListRetrieved) {
     if (
       state.noteTitleEditor.state === NoteTitleEditorState.EditingTemplateNote
@@ -147,7 +180,7 @@ export const handleTemplateNoteTitleUpdated = (
           state.noteTitleEditor
         );
 
-      const newState: AppState = {
+      const newState: AppStateAuthenticated = {
         ...state,
         noteList: newNoteList,
         noteTitleEditor: {
@@ -161,20 +194,20 @@ export const handleTemplateNoteTitleUpdated = (
   }
 
   // If the file list wasnt't retrieved, ignore the change
-  const newState: AppState = {
+  const newState: AppStateAuthenticated = {
     ...state,
     noteTitleEditor: {
       state: NoteTitleEditorState.NotActive,
     },
   };
-  return JustState(newState);
+  return JustStateAuthenticated(newState);
 };
 
 export const handleRegularNoteTitleEditorTextChanged = (
-  state: AppState,
+  state: AppStateAuthenticated,
   event: RegularNoteTitleEditorTextChangedEvent
-): [AppState, AppCommand] => {
-  const newState: AppState = {
+): [AppStateAuthenticated, AppCommand] => {
+  const newState: AppStateAuthenticated = {
     ...state,
     noteTitleEditor: {
       state: NoteTitleEditorState.EditingRegularNote,
@@ -182,13 +215,13 @@ export const handleRegularNoteTitleEditorTextChanged = (
       text: event.newText,
     },
   };
-  return JustState(newState);
+  return JustStateAuthenticated(newState);
 };
 
 export const handleRegularNoteTitleUpdated = (
-  state: AppState,
+  state: AppStateAuthenticated,
   event: RegularNoteTitleUpdatedEvent
-): [AppState, AppCommand] => {
+): [AppStateAuthenticated, AppCommand] => {
   if (state.noteList.state === NoteListState.FileListRetrieved) {
     if (
       state.noteTitleEditor.state === NoteTitleEditorState.EditingRegularNote
@@ -199,7 +232,7 @@ export const handleRegularNoteTitleUpdated = (
         state.noteTitleEditor
       );
 
-      const newState: AppState = {
+      const newState: AppStateAuthenticated = {
         ...state,
         noteList: newNoteList,
         noteTitleEditor: {
@@ -210,57 +243,57 @@ export const handleRegularNoteTitleUpdated = (
       return [newState, command];
     }
   }
-  return JustState(state);
+  return JustStateAuthenticated(state);
 };
 
 export const handleNoteTextEditorTextChanged = (
-  state: AppState,
+  state: AppStateAuthenticated,
   event: NoteTextEditorTextChangedEvent
-): [AppState, AppCommand] => {
+): [AppStateAuthenticated, AppCommand] => {
   if (
     state.noteTextEditor.state === NoteTextEditorState.EditingRegularNote ||
     state.noteTextEditor.state === NoteTextEditorState.EditingTemplateNote
   ) {
-    const newState: AppState = {
+    const newState: AppStateAuthenticated = {
       ...state,
       noteTextEditor: {
         ...state.noteTextEditor,
         text: event.newText,
       },
     };
-    return JustState(newState);
+    return JustStateAuthenticated(newState);
   }
-  return JustState(state);
+  return JustStateAuthenticated(state);
 };
 
 export const handleNoteTextEditorCancelEdit = (
-  state: AppState
-): [AppState, AppCommand] => {
-  const newState: AppState = {
+  state: AppStateAuthenticated
+): [AppStateAuthenticated, AppCommand] => {
+  const newState: AppStateAuthenticated = {
     ...state,
     noteTextEditor: {
       state: NoteTextEditorState.NotActive,
     },
   };
-  return JustState(newState);
+  return JustStateAuthenticated(newState);
 };
 
 export const handleTemplateNoteStartTextEditing = (
-  state: AppState
-): [AppState, AppCommand] => {
-  const newState: AppState = {
+  state: AppStateAuthenticated
+): [AppStateAuthenticated, AppCommand] => {
+  const newState: AppStateAuthenticated = {
     ...state,
     noteTextEditor: {
       state: NoteTextEditorState.EditingTemplateNote,
       text: "",
     },
   };
-  return JustState(newState);
+  return JustStateAuthenticated(newState);
 };
 
 export const handleTemplateNoteTextUpdated = (
-  state: AppState
-): [AppState, AppCommand] => {
+  state: AppStateAuthenticated
+): [AppStateAuthenticated, AppCommand] => {
   if (state.noteList.state === NoteListState.FileListRetrieved) {
     if (
       state.noteTextEditor.state === NoteTextEditorState.EditingTemplateNote
@@ -270,7 +303,7 @@ export const handleTemplateNoteTextUpdated = (
         state.noteTextEditor
       );
 
-      const newState: AppState = {
+      const newState: AppStateAuthenticated = {
         ...state,
         noteList: newNoteList,
         noteTextEditor: {
@@ -283,20 +316,20 @@ export const handleTemplateNoteTextUpdated = (
   }
 
   // If the file list wasnt't retrieved, ignore the change
-  const newState: AppState = {
+  const newState: AppStateAuthenticated = {
     ...state,
     noteTextEditor: {
       state: NoteTextEditorState.NotActive,
     },
   };
-  return JustState(newState);
+  return JustStateAuthenticated(newState);
 };
 
 export const handleRegularNoteStartTextEditing = (
-  state: AppState,
+  state: AppStateAuthenticated,
   event: RegularNoteStartTextEditingEvent
-): [AppState, AppCommand] => {
-  const newState: AppState = {
+): [AppStateAuthenticated, AppCommand] => {
+  const newState: AppStateAuthenticated = {
     ...state,
     noteTextEditor: {
       state: NoteTextEditorState.EditingRegularNote,
@@ -305,13 +338,13 @@ export const handleRegularNoteStartTextEditing = (
         event.note.state === NoteState.CreatingFromTitle ? "" : event.note.text,
     },
   };
-  return JustState(newState);
+  return JustStateAuthenticated(newState);
 };
 
 export const handleRegularNoteTextUpdated = (
-  state: AppState,
+  state: AppStateAuthenticated,
   event: RegularNoteTextUpdatedEvent
-): [AppState, AppCommand] => {
+): [AppStateAuthenticated, AppCommand] => {
   if (state.noteList.state === NoteListState.FileListRetrieved) {
     if (state.noteTextEditor.state === NoteTextEditorState.EditingRegularNote) {
       const [newNoteList, command] = finishNoteTextEditing(
@@ -320,7 +353,7 @@ export const handleRegularNoteTextUpdated = (
         state.noteTextEditor
       );
 
-      const newState: AppState = {
+      const newState: AppStateAuthenticated = {
         ...state,
         noteList: newNoteList,
         noteTextEditor: {
@@ -331,20 +364,20 @@ export const handleRegularNoteTextUpdated = (
       return [newState, command];
     }
   }
-  return JustState(state);
+  return JustStateAuthenticated(state);
 };
 
 export const handleNoteDeleteTriggered = (
-  state: AppState,
+  state: AppStateAuthenticated,
   event: NoteDeleteTriggeredEvent
-): [AppState, AppCommand] => {
+): [AppStateAuthenticated, AppCommand] => {
   if (state.noteList.state === NoteListState.FileListRetrieved) {
     const [newNoteList, noteDeleting, notesToLoad] = deleteNote(
       state.noteList,
       event.note
     );
 
-    const newState: AppState = {
+    const newState: AppStateAuthenticated = {
       ...state,
       noteList: newNoteList,
     };
@@ -356,43 +389,43 @@ export const handleNoteDeleteTriggered = (
 
     return [newState, command];
   }
-  return JustState(state);
+  return JustStateAuthenticated(state);
 };
 
 export const handleNoteDeleted = (
-  state: AppState,
+  state: AppStateAuthenticated,
   event: NoteDeletedEvent
-): [AppState, AppCommand] => {
+): [AppStateAuthenticated, AppCommand] => {
   if (state.noteList.state === NoteListState.FileListRetrieved) {
     const newNoteList = updateNoteAsDeleted(state.noteList, event.note);
-    const newState: AppState = {
+    const newState: AppStateAuthenticated = {
       ...state,
       noteList: newNoteList,
     };
-    return JustState(newState);
+    return JustStateAuthenticated(newState);
   }
-  return JustState(state);
+  return JustStateAuthenticated(state);
 };
 
 export const handleNoteRestoreTriggered = (
-  state: AppState,
+  state: AppStateAuthenticated,
   event: NoteRestoreTriggeredEvent
-): [AppState, AppCommand] => {
+): [AppStateAuthenticated, AppCommand] => {
   if (state.noteList.state === NoteListState.FileListRetrieved) {
     const [newNoteList, noteSyncing] = restoreNote(state.noteList, event.note);
-    const newState: AppState = {
+    const newState: AppStateAuthenticated = {
       ...state,
       noteList: newNoteList,
     };
     return [newState, RestoreNote(noteSyncing)];
   }
-  return JustState(state);
+  return JustStateAuthenticated(state);
 };
 
 export const handleRetrieveFileListSuccess = (
-  state: AppState,
+  state: AppStateAuthenticated,
   event: RetrieveFileListSuccessEvent
-): [AppState, AppCommand] => {
+): [AppStateAuthenticated, AppCommand] => {
   if (
     state.noteList.state === NoteListState.RetrievingFileList &&
     state.noteList.fileListVersion === event.fileListVersion
@@ -411,53 +444,53 @@ export const handleRetrieveFileListSuccess = (
       NOTES_ON_PAGE
     );
 
-    const newState: AppState = {
+    const newState: AppStateAuthenticated = {
       ...state,
       noteList: newNoteList,
     };
 
     return [newState, LoadNoteText(notesToLoad, event.fileListVersion)];
   }
-  return JustState(state);
+  return JustStateAuthenticated(state);
 };
 
 export const handleNoteSavedOnNewPath = (
-  state: AppState,
+  state: AppStateAuthenticated,
   event: NoteSavedOnNewPathEvent
-): [AppState, AppCommand] => {
+): [AppStateAuthenticated, AppCommand] => {
   const [newNoteList, newNoteTitleEditor, newNoteTextEditor] = updateNotePath(
     state,
     event.note,
     event.newPath
   );
-  const newState: AppState = {
+  const newState: AppStateAuthenticated = {
     ...state,
     noteTitleEditor: newNoteTitleEditor,
     noteTextEditor: newNoteTextEditor,
     noteList: newNoteList,
   };
-  return JustState(newState);
+  return JustStateAuthenticated(newState);
 };
 
 export const handleNoteSaved = (
-  state: AppState,
+  state: AppStateAuthenticated,
   event: NoteSavedEvent
-): [AppState, AppCommand] => {
+): [AppStateAuthenticated, AppCommand] => {
   const [newNoteList, newNoteTitleEditor, newNoteTextEditor] =
     updateNoteAsSynced(state, event.note);
-  const newState: AppState = {
+  const newState: AppStateAuthenticated = {
     ...state,
     noteTitleEditor: newNoteTitleEditor,
     noteTextEditor: newNoteTextEditor,
     noteList: newNoteList,
   };
-  return JustState(newState);
+  return JustStateAuthenticated(newState);
 };
 
 export const handleLoadNoteTextSuccess = (
-  state: AppState,
+  state: AppStateAuthenticated,
   event: LoadNoteTextSuccessEvent
-): [AppState, AppCommand] => {
+): [AppStateAuthenticated, AppCommand] => {
   if (state.noteList.state === NoteListState.FileListRetrieved) {
     if (state.noteList.fileListVersion === event.fileListVersion) {
       const newNoteList = handleLoadedNote(
@@ -466,25 +499,27 @@ export const handleLoadNoteTextSuccess = (
         event.text
       );
 
-      const newState: AppState = {
+      const newState: AppStateAuthenticated = {
         ...state,
         noteList: newNoteList,
       };
 
-      return JustState(newState);
+      return JustStateAuthenticated(newState);
     }
   }
-  return JustState(state);
+  return JustStateAuthenticated(state);
 };
 
-export const handleLoadNextPage = (state: AppState): [AppState, AppCommand] => {
+export const handleLoadNextPage = (
+  state: AppStateAuthenticated
+): [AppStateAuthenticated, AppCommand] => {
   if (state.noteList.state === NoteListState.FileListRetrieved) {
     const [newNoteList, notesToLoad] = shiftNotesToLoad(
       state.noteList,
       NOTES_ON_PAGE
     );
 
-    const newState: AppState = {
+    const newState: AppStateAuthenticated = {
       ...state,
       noteList: newNoteList,
     };
@@ -494,13 +529,13 @@ export const handleLoadNextPage = (state: AppState): [AppState, AppCommand] => {
       LoadNoteText(notesToLoad, state.noteList.fileListVersion),
     ];
   }
-  return JustState(state);
+  return JustStateAuthenticated(state);
 };
 
 export const handleNoteLoadFailed = (
-  state: AppState,
+  state: AppStateAuthenticated,
   event: NoteLoadFailedEvent
-): [AppState, AppCommand] => {
+): [AppStateAuthenticated, AppCommand] => {
   if (state.noteList.state === NoteListState.FileListRetrieved) {
     const newNoteList = handleNoteFailedToLoad(
       state.noteList,
@@ -508,22 +543,22 @@ export const handleNoteLoadFailed = (
       event.err
     );
 
-    const newState: AppState = {
+    const newState: AppStateAuthenticated = {
       ...state,
       noteList: newNoteList,
     };
     return [newState, ReportError(event.err)];
   }
-  return JustState(state);
+  return JustStateAuthenticated(state);
 };
 
 export const handleNoteSyncFailed = (
-  state: AppState,
+  state: AppStateAuthenticated,
   event: NoteSyncFailedEvent
-): [AppState, AppCommand] => {
+): [AppStateAuthenticated, AppCommand] => {
   const [newNoteList, newNoteTitleEditor, newNoteTextEditor] =
     updateNoteAsOutOfSync(state, event.note, event.note.path, event.err);
-  const newState: AppState = {
+  const newState: AppStateAuthenticated = {
     ...state,
     noteTitleEditor: newNoteTitleEditor,
     noteTextEditor: newNoteTextEditor,
@@ -533,12 +568,12 @@ export const handleNoteSyncFailed = (
 };
 
 export const handleNoteCreationFromTitleFailed = (
-  state: AppState,
+  state: AppStateAuthenticated,
   event: NoteCreationFromTitleFailedEvent
-): [AppState, AppCommand] => {
+): [AppStateAuthenticated, AppCommand] => {
   const [newNoteList, newNoteTitleEditor, newNoteTextEditor] =
     updateNoteAsOutOfSync(state, event.note, event.path, event.err);
-  const newState: AppState = {
+  const newState: AppStateAuthenticated = {
     ...state,
     noteTitleEditor: newNoteTitleEditor,
     noteTextEditor: newNoteTextEditor,
@@ -548,12 +583,12 @@ export const handleNoteCreationFromTitleFailed = (
 };
 
 export const handleNoteCreationFromTextFailed = (
-  state: AppState,
+  state: AppStateAuthenticated,
   event: NoteCreationFromTextFailedEvent
-): [AppState, AppCommand] => {
+): [AppStateAuthenticated, AppCommand] => {
   const [newNoteList, newNoteTitleEditor, newNoteTextEditor] =
     updateNoteAsOutOfSync(state, event.note, event.path, event.err);
-  const newState: AppState = {
+  const newState: AppStateAuthenticated = {
     ...state,
     noteTitleEditor: newNoteTitleEditor,
     noteTextEditor: newNoteTextEditor,
@@ -563,9 +598,9 @@ export const handleNoteCreationFromTextFailed = (
 };
 
 export const handleRestApiError = (
-  state: AppState,
+  state: AppStateAuthenticated,
   event: RestApiErrorEvent
-): [AppState, AppCommand] => {
+): [AppStateAuthenticated, AppCommand] => {
   return [state, ReportError(event.err)];
 };
 
@@ -769,7 +804,7 @@ const convertToRegularNoteOnTextUpdated = (
 };
 
 const updateNotePath = (
-  state: AppState,
+  state: AppStateAuthenticated,
   note: NotePendingStorageUpdate,
   newPath: string
 ): [NoteList, NoteTitleEditor, NoteTextEditor] => {
@@ -809,7 +844,7 @@ const updateNotePath = (
 };
 
 const updateNoteAsSynced = (
-  state: AppState,
+  state: AppStateAuthenticated,
   note: NoteSyncing
 ): [NoteList, NoteTitleEditor, NoteTextEditor] => {
   const noteTitleEditor = state.noteTitleEditor;
@@ -848,7 +883,7 @@ const updateNoteAsSynced = (
 };
 
 const updateNoteAsOutOfSync = (
-  state: AppState,
+  state: AppStateAuthenticated,
   note: NotePendingStorageUpdate,
   path: string,
   err: string

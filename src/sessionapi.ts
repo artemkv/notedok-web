@@ -81,37 +81,37 @@ function callApi(f: any) {
 }
 
 export const getFiles = (pageSize: number, continuationToken: string) => {
-  //return callApi(() => {
-  return api.getFiles(getSession(), pageSize, continuationToken);
-  //});
+  return callApi(() => {
+    return api.getFiles(getSession(), pageSize, continuationToken);
+  });
 };
 
 export const getFile = (filename: string) => {
-  //return callApi(() => {
-  return api.getFile(getSession(), filename);
-  //});
+  return callApi(() => {
+    return api.getFile(getSession(), filename);
+  });
 };
 
 export const postFile = (filename: string, text: string) => {
-  //return callApi(() => {
-  return api.postFile(getSession(), filename, text);
-  //});
+  return callApi(() => {
+    return api.postFile(getSession(), filename, text);
+  });
 };
 
 export const putFile = (filename: string, text: string) => {
-  //return callApi(() => {
-  return api.putFile(getSession(), filename, text);
-  //});
+  return callApi(() => {
+    return api.putFile(getSession(), filename, text);
+  });
 };
 
 export const renameFile = (filename: string, newFilename: string) => {
-  //return callApi(() => {
-  return api.renameFile(getSession(), filename, newFilename);
-  //});
+  return callApi(() => {
+    return api.renameFile(getSession(), filename, newFilename);
+  });
 };
 
 export const deleteFile = (filename: string) => {
-  //return callApi(() => {
-  return api.deleteFile(getSession(), filename);
-  //});
+  return callApi(() => {
+    return api.deleteFile(getSession(), filename);
+  });
 };

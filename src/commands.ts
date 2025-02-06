@@ -11,6 +11,7 @@ import {
 export enum CommandType {
   DoNothing,
   DoMany,
+  CreateUserSession,
   RetrieveFileList,
   LoadNoteText,
   RenameNoteFromTitle,
@@ -33,6 +34,11 @@ export interface DoNothingCommand extends Command<AppEvent> {
 export interface DoManyCommand extends Command<AppEvent> {
   type: CommandType.DoMany;
   commands: AppCommand[];
+}
+
+export interface CreateUserSessionCommand extends Command<AppEvent> {
+  type: CommandType.CreateUserSession;
+  idToken: string;
 }
 
 export interface RetrieveFileListCommand extends Command<AppEvent> {
@@ -83,6 +89,7 @@ export interface ReportErrorCommand extends Command<AppEvent> {
 export type AppCommand =
   | DoNothingCommand
   | DoManyCommand
+  | CreateUserSessionCommand
   | RetrieveFileListCommand
   | LoadNoteTextCommand
   | RenameNoteFromTitleCommand
@@ -105,3 +112,7 @@ export const DoMany = (commands: AppCommand[]): DoManyCommand => ({
     commands.forEach((c) => c.execute(dispatch));
   },
 });
+
+// Initial command
+
+export const InitialCommand = DoNothing;

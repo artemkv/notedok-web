@@ -214,8 +214,6 @@ export const getFile = (session: string, filename: string) => {
 };
 
 export const postFile = (session: string, filename: string, text: string) => {
-  console.log(`/files/${encodeURIComponent(filename)}`);
-
   return postText(`/files/${encodeURIComponent(filename)}`, text, session);
 };
 

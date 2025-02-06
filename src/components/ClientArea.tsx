@@ -1,10 +1,10 @@
-import { AppState } from "../model";
+import { AppStateAuthenticated } from "../model";
 import "./ClientArea.css";
 import Footer from "./Footer";
 import NoteContainer from "./NoteContainer";
 import SearchPanel from "./SearchPanel";
 
-function ClientArea(props: { state: AppState }) {
+function ClientArea(props: { state: AppStateAuthenticated }) {
   const searchText = props.state.searchText;
   const noteTitleEditor = props.state.noteTitleEditor;
   const noteTextEditor = props.state.noteTextEditor;

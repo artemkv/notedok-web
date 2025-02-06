@@ -1,5 +1,3 @@
-import { RetrieveFileList } from "./commands/storage";
-
 // note
 
 export enum NoteState {
@@ -254,8 +252,18 @@ export type NoteList = NoteListRetrievingFileList | NoteListFileListRetrieved;
 
 // App state
 
+export enum AuthenticationStatus {
+  Unauthenticated,
+  Authenticated,
+}
+
+export interface AppStateUnauthenticated {
+  auth: AuthenticationStatus.Unauthenticated;
+}
+
 // TODO: having editors at this level allows editing before the notes are loaded, check that this is possible
-export interface AppState {
+export interface AppStateAuthenticated {
+  auth: AuthenticationStatus.Authenticated;
   searchText: string;
   // It is possible to start editing template note even before we load all the notes
   noteTextEditor: NoteTextEditor;
@@ -263,23 +271,10 @@ export interface AppState {
   noteList: NoteList;
 }
 
+export type AppState = AppStateUnauthenticated | AppStateAuthenticated;
+
 // Initial state
 
-const INITIAL_FILE_LIST_VERSION = 0;
-
 export const IntialState: AppState = {
-  searchText: "",
-  noteTextEditor: {
-    state: NoteTextEditorState.NotActive,
-  },
-  noteTitleEditor: {
-    state: NoteTitleEditorState.NotActive,
-  },
-  noteList: {
-    state: NoteListState.RetrievingFileList,
-    fileListVersion: INITIAL_FILE_LIST_VERSION,
-  },
+  auth: AuthenticationStatus.Unauthenticated,
 };
-
-// Initial command - here to avoid circular refs
-export const InitialCommand = RetrieveFileList("", INITIAL_FILE_LIST_VERSION);

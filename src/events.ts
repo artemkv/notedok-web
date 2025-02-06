@@ -18,6 +18,9 @@ export enum EventType {
   // this is just to make TS happy
   Never,
 
+  UserAuthenticated,
+  UserSessionCreated,
+
   SearchTextChanged,
   SearchTextSubmitted,
 
@@ -58,6 +61,15 @@ export enum EventType {
 
 export interface NeverEvent {
   type: EventType.Never;
+}
+
+export interface UserAuthenticatedEvent {
+  type: EventType.UserAuthenticated;
+  idToken: string;
+}
+
+export interface UserSessionCreatedEvent {
+  type: EventType.UserSessionCreated;
 }
 
 export interface SearchTextChangedEvent {
@@ -196,6 +208,8 @@ export interface RestApiErrorEvent {
 
 export type AppEvent =
   | NeverEvent
+  | UserAuthenticatedEvent
+  | UserSessionCreatedEvent
   | SearchTextChangedEvent
   | SearchTextSubmittedEvent
   | TemplateNoteTitleEditorTextChangedEvent
