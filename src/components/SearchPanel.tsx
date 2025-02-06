@@ -15,6 +15,12 @@ function SearchPanel(props: { searchText: string }) {
     });
   };
 
+  const searchOnFocus = () => {
+    dispatch({
+      type: EventType.SearchActivated,
+    });
+  };
+
   const onSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     dispatch({
       type: EventType.SearchTextSubmitted,
@@ -30,6 +36,7 @@ function SearchPanel(props: { searchText: string }) {
             <input
               type="text"
               value={searchText}
+              onFocus={searchOnFocus}
               onChange={searchTextOnChange}
               className="search-textbox"
               placeholder={uistrings.SearchTextBoxPlaceholder}

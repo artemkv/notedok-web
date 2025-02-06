@@ -79,6 +79,12 @@ function RegularNote(props: {
     }
   };
 
+  const noteTitleOnFocus = () => {
+    dispatch({
+      type: EventType.TitleEditorActivated,
+    });
+  };
+
   const noteTitleOnBlur = () => {
     if (isTitleSaveable(note)) {
       dispatch({
@@ -115,16 +121,6 @@ function RegularNote(props: {
       dispatch({
         type: EventType.NoteTextEditorTextChanged,
         newText: e.target.value,
-      });
-    }
-  };
-
-  const noteTextOnBlur = () => {
-    if (isTextSaveable(note)) {
-      dispatch({
-        type: EventType.RegularNoteTextUpdated,
-        note,
-        newText: editedText,
       });
     }
   };
@@ -194,8 +190,6 @@ function RegularNote(props: {
   };
 
   // TODO: cancel editing by esc
-  // TODO: Before you had to click anywhere outside of the textarea to finish editing
-  //   , now it happens on blur. See if I can restore the old behavior, and if it's actually better
   const textEditor = () => {
     return (
       <div className="note-text-editable-container">
@@ -206,7 +200,6 @@ function RegularNote(props: {
           }`}
           value={editedText}
           onChange={noteTextOnChange}
-          onBlur={noteTextOnBlur}
         ></textarea>
       </div>
     );
@@ -304,6 +297,7 @@ function RegularNote(props: {
           className="note-title"
           value={noteTitle}
           onChange={noteTitleOnChange}
+          onFocus={noteTitleOnFocus}
           onBlur={noteTitleOnBlur}
           placeholder={uistrings.NoteTitlePlaceholder}
           maxLength={50}

@@ -1,4 +1,3 @@
-// TODO: where to configure it?
 // const baseUrl = 'https://notedok.artemkv.net:8070';
 const baseUrl = "http://127.0.0.1:8070";
 
@@ -22,6 +21,7 @@ export class ApiError extends Error {
   }
 }
 
+// TODO: here I am losing the error text, if any was sent in the body
 function handleErrors(response: Response) {
   if (response.status < 400) {
     return response;

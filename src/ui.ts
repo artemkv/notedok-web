@@ -1,7 +1,6 @@
 import { formatWiki } from "./formatting";
 
 // This is all legacy code to render wiki-formatted code as HTML
-// TODO: Review if still needed for md support
 
 export const htmlEscape = (unsafe: string): string => {
   let safe = String(unsafe);

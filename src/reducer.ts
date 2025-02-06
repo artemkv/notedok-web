@@ -1,4 +1,5 @@
 import {
+  cancelAllActiveEditors,
   handleLoadNextPage,
   handleLoadNoteTextSuccess,
   handleNoteCreationFromTextFailed,
@@ -56,6 +57,14 @@ export const Reducer = (
       return handleUserSessionCreated();
     }
   } else {
+    if (event.type === EventType.SearchActivated) {
+      return cancelAllActiveEditors(state);
+    }
+
+    if (event.type === EventType.TitleEditorActivated) {
+      return cancelAllActiveEditors(state);
+    }
+
     if (event.type === EventType.SearchTextSubmitted) {
       return handleSearchTextSubmitted(state);
     }
@@ -84,7 +93,6 @@ export const Reducer = (
       return handleNoteTextEditorTextChanged(state, event);
     }
 
-    // TODO: does not restore the previous text because lost focus happens first
     if (event.type === EventType.NoteTextEditorCancelEdit) {
       return handleNoteTextEditorCancelEdit(state);
     }

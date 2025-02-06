@@ -54,11 +54,11 @@ As a regular user, I want to edit note title and text
 
 As a regular user, I want to make sure the changes I did are saved
 
-* TODO: When title/text textbox loses focus, changes are saved to the S3
+* When user clicks "Save", changes are saved to the S3
 * Changes should be saved asynchronously
 * If title left empty, generate the file name
 * When title is updated (manually or when auto-generated), the file should be renamed
-* TODO: Title can be invalid file name. The app should make a best effort to replace the invalid characters as follows:
+* Title can be invalid file name. The app should make a best effort to replace the invalid characters as follows:
 / becomes (sl)
 ? becomes (qst)
 < becomes (lt)
@@ -69,7 +69,7 @@ As a regular user, I want to make sure the changes I did are saved
 | becomes (pipe)
 " becomes (dqt)
 ^ becomes (crt)
-* TODO: check more S3-specific limitations
+% becomes (pct)
 
 
 !  Template note
@@ -96,7 +96,7 @@ Once the changes are saved, the new empty note should appear allowing me to cont
 
 
 
-TODO:
+TODOs:
 - tab does not stop on control area buttons
 - utf-8
 - use etags to avoid getting content if didn't change
@@ -132,12 +132,39 @@ title updated ->
 
 
 /*
-export interface NoteLoaded {
-  type: NoteType.Loaded;
-  id: string;
-  path: string; // can be empty if the note was created on UI and haven't been yet saved
-  title: string;
-  text: string;
-  isDeleted: boolean; // TODO: begins to clash with path
-}
+export const commitAnyOpenEditor = (
+  state: AppStateAuthenticated
+): [AppStateAuthenticated, AppCommand] => {
+  if (state.noteList.state === NoteListState.FileListRetrieved) {
+    if (state.noteTextEditor.state === NoteTextEditorState.NotActive) {
+      return JustStateAuthenticated(state);
+    }
+
+    let newNoteList: NoteListFileListRetrieved;
+    let command: AppCommand;
+    if (state.noteTextEditor.state === NoteTextEditorState.EditingRegularNote) {
+      [newNoteList, command] = finishNoteTextEditing(
+        state.noteList,
+        state.noteTextEditor.note as NoteTextSaveable,
+        state.noteTextEditor
+      );
+    } else {
+      [newNoteList, command] = convertToRegularNoteOnTextUpdated(
+        state.noteList,
+        state.noteTextEditor
+      );
+    }
+
+    const newState: AppStateAuthenticated = {
+      ...state,
+      noteList: newNoteList,
+      noteTextEditor: {
+        state: NoteTextEditorState.NotActive,
+      },
+    };
+    return [newState, command];
+  }
+
+  return JustStateAuthenticated(state);
+};
 */

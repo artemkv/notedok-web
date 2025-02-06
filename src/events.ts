@@ -21,8 +21,11 @@ export enum EventType {
   UserAuthenticated,
   UserSessionCreated,
 
+  SearchActivated,
   SearchTextChanged,
   SearchTextSubmitted,
+
+  TitleEditorActivated,
 
   TemplateNoteTitleEditorTextChanged,
   TemplateNoteTitleUpdated,
@@ -77,8 +80,16 @@ export interface SearchTextChangedEvent {
   newText: string;
 }
 
+export interface SearchActivatedEvent {
+  type: EventType.SearchActivated;
+}
+
 export interface SearchTextSubmittedEvent {
   type: EventType.SearchTextSubmitted;
+}
+
+export interface TitleEditorActivatedEvent {
+  type: EventType.TitleEditorActivated;
 }
 
 export interface TemplateNoteTitleEditorTextChangedEvent {
@@ -210,8 +221,10 @@ export type AppEvent =
   | NeverEvent
   | UserAuthenticatedEvent
   | UserSessionCreatedEvent
+  | SearchActivatedEvent
   | SearchTextChangedEvent
   | SearchTextSubmittedEvent
+  | TitleEditorActivatedEvent
   | TemplateNoteTitleEditorTextChangedEvent
   | TemplateNoteTitleUpdatedEvent
   | RegularNoteTitleEditorTextChangedEvent

@@ -261,7 +261,6 @@ export interface AppStateUnauthenticated {
   auth: AuthenticationStatus.Unauthenticated;
 }
 
-// TODO: having editors at this level allows editing before the notes are loaded, check that this is possible
 export interface AppStateAuthenticated {
   auth: AuthenticationStatus.Authenticated;
   searchText: string;

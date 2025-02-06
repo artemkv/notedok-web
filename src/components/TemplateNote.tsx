@@ -43,6 +43,12 @@ function TemplateNote(props: {
     });
   };
 
+  const noteTitleOnFocus = () => {
+    dispatch({
+      type: EventType.TitleEditorActivated,
+    });
+  };
+
   const noteTitleOnBlur = () => {
     dispatch({
       type: EventType.TemplateNoteTitleUpdated,
@@ -60,13 +66,6 @@ function TemplateNote(props: {
     dispatch({
       type: EventType.NoteTextEditorTextChanged,
       newText: e.target.value,
-    });
-  };
-
-  const noteTextOnBlur = () => {
-    dispatch({
-      type: EventType.TemplateNoteTextUpdated,
-      newText: editedText,
     });
   };
 
@@ -112,7 +111,6 @@ function TemplateNote(props: {
           className="note-text-editable text-area-short"
           value={editedText}
           onChange={noteTextOnChange}
-          onBlur={noteTextOnBlur}
         ></textarea>
       </div>
     );
@@ -146,6 +144,7 @@ function TemplateNote(props: {
           className="note-title"
           value={noteTitle}
           onChange={noteTitleOnChange}
+          onFocus={noteTitleOnFocus}
           onBlur={noteTitleOnBlur}
           placeholder={uistrings.TemplateNoteTitlePlaceholder}
           maxLength={50}

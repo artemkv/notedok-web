@@ -142,6 +142,18 @@ export const handleSearchTextSubmitted = (
   return [newState, RetrieveFileList(state.searchText, newFileListVersion)];
 };
 
+export const cancelAllActiveEditors = (
+  state: AppStateAuthenticated
+): [AppStateAuthenticated, AppCommand] => {
+  const newState: AppStateAuthenticated = {
+    ...state,
+    noteTextEditor: {
+      state: NoteTextEditorState.NotActive,
+    },
+  };
+  return JustStateAuthenticated(newState);
+};
+
 export const handleSearchTextChanged = (
   state: AppStateAuthenticated,
   event: SearchTextChangedEvent

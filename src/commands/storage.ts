@@ -105,15 +105,14 @@ export const LoadNoteText = (
   execute: (dispatch) => {
     notes.forEach((note) => {
       try {
-        getFile(note.path) // TODO: url-encode
-          .then((text: string) => {
-            dispatch({
-              type: EventType.LoadNoteTextSuccess,
-              note,
-              text,
-              fileListVersion,
-            });
+        getFile(note.path).then((text: string) => {
+          dispatch({
+            type: EventType.LoadNoteTextSuccess,
+            note,
+            text,
+            fileListVersion,
           });
+        });
       } catch (err) {
         dispatch({
           type: EventType.NoteLoadFailed,
