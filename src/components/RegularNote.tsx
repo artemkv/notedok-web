@@ -125,6 +125,14 @@ function RegularNote(props: {
     }
   };
 
+  const noteTextOnKeyUp = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") {
+      dispatch({
+        type: EventType.NoteTextEditorCancelEdit,
+      });
+    }
+  };
+
   const onCancelNoteTextEditing = () => {
     dispatch({
       type: EventType.NoteTextEditorCancelEdit,
@@ -189,7 +197,6 @@ function RegularNote(props: {
     );
   };
 
-  // TODO: cancel editing by esc
   const textEditor = () => {
     return (
       <div className="note-text-editable-container">
@@ -200,6 +207,7 @@ function RegularNote(props: {
           }`}
           value={editedText}
           onChange={noteTextOnChange}
+          onKeyUp={noteTextOnKeyUp}
         ></textarea>
       </div>
     );
