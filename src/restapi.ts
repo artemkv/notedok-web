@@ -1,5 +1,5 @@
-// const baseUrl = 'https://notedok.artemkv.net:8070';
-const baseUrl = "http://127.0.0.1:8070";
+const baseUrl = "https://notedok.artemkv.net:8100";
+// const baseUrl = "http://127.0.0.1:8700";
 
 export class ApiError extends Error {
   statusCode: number;
