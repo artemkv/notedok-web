@@ -1,3 +1,7 @@
+.placeholder {
+    color: #a9a9a9;
+}
+
 .note-outer {
     margin: 16px;
     padding: 16px;
@@ -69,15 +73,16 @@
     text-overflow: ellipsis;
 }
 
-.placeholder {
-    color: #a9a9a9;
+div.note-text ul, div.note-text ol
+{
+    white-space: normal;
+    list-style-position: inside;
+    display: inline-block;
+    width: 100%;
 }
 
-div.note-text-editable-container
-{
-    margin: 0px;
-    padding: 0px;
-    border: none;
+div.note-text {
+    border: 1px solid #ffffff;
 }
 
 textarea.note-text-editable {
@@ -93,9 +98,11 @@ textarea.text-area-tall {
     min-height: 600px;
 }
 
-.note-save-button
+div.note-text-editable-container
 {
-    display:none;
+    margin: 0px;
+    padding: 0px;
+    border: none;
 }
 
 .note-controlarea {
@@ -126,4 +133,9 @@ textarea.text-area-tall {
     font-family: monospace;
     overflow-x: auto;
     background: #fbfbfb;
+}
+
+.note-save-button
+{
+    display:none;
 }
