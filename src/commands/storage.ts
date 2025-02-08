@@ -54,6 +54,8 @@ const mapToFiles = (fileData: FileData[]): FileDataWithDate[] => {
   }));
 };
 
+const PAGE_SIZE = 1000;
+
 export const RetrieveFileList = (
   searchString: string,
   fileListVersion: number
@@ -65,7 +67,7 @@ export const RetrieveFileList = (
       let files: FileDataWithDate[] = [];
 
       // Retrieve the first batch
-      let getFilesResponse: GetFilesResponse = await getFiles(100, "");
+      let getFilesResponse: GetFilesResponse = await getFiles(PAGE_SIZE, "");
       files = [...files, ...mapToFiles(getFilesResponse.files)];
 
       // Keep retrieving until all
