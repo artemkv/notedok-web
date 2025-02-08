@@ -85,7 +85,7 @@ import {
   noteSyncingToSyncedWithNewPath,
 } from "./noteLifecycle";
 
-export const NOTES_ON_PAGE = 5;
+export const NOTES_ON_PAGE = 10;
 
 export const JustStateAuthenticated = (
   state: AppStateAuthenticated
