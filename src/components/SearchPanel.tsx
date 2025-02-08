@@ -2,11 +2,17 @@ import "./SearchPanel.css";
 import { useContext } from "react";
 import AppContext from "../AppContext";
 import { EventType } from "../events";
+import SearchAutocomplete from "./SearchAutocomplete";
+import { AutoSuggestItem } from "../model";
 
-function SearchPanel(props: { searchText: string }) {
+function SearchPanel(props: {
+  searchText: string;
+  autoSuggestItems: AutoSuggestItem[];
+}) {
   const { uistrings, dispatch } = useContext(AppContext);
 
   const searchText = props.searchText;
+  const autoSuggestItems = props.autoSuggestItems;
 
   const searchTextOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({
@@ -34,6 +40,7 @@ function SearchPanel(props: { searchText: string }) {
         <div className="search-panel">
           <form onSubmit={onSearchSubmit}>
             <input
+              id="search_textbox"
               type="text"
               value={searchText}
               onFocus={searchOnFocus}
@@ -44,6 +51,7 @@ function SearchPanel(props: { searchText: string }) {
           </form>
         </div>
       </div>
+      <SearchAutocomplete autoSuggestItems={autoSuggestItems} />
     </div>
   );
 }

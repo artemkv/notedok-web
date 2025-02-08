@@ -1,4 +1,5 @@
 import {
+  AutoSuggestItem,
   NoteCreatingFromText,
   NoteCreatingFromTitle,
   NoteDeletable,
@@ -50,6 +51,9 @@ export enum EventType {
   NoteSaved,
 
   RetrieveFileListSuccess,
+
+  SearchAutoSuggestionsComputed,
+
   LoadNoteTextSuccess,
   LoadNextPage,
 
@@ -164,6 +168,11 @@ export interface RetrieveFileListSuccessEvent {
   fileList: string[];
 }
 
+export interface SearchAutoSuggestionsComputedEvent {
+  type: EventType.SearchAutoSuggestionsComputed;
+  autoSuggestItems: AutoSuggestItem[];
+}
+
 export interface LoadNoteTextSuccessEvent {
   type: EventType.LoadNoteTextSuccess;
   note: NoteRef;
@@ -241,6 +250,7 @@ export type AppEvent =
   | NoteSavedOnNewPathEvent
   | NoteSavedEvent
   | RetrieveFileListSuccessEvent
+  | SearchAutoSuggestionsComputedEvent
   | LoadNoteTextSuccessEvent
   | LoadNextPageEvent
   | NoteLoadFailedEvent

@@ -199,6 +199,38 @@ export type NoteTextEditor =
   | NoteTextEditorEditingTemplateNote
   | NoteTextEditorEditingRegularNote;
 
+// autocomplete
+
+export enum SearchAutoSuggestState {
+  NotComputed,
+  Computed,
+}
+
+export interface SearchAutoSuggestNotComputed {
+  state: SearchAutoSuggestState.NotComputed;
+}
+
+export interface SearchAutoSuggestComputed {
+  state: SearchAutoSuggestState.Computed;
+  autoSuggestItems: AutoSuggestItem[];
+}
+
+export type SearchAutoSuggest =
+  | SearchAutoSuggestNotComputed
+  | SearchAutoSuggestComputed;
+
+export type AutoSuggestItem = {
+  value: string;
+  data: {
+    g: string;
+  };
+};
+
+export type AutoSuggestHashTag = {
+  value: string;
+  data: string;
+};
+
 // note title editor
 
 export enum NoteTitleEditorState {
@@ -264,6 +296,7 @@ export interface AppStateUnauthenticated {
 export interface AppStateAuthenticated {
   auth: AuthenticationStatus.Authenticated;
   searchText: string;
+  searchAutoSuggest: SearchAutoSuggest;
   // It is possible to start editing template note even before we load all the notes
   noteTextEditor: NoteTextEditor;
   noteTitleEditor: NoteTitleEditor;

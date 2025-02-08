@@ -69,6 +69,7 @@ function TemplateNote(props: {
     });
   };
 
+  // TODO: could do the same thing for the title editing
   const noteTextOnKeyUp = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
       dispatch({
@@ -148,6 +149,7 @@ function TemplateNote(props: {
     <div id="note_template" className="note-outer">
       <div className="note-inner">
         <input
+          id="note_template_title"
           type="text"
           className="note-title"
           value={noteTitle}

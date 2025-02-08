@@ -1,6 +1,7 @@
 import { AppCommand, DoMany, DoNothing } from "./commands";
 import { ReportError } from "./commands/alerts";
 import { StartUserSession } from "./commands/auth";
+import { ActivateSearchAutoSuggest } from "./commands/autosuggest";
 import {
   CreateNewNoteWithText,
   CreateNewNoteWithTitle,
@@ -29,6 +30,7 @@ import {
   RegularNoteTitleUpdatedEvent,
   RestApiErrorEvent,
   RetrieveFileListSuccessEvent,
+  SearchAutoSuggestionsComputedEvent,
   SearchTextChangedEvent,
   TemplateNoteTitleEditorTextChangedEvent,
   UserAuthenticatedEvent,
@@ -63,6 +65,7 @@ import {
   AuthenticationStatus,
   AppStateAuthenticated,
   AppStateUnauthenticated,
+  SearchAutoSuggestState,
 } from "./model";
 import {
   createNewNoteFromText,
@@ -105,6 +108,9 @@ export const handleUserSessionCreated = (): [
   const newState: AppStateAuthenticated = {
     auth: AuthenticationStatus.Authenticated,
     searchText: "",
+    searchAutoSuggest: {
+      state: SearchAutoSuggestState.NotComputed,
+    },
     noteTextEditor: {
       state: NoteTextEditorState.NotActive,
     },
@@ -461,9 +467,32 @@ export const handleRetrieveFileListSuccess = (
       noteList: newNoteList,
     };
 
-    return [newState, LoadNoteText(notesToLoad, event.fileListVersion)];
+    return [
+      newState,
+      DoMany([
+        LoadNoteText(notesToLoad, event.fileListVersion),
+        // Only activate once
+        state.searchAutoSuggest.state === SearchAutoSuggestState.NotComputed
+          ? ActivateSearchAutoSuggest(event.fileList)
+          : DoNothing,
+      ]),
+    ];
   }
   return JustStateAuthenticated(state);
+};
+
+export const handleSearchAutoSuggestionsComputed = (
+  state: AppStateAuthenticated,
+  event: SearchAutoSuggestionsComputedEvent
+): [AppStateAuthenticated, AppCommand] => {
+  const newState: AppStateAuthenticated = {
+    ...state,
+    searchAutoSuggest: {
+      state: SearchAutoSuggestState.Computed,
+      autoSuggestItems: event.autoSuggestItems,
+    },
+  };
+  return JustStateAuthenticated(newState);
 };
 
 export const handleNoteSavedOnNewPath = (

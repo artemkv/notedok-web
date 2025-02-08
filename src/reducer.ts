@@ -19,6 +19,7 @@ import {
   handleRegularNoteTitleUpdated,
   handleRestApiError,
   handleRetrieveFileListSuccess,
+  handleSearchAutoSuggestionsComputed,
   handleSearchTextChanged,
   handleSearchTextSubmitted,
   handleTemplateNoteStartTextEditing,
@@ -127,6 +128,10 @@ export const Reducer = (
 
     if (event.type === EventType.RetrieveFileListSuccess) {
       return handleRetrieveFileListSuccess(state, event);
+    }
+
+    if (event.type === EventType.SearchAutoSuggestionsComputed) {
+      return handleSearchAutoSuggestionsComputed(state, event);
     }
 
     if (event.type === EventType.NoteSavedOnNewPath) {

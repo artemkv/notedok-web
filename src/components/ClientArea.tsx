@@ -1,4 +1,4 @@
-import { AppStateAuthenticated } from "../model";
+import { AppStateAuthenticated, SearchAutoSuggestState } from "../model";
 import "./ClientArea.css";
 import Footer from "./Footer";
 import NoteContainer from "./NoteContainer";
@@ -10,10 +10,18 @@ function ClientArea(props: { state: AppStateAuthenticated }) {
   const noteTextEditor = props.state.noteTextEditor;
   const noteList = props.state.noteList;
 
+  const searchAutoSuggestItems =
+    props.state.searchAutoSuggest.state === SearchAutoSuggestState.Computed
+      ? props.state.searchAutoSuggest.autoSuggestItems
+      : [];
+
   return (
     <div className="client-area-outer">
       <div className="client-area-inner">
-        <SearchPanel searchText={searchText} />
+        <SearchPanel
+          searchText={searchText}
+          autoSuggestItems={searchAutoSuggestItems}
+        />
         <NoteContainer
           noteTitleEditor={noteTitleEditor}
           noteTextEditor={noteTextEditor}

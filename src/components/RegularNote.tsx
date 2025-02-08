@@ -125,6 +125,7 @@ function RegularNote(props: {
     }
   };
 
+  // TODO: could do the same thing for the title editing
   const noteTextOnKeyUp = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
       dispatch({
@@ -301,6 +302,7 @@ function RegularNote(props: {
       {hasError ? noteError() : Empty()}
       <div className="note-inner">
         <input
+          id={`${note.id}_title`}
           type="text"
           className="note-title"
           value={noteTitle}
