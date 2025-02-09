@@ -1,11 +1,7 @@
 import "./Note.css";
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import {
-  NoteTextEditor,
-  NoteTextEditorState,
   NoteRegular,
-  NoteTitleEditor,
-  NoteTitleEditorState,
   NoteState,
   isTitleEditable,
   isTitleSaveable,
@@ -13,6 +9,8 @@ import {
   isTextSaveable,
   isDeletable,
   isPendingStorageUpdate,
+  EditableText,
+  ModifiedState,
 } from "../model";
 import { htmlEscape, renderNoteTextHtml } from "../ui";
 import { AppEvent, EventType } from "../events";
@@ -23,28 +21,26 @@ import Empty from "./Empty";
 import { Dispatch } from "../hooks/useReducer";
 import uistrings from "../uistrings";
 
-function RegularNote(props: {
+const RegularNote = memo(function RegularNote(props: {
   note: NoteRegular;
-  noteTitleEditor: NoteTitleEditor;
-  noteTextEditor: NoteTextEditor;
+  titleEditable: EditableText;
+  textEditable: EditableText;
   dispatch: Dispatch<AppEvent>;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const note = props.note;
-  const noteTitleEditor = props.noteTitleEditor;
-  const noteTextEditor = props.noteTextEditor;
   const dispatch = props.dispatch;
 
   const isBusy = isPendingStorageUpdate(note);
   const hasError = note.state === NoteState.OutOfSync;
   const errorText = hasError ? note.err : "";
+  const titleEditable = props.titleEditable;
+  const textEditable = props.textEditable;
 
   const getNoteTitle = (): string => {
-    if (noteTitleEditor.state === NoteTitleEditorState.EditingRegularNote) {
-      if (noteTitleEditor.note === note) {
-        return noteTitleEditor.text;
-      }
+    if (titleEditable.state === ModifiedState.ModifiedValue) {
+      return titleEditable.newValue;
     }
     if (note.state === NoteState.CreatingFromText) {
       return "";
@@ -54,10 +50,8 @@ function RegularNote(props: {
   const noteTitle = getNoteTitle();
 
   const getTextEditorState = (): [boolean, string] => {
-    if (noteTextEditor.state === NoteTextEditorState.EditingRegularNote) {
-      if (noteTextEditor.note === note) {
-        return [true, noteTextEditor.text];
-      }
+    if (textEditable.state === ModifiedState.ModifiedValue) {
+      return [true, textEditable.newValue];
     }
     return [false, ""];
   };
@@ -327,6 +321,6 @@ function RegularNote(props: {
       </div>
     </div>
   );
-}
+});
 
 export default RegularNote;

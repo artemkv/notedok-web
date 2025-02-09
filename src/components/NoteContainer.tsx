@@ -6,6 +6,11 @@ import {
   NoteListState,
   NoteTitleEditor,
   NoteState,
+  NoteTitleEditorState,
+  NoteRegular,
+  NoteTextEditorState,
+  ModifiedState,
+  EditableText,
 } from "../model";
 import ProgressIndicator from "./ProgressIndicator";
 import RegularNote from "./RegularNote";
@@ -13,6 +18,10 @@ import DeletedNote from "./DeletedNote";
 import { AppEvent } from "../events";
 import { Dispatch } from "../hooks/useReducer";
 import { memo } from "react";
+
+const noChanges: EditableText = {
+  state: ModifiedState.OriginalValue,
+};
 
 const NoteContainer = memo(function NoteContainer(props: {
   noteTitleEditor: NoteTitleEditor;
@@ -24,6 +33,38 @@ const NoteContainer = memo(function NoteContainer(props: {
   const noteTextEditor = props.noteTextEditor;
   const noteList = props.noteList;
   const dispatch = props.dispatch;
+
+  const getTitleAsEditableText = (
+    noteTitleEditor: NoteTitleEditor,
+    note: NoteRegular
+  ): EditableText => {
+    if (
+      noteTitleEditor.state === NoteTitleEditorState.EditingRegularNote &&
+      noteTitleEditor.note === note
+    ) {
+      return {
+        state: ModifiedState.ModifiedValue,
+        newValue: noteTitleEditor.text,
+      };
+    }
+    return noChanges;
+  };
+
+  const getTextAsEditableText = (
+    noteTextEditor: NoteTextEditor,
+    note: NoteRegular
+  ): EditableText => {
+    if (
+      noteTextEditor.state === NoteTextEditorState.EditingRegularNote &&
+      noteTextEditor.note === note
+    ) {
+      return {
+        state: ModifiedState.ModifiedValue,
+        newValue: noteTextEditor.text,
+      };
+    }
+    return noChanges;
+  };
 
   return (
     <div className="notes-outer">
@@ -45,8 +86,8 @@ const NoteContainer = memo(function NoteContainer(props: {
                 <RegularNote
                   key={note.id}
                   note={note}
-                  noteTitleEditor={noteTitleEditor}
-                  noteTextEditor={noteTextEditor}
+                  titleEditable={getTitleAsEditableText(noteTitleEditor, note)}
+                  textEditable={getTextAsEditableText(noteTextEditor, note)}
                   dispatch={dispatch}
                 />
               )

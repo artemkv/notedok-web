@@ -199,6 +199,22 @@ export type NoteTextEditor =
   | NoteTextEditorEditingTemplateNote
   | NoteTextEditorEditingRegularNote;
 
+export enum ModifiedState {
+  OriginalValue,
+  ModifiedValue,
+}
+
+export interface NotModified {
+  state: ModifiedState.OriginalValue;
+}
+
+export interface Modified {
+  state: ModifiedState.ModifiedValue;
+  newValue: string;
+}
+
+export type EditableText = NotModified | Modified;
+
 // autocomplete
 
 export enum SearchAutoSuggestState {
