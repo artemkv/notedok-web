@@ -5,7 +5,7 @@ import { useContext, useEffect } from "react";
 import AppContext from "../AppContext";
 import { EventType } from "../events";
 import { AutoSuggestItem } from "../model";
-import { autoSuggestFilter, SEARCH_STRING_DELIMITER } from "../autosuggest";
+import { autoSuggestFilter, isFullTitleAutoSuggest } from "../autosuggest";
 
 function SearchAutocomplete(props: { autoSuggestItems: AutoSuggestItem[] }) {
   const { dispatch } = useContext(AppContext);
@@ -22,7 +22,9 @@ function SearchAutocomplete(props: { autoSuggestItems: AutoSuggestItem[] }) {
       lookup: autoSuggestItems,
       lookupLimit: 10,
       minChars: 1,
-      delimiter: SEARCH_STRING_DELIMITER,
+      // single word allows searching for single words
+      // but multiple words search for titles
+      delimiter: "",
       maxHeight: 500,
       groupBy: "g",
       forceFixPosition: true,
@@ -33,12 +35,18 @@ function SearchAutocomplete(props: { autoSuggestItems: AutoSuggestItem[] }) {
           searchTextbox.val().toLowerCase(),
           queryLowerCase
         ),
-      onSelect: () => {
-        dispatch({
-          type: EventType.SearchTextChanged,
-          // TODO: full note titles get appended to the input, and produce shit
-          newText: searchTextbox.val(),
-        });
+      onSelect: (suggestion: AutoSuggestItem) => {
+        if (isFullTitleAutoSuggest(suggestion)) {
+          dispatch({
+            type: EventType.SearchTextAutoFilled,
+            text: searchTextbox.val(),
+          });
+        } else {
+          dispatch({
+            type: EventType.SearchTextChanged,
+            newText: searchTextbox.val(),
+          });
+        }
       },
     };
     searchTextbox.autocomplete(options);

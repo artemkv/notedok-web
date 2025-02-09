@@ -31,6 +31,7 @@ import {
   RestApiErrorEvent,
   RetrieveFileListSuccessEvent,
   SearchAutoSuggestionsComputedEvent,
+  SearchTextAutoFilledEvent,
   SearchTextChangedEvent,
   TemplateNoteTitleEditorTextChangedEvent,
   UserAuthenticatedEvent,
@@ -146,6 +147,30 @@ export const handleSearchTextSubmitted = (
   };
 
   return [newState, RetrieveFileList(state.searchText, newFileListVersion)];
+};
+
+export const handleSearchTextAutoFilled = (
+  state: AppStateAuthenticated,
+  event: SearchTextAutoFilledEvent
+): [AppStateAuthenticated, AppCommand] => {
+  const newFileListVersion = state.noteList.fileListVersion + 1;
+
+  const newState: AppStateAuthenticated = {
+    ...state,
+    searchText: event.text,
+    noteTextEditor: {
+      state: NoteTextEditorState.NotActive,
+    },
+    noteTitleEditor: {
+      state: NoteTitleEditorState.NotActive,
+    },
+    noteList: {
+      state: NoteListState.RetrievingFileList,
+      fileListVersion: newFileListVersion,
+    },
+  };
+
+  return [newState, RetrieveFileList(event.text, newFileListVersion)];
 };
 
 export const cancelAllActiveEditors = (

@@ -73,6 +73,12 @@ export const autoSuggestFilter = (
   return true;
 };
 
+export const isFullTitleAutoSuggest = (
+  suggestion: AutoSuggestItem
+): boolean => {
+  return suggestion.data.g === TITLE_GROUP;
+};
+
 const _hashTagsExtractor = (function () {
   const _autoSuggestHashTagsUsed = new Set<string>();
 
