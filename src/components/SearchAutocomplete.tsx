@@ -1,16 +1,18 @@
 import "./SearchAutocomplete.css";
 import $ from "jquery";
 import "devbridge-autocomplete";
-import { useContext, useEffect } from "react";
-import AppContext from "../AppContext";
-import { EventType } from "../events";
+import { useEffect } from "react";
+import { AppEvent, EventType } from "../events";
 import { AutoSuggestItem } from "../model";
 import { autoSuggestFilter, isFullTitleAutoSuggest } from "../autosuggest";
+import { Dispatch } from "../hooks/useReducer";
 
-function SearchAutocomplete(props: { autoSuggestItems: AutoSuggestItem[] }) {
-  const { dispatch } = useContext(AppContext);
-
+function SearchAutocomplete(props: {
+  autoSuggestItems: AutoSuggestItem[];
+  dispatch: Dispatch<AppEvent>;
+}) {
   const autoSuggestItems = props.autoSuggestItems;
+  const dispatch = props.dispatch;
 
   useEffect(() => {
     const autocompleteContainer = $(

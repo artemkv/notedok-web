@@ -1,15 +1,17 @@
 import "./DeletedNote.css";
-import { useContext } from "react";
 import { NoteDeleted, NoteDeleting, NoteState } from "../model";
-import AppContext from "../AppContext";
-import { EventType } from "../events";
+import { AppEvent, EventType } from "../events";
 import { OrbitProgress } from "react-loading-indicators";
+import { Dispatch } from "../hooks/useReducer";
+import uistrings from "../uistrings";
 
-function DeletedNote(props: { note: NoteDeleting | NoteDeleted }) {
-  const { uistrings, dispatch } = useContext(AppContext);
-
+function DeletedNote(props: {
+  note: NoteDeleting | NoteDeleted;
+  dispatch: Dispatch<AppEvent>;
+}) {
   const note = props.note;
   const isDeleting = note.state === NoteState.Deleting;
+  const dispatch = props.dispatch;
 
   const onRestoreNote = () => {
     if (note.state === NoteState.Deleted) {

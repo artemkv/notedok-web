@@ -2,9 +2,9 @@ import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 import { Amplify } from "aws-amplify";
 import { fetchAuthSession } from "aws-amplify/auth";
-import { useContext, useEffect } from "react";
-import AppContext from "../AppContext";
-import { EventType } from "../events";
+import { useEffect } from "react";
+import { AppEvent, EventType } from "../events";
+import { Dispatch } from "../hooks/useReducer";
 
 Amplify.configure({
   Auth: {
@@ -15,8 +15,8 @@ Amplify.configure({
   },
 });
 
-function CognitoSignIn() {
-  const { dispatch } = useContext(AppContext);
+function CognitoSignIn(props: { dispatch: Dispatch<AppEvent> }) {
+  const dispatch = props.dispatch;
 
   const SignedIn = () => {
     useEffect(() => {

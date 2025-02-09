@@ -1,7 +1,6 @@
 import "./Note.css";
-import { useContext, useEffect, useRef } from "react";
-import AppContext from "../AppContext";
-import { EventType } from "../events";
+import { useEffect, useRef } from "react";
+import { AppEvent, EventType } from "../events";
 import Empty from "./Empty";
 import {
   NoteTextEditor,
@@ -9,16 +8,19 @@ import {
   NoteTitleEditor,
   NoteTitleEditorState,
 } from "../model";
+import { Dispatch } from "../hooks/useReducer";
+import uistrings from "../uistrings";
 
 function TemplateNote(props: {
   noteTitleEditor: NoteTitleEditor;
   noteTextEditor: NoteTextEditor;
+  dispatch: Dispatch<AppEvent>;
 }) {
-  const { uistrings, dispatch } = useContext(AppContext);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const noteTitleEditor = props.noteTitleEditor;
   const noteTextEditor = props.noteTextEditor;
+  const dispatch = props.dispatch;
 
   const getNoteTitle = (): string => {
     if (noteTitleEditor.state === NoteTitleEditorState.EditingTemplateNote) {

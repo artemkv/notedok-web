@@ -1,5 +1,5 @@
 import "./Note.css";
-import { useContext, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import {
   NoteTextEditor,
   NoteTextEditorState,
@@ -14,25 +14,27 @@ import {
   isDeletable,
   isPendingStorageUpdate,
 } from "../model";
-import AppContext from "../AppContext";
 import { htmlEscape, renderNoteTextHtml } from "../ui";
-import { EventType } from "../events";
+import { AppEvent, EventType } from "../events";
 import { countLines, selectionIsNotEmpty } from "../util";
 import { OrbitProgress } from "react-loading-indicators";
 import ErrorIcon from "../assets/error_outline.svg";
 import Empty from "./Empty";
+import { Dispatch } from "../hooks/useReducer";
+import uistrings from "../uistrings";
 
 function RegularNote(props: {
   note: NoteRegular;
   noteTitleEditor: NoteTitleEditor;
   noteTextEditor: NoteTextEditor;
+  dispatch: Dispatch<AppEvent>;
 }) {
-  const { uistrings, dispatch } = useContext(AppContext);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const note = props.note;
   const noteTitleEditor = props.noteTitleEditor;
   const noteTextEditor = props.noteTextEditor;
+  const dispatch = props.dispatch;
 
   const isBusy = isPendingStorageUpdate(note);
   const hasError = note.state === NoteState.OutOfSync;

@@ -10,15 +10,20 @@ import {
 import ProgressIndicator from "./ProgressIndicator";
 import RegularNote from "./RegularNote";
 import DeletedNote from "./DeletedNote";
+import { AppEvent } from "../events";
+import { Dispatch } from "../hooks/useReducer";
+import { memo } from "react";
 
-function NoteContainer(props: {
+const NoteContainer = memo(function NoteContainer(props: {
   noteTitleEditor: NoteTitleEditor;
   noteTextEditor: NoteTextEditor;
   noteList: NoteList;
+  dispatch: Dispatch<AppEvent>;
 }) {
   const noteTitleEditor = props.noteTitleEditor;
   const noteTextEditor = props.noteTextEditor;
   const noteList = props.noteList;
+  const dispatch = props.dispatch;
 
   return (
     <div className="notes-outer">
@@ -26,6 +31,7 @@ function NoteContainer(props: {
         <TemplateNote
           noteTitleEditor={noteTitleEditor}
           noteTextEditor={noteTextEditor}
+          dispatch={dispatch}
         />
         {noteList.state === NoteListState.RetrievingFileList ? (
           <ProgressIndicator />
@@ -34,13 +40,14 @@ function NoteContainer(props: {
             {noteList.notes.map((note) =>
               note.state === NoteState.Deleting ||
               note.state === NoteState.Deleted ? (
-                <DeletedNote key={note.id} note={note} />
+                <DeletedNote key={note.id} note={note} dispatch={dispatch} />
               ) : (
                 <RegularNote
                   key={note.id}
                   note={note}
                   noteTitleEditor={noteTitleEditor}
                   noteTextEditor={noteTextEditor}
+                  dispatch={dispatch}
                 />
               )
             )}
@@ -49,6 +56,6 @@ function NoteContainer(props: {
       </div>
     </div>
   );
-}
+});
 
 export default NoteContainer;

@@ -1,12 +1,14 @@
-import { useContext } from "react";
 import "./MoreButton.css";
-import AppContext from "../AppContext";
-import { EventType } from "../events";
+import { AppEvent, EventType } from "../events";
+import { Dispatch } from "../hooks/useReducer";
+import uistrings from "../uistrings";
 
-function MoreButton(props: { notesNotYetLoadedTotal: number }) {
-  const { uistrings, dispatch } = useContext(AppContext);
-
+function MoreButton(props: {
+  notesNotYetLoadedTotal: number;
+  dispatch: Dispatch<AppEvent>;
+}) {
   const notesNotYetLoadedTotal = props.notesNotYetLoadedTotal;
+  const dispatch = props.dispatch;
 
   const loadMore = () => {
     dispatch({
