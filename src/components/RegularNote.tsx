@@ -95,6 +95,14 @@ function RegularNote(props: {
     }
   };
 
+  const noteTitleOnKeyUp = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") {
+      dispatch({
+        type: EventType.TitleEditorCancelEdit,
+      });
+    }
+  };
+
   const noteTextOnClick = (e: React.SyntheticEvent) => {
     const element = e.target as HTMLElement;
 
@@ -125,7 +133,6 @@ function RegularNote(props: {
     }
   };
 
-  // TODO: could do the same thing for the title editing
   const noteTextOnKeyUp = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
       dispatch({
@@ -309,6 +316,7 @@ function RegularNote(props: {
           onChange={noteTitleOnChange}
           onFocus={noteTitleOnFocus}
           onBlur={noteTitleOnBlur}
+          onKeyUp={noteTitleOnKeyUp}
           placeholder={uistrings.NoteTitlePlaceholder}
           maxLength={50}
         />

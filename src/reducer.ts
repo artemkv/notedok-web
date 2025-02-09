@@ -13,6 +13,7 @@ import {
   handleNoteSyncFailed,
   handleNoteTextEditorCancelEdit,
   handleNoteTextEditorTextChanged,
+  handleNoteTitleEditorCancelEdit,
   handleRegularNoteStartTextEditing,
   handleRegularNoteTextUpdated,
   handleRegularNoteTitleEditorTextChanged,
@@ -65,6 +66,10 @@ export const Reducer = (
 
     if (event.type === EventType.TitleEditorActivated) {
       return cancelAllActiveEditors(state);
+    }
+
+    if (event.type === EventType.TitleEditorCancelEdit) {
+      return handleNoteTitleEditorCancelEdit(state);
     }
 
     if (event.type === EventType.SearchTextSubmitted) {

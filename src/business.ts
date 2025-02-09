@@ -309,6 +309,18 @@ export const handleNoteTextEditorTextChanged = (
   return JustStateAuthenticated(state);
 };
 
+export const handleNoteTitleEditorCancelEdit = (
+  state: AppStateAuthenticated
+): [AppStateAuthenticated, AppCommand] => {
+  const newState: AppStateAuthenticated = {
+    ...state,
+    noteTitleEditor: {
+      state: NoteTitleEditorState.NotActive,
+    },
+  };
+  return JustStateAuthenticated(newState);
+};
+
 export const handleNoteTextEditorCancelEdit = (
   state: AppStateAuthenticated
 ): [AppStateAuthenticated, AppCommand] => {

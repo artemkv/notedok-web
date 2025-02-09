@@ -56,6 +56,14 @@ function TemplateNote(props: {
     });
   };
 
+  const noteTitleOnKeyUp = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") {
+      dispatch({
+        type: EventType.TitleEditorCancelEdit,
+      });
+    }
+  };
+
   const onStartNoteTextEditing = () => {
     dispatch({
       type: EventType.TemplateNoteStartTextEditing,
@@ -69,7 +77,6 @@ function TemplateNote(props: {
     });
   };
 
-  // TODO: could do the same thing for the title editing
   const noteTextOnKeyUp = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
       dispatch({
@@ -156,6 +163,7 @@ function TemplateNote(props: {
           onChange={noteTitleOnChange}
           onFocus={noteTitleOnFocus}
           onBlur={noteTitleOnBlur}
+          onKeyUp={noteTitleOnKeyUp}
           placeholder={uistrings.TemplateNoteTitlePlaceholder}
           maxLength={50}
         />
