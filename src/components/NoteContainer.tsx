@@ -66,12 +66,36 @@ const NoteContainer = memo(function NoteContainer(props: {
     return noChanges;
   };
 
+  const getTemplateTitleAsEditableText = (
+    noteTitleEditor: NoteTitleEditor
+  ): EditableText => {
+    if (noteTitleEditor.state === NoteTitleEditorState.EditingTemplateNote) {
+      return {
+        state: ModifiedState.ModifiedValue,
+        newValue: noteTitleEditor.text,
+      };
+    }
+    return noChanges;
+  };
+
+  const getTemplateTextAsEditableText = (
+    noteTextEditor: NoteTextEditor
+  ): EditableText => {
+    if (noteTextEditor.state === NoteTextEditorState.EditingTemplateNote) {
+      return {
+        state: ModifiedState.ModifiedValue,
+        newValue: noteTextEditor.text,
+      };
+    }
+    return noChanges;
+  };
+
   return (
     <div className="notes-outer">
       <div className="notes-inner">
         <TemplateNote
-          noteTitleEditor={noteTitleEditor}
-          noteTextEditor={noteTextEditor}
+          titleEditable={getTemplateTitleAsEditableText(noteTitleEditor)}
+          textEditable={getTemplateTextAsEditableText(noteTextEditor)}
           dispatch={dispatch}
         />
         {noteList.state === NoteListState.RetrievingFileList ? (

@@ -4,8 +4,9 @@ import SearchAutocomplete from "./SearchAutocomplete";
 import { AutoSuggestItem } from "../model";
 import { Dispatch } from "../hooks/useReducer";
 import uistrings from "../uistrings";
+import { memo } from "react";
 
-function SearchPanel(props: {
+const SearchPanel = memo(function SearchPanel(props: {
   searchText: string;
   autoSuggestItems: AutoSuggestItem[];
   dispatch: Dispatch<AppEvent>;
@@ -66,6 +67,6 @@ function SearchPanel(props: {
       />
     </div>
   );
-}
+});
 
 export default SearchPanel;

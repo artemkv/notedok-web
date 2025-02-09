@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { AppEvent } from "../events";
 import { Dispatch } from "../hooks/useReducer";
 import { NoteList, NoteListState } from "../model";
@@ -5,7 +6,10 @@ import Empty from "./Empty";
 import "./Footer.css";
 import MoreButton from "./MoreButton";
 
-function Footer(props: { noteList: NoteList; dispatch: Dispatch<AppEvent> }) {
+const Footer = memo(function Footer(props: {
+  noteList: NoteList;
+  dispatch: Dispatch<AppEvent>;
+}) {
   const noteList = props.noteList;
   const dispatch = props.dispatch;
 
@@ -30,6 +34,6 @@ function Footer(props: { noteList: NoteList; dispatch: Dispatch<AppEvent> }) {
       </div>
     </div>
   );
-}
+});
 
 export default Footer;

@@ -1,38 +1,33 @@
 import "./Note.css";
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import { AppEvent, EventType } from "../events";
 import Empty from "./Empty";
-import {
-  NoteTextEditor,
-  NoteTextEditorState,
-  NoteTitleEditor,
-  NoteTitleEditorState,
-} from "../model";
+import { EditableText, ModifiedState } from "../model";
 import { Dispatch } from "../hooks/useReducer";
 import uistrings from "../uistrings";
 
-function TemplateNote(props: {
-  noteTitleEditor: NoteTitleEditor;
-  noteTextEditor: NoteTextEditor;
+const TemplateNote = memo(function TemplateNote(props: {
+  titleEditable: EditableText;
+  textEditable: EditableText;
   dispatch: Dispatch<AppEvent>;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const noteTitleEditor = props.noteTitleEditor;
-  const noteTextEditor = props.noteTextEditor;
+  const titleEditable = props.titleEditable;
+  const textEditable = props.textEditable;
   const dispatch = props.dispatch;
 
   const getNoteTitle = (): string => {
-    if (noteTitleEditor.state === NoteTitleEditorState.EditingTemplateNote) {
-      return noteTitleEditor.text;
+    if (titleEditable.state === ModifiedState.ModifiedValue) {
+      return titleEditable.newValue;
     }
     return "";
   };
   const noteTitle = getNoteTitle();
 
   const getTextEditorState = (): [boolean, string] => {
-    if (noteTextEditor.state === NoteTextEditorState.EditingTemplateNote) {
-      return [true, noteTextEditor.text];
+    if (textEditable.state === ModifiedState.ModifiedValue) {
+      return [true, textEditable.newValue];
     }
     return [false, ""];
   };
@@ -174,6 +169,6 @@ function TemplateNote(props: {
       </div>
     </div>
   );
-}
+});
 
 export default TemplateNote;
