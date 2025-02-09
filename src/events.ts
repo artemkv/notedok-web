@@ -26,6 +26,7 @@ export enum EventType {
   SearchTextChanged,
   SearchTextSubmitted,
   SearchTextAutoFilled,
+  SearchCancelEdit,
 
   TitleEditorActivated,
   TitleEditorCancelEdit,
@@ -97,6 +98,10 @@ export interface SearchTextSubmittedEvent {
 export interface SearchTextAutoFilledEvent {
   type: EventType.SearchTextAutoFilled;
   text: string;
+}
+
+export interface SearchCancelEditEvent {
+  type: EventType.SearchCancelEdit;
 }
 
 export interface TitleEditorActivatedEvent {
@@ -245,6 +250,7 @@ export type AppEvent =
   | SearchTextChangedEvent
   | SearchTextSubmittedEvent
   | SearchTextAutoFilledEvent
+  | SearchCancelEditEvent
   | TitleEditorActivatedEvent
   | TitleEditorCancelEditEvent
   | TemplateNoteTitleEditorTextChangedEvent

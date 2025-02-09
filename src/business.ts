@@ -196,6 +196,16 @@ export const handleSearchTextChanged = (
   return JustStateAuthenticated(newState);
 };
 
+export const handleSearchCancelEdit = (
+  state: AppStateAuthenticated
+): [AppStateAuthenticated, AppCommand] => {
+  const newState: AppStateAuthenticated = {
+    ...state,
+    searchText: "",
+  };
+  return JustStateAuthenticated(newState);
+};
+
 export const handleTemplateNoteTitleEditorTextChanged = (
   state: AppStateAuthenticated,
   event: TemplateNoteTitleEditorTextChangedEvent

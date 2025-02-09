@@ -21,6 +21,7 @@ import {
   handleRestApiError,
   handleRetrieveFileListSuccess,
   handleSearchAutoSuggestionsComputed,
+  handleSearchCancelEdit,
   handleSearchTextAutoFilled,
   handleSearchTextChanged,
   handleSearchTextSubmitted,
@@ -82,6 +83,10 @@ export const Reducer = (
 
     if (event.type === EventType.SearchTextChanged) {
       return handleSearchTextChanged(state, event);
+    }
+
+    if (event.type === EventType.SearchCancelEdit) {
+      return handleSearchCancelEdit(state);
     }
 
     if (event.type === EventType.TemplateNoteTitleEditorTextChanged) {

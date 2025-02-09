@@ -21,6 +21,14 @@ function SearchPanel(props: {
     });
   };
 
+  const searchTextOnKeyUp = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") {
+      dispatch({
+        type: EventType.SearchCancelEdit,
+      });
+    }
+  };
+
   const searchOnFocus = () => {
     dispatch({
       type: EventType.SearchActivated,
@@ -45,6 +53,7 @@ function SearchPanel(props: {
               value={searchText}
               onFocus={searchOnFocus}
               onChange={searchTextOnChange}
+              onKeyUp={searchTextOnKeyUp}
               className="search-textbox"
               placeholder={uistrings.SearchTextBoxPlaceholder}
             />
