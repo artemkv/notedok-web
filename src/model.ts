@@ -229,6 +229,7 @@ export interface SearchAutoSuggestNotComputed {
 export interface SearchAutoSuggestComputed {
   state: SearchAutoSuggestState.Computed;
   autoSuggestItems: AutoSuggestItem[];
+  autoSuggestHashTags: AutoSuggestHashTag[];
 }
 
 export type SearchAutoSuggest =

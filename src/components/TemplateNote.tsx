@@ -2,19 +2,22 @@ import "./Note.css";
 import { memo, useEffect, useRef } from "react";
 import { AppEvent, EventType } from "../events";
 import Empty from "./Empty";
-import { EditableText, ModifiedState } from "../model";
+import { AutoSuggestHashTag, EditableText, ModifiedState } from "../model";
 import { Dispatch } from "../hooks/useReducer";
 import uistrings from "../uistrings";
+import NoteTitleAutocomplete from "./NoteTitleAutocomplete";
 
 const TemplateNote = memo(function TemplateNote(props: {
   titleEditable: EditableText;
   textEditable: EditableText;
+  autoSuggestHashTags: AutoSuggestHashTag[];
   dispatch: Dispatch<AppEvent>;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const titleEditable = props.titleEditable;
   const textEditable = props.textEditable;
+  const autoSuggestHashTags = props.autoSuggestHashTags;
   const dispatch = props.dispatch;
 
   const getNoteTitle = (): string => {
@@ -163,6 +166,10 @@ const TemplateNote = memo(function TemplateNote(props: {
           onKeyUp={noteTitleOnKeyUp}
           placeholder={uistrings.TemplateNoteTitlePlaceholder}
           maxLength={50}
+        />
+        <NoteTitleAutocomplete
+          noteTitleId="note_template_title"
+          autoSuggestHashTags={autoSuggestHashTags}
         />
         {isEditingText ? textEditor() : noteTextPlaceholder()}
         {isEditingText ? editingNoteControlArea() : <Empty />}

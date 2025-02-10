@@ -11,6 +11,7 @@ import {
   NoteTextEditorState,
   ModifiedState,
   EditableText,
+  AutoSuggestHashTag,
 } from "../model";
 import ProgressIndicator from "./ProgressIndicator";
 import RegularNote from "./RegularNote";
@@ -27,11 +28,13 @@ const NoteContainer = memo(function NoteContainer(props: {
   noteTitleEditor: NoteTitleEditor;
   noteTextEditor: NoteTextEditor;
   noteList: NoteList;
+  autoSuggestHashTags: AutoSuggestHashTag[];
   dispatch: Dispatch<AppEvent>;
 }) {
   const noteTitleEditor = props.noteTitleEditor;
   const noteTextEditor = props.noteTextEditor;
   const noteList = props.noteList;
+  const autoSuggestHashTags = props.autoSuggestHashTags;
   const dispatch = props.dispatch;
 
   const getTitleAsEditableText = (
@@ -96,6 +99,7 @@ const NoteContainer = memo(function NoteContainer(props: {
         <TemplateNote
           titleEditable={getTemplateTitleAsEditableText(noteTitleEditor)}
           textEditable={getTemplateTextAsEditableText(noteTextEditor)}
+          autoSuggestHashTags={autoSuggestHashTags}
           dispatch={dispatch}
         />
         {noteList.state === NoteListState.RetrievingFileList ? (

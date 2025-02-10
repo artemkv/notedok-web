@@ -1,4 +1,5 @@
 import {
+  AutoSuggestHashTag,
   AutoSuggestItem,
   NoteCreatingFromText,
   NoteCreatingFromTitle,
@@ -187,6 +188,7 @@ export interface RetrieveFileListSuccessEvent {
 export interface SearchAutoSuggestionsComputedEvent {
   type: EventType.SearchAutoSuggestionsComputed;
   autoSuggestItems: AutoSuggestItem[];
+  autoSuggestHashTags: AutoSuggestHashTag[];
 }
 
 export interface LoadNoteTextSuccessEvent {

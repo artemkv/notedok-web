@@ -73,6 +73,17 @@ export const autoSuggestFilter = (
   return true;
 };
 
+export const hashTagAutoSuggestFilter = (
+  suggestion: AutoSuggestItem,
+  queryLowerCase: string
+): boolean => {
+  return (
+    // TODO: substr is deprecated, replace it eventually
+    suggestion.value.toLowerCase().substr(0, queryLowerCase.length) ===
+    queryLowerCase
+  );
+};
+
 export const isFullTitleAutoSuggest = (
   suggestion: AutoSuggestItem
 ): boolean => {

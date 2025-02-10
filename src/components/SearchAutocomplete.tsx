@@ -24,8 +24,9 @@ function SearchAutocomplete(props: {
       lookup: autoSuggestItems,
       lookupLimit: 10,
       minChars: 1,
-      // single word allows searching for single words
-      // but multiple words search for titles
+      // single word suggests single words
+      // but multiple words autosuggest complete titles
+      // does not make sense to suggest some combination that does not exist
       delimiter: "",
       maxHeight: 500,
       groupBy: "g",
@@ -39,14 +40,10 @@ function SearchAutocomplete(props: {
         ),
       onSelect: (suggestion: AutoSuggestItem) => {
         if (isFullTitleAutoSuggest(suggestion)) {
+          // When full title is selected, trigger search immediately
           dispatch({
             type: EventType.SearchTextAutoFilled,
             text: searchTextbox.val(),
-          });
-        } else {
-          dispatch({
-            type: EventType.SearchTextChanged,
-            newText: searchTextbox.val(),
           });
         }
       },

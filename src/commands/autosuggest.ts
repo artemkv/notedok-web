@@ -13,6 +13,7 @@ export const ActivateSearchAutoSuggest = (
     dispatch({
       type: EventType.SearchAutoSuggestionsComputed,
       autoSuggestItems,
+      autoSuggestHashTags,
     });
   },
 });

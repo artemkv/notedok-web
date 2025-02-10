@@ -21,6 +21,11 @@ function ClientArea(props: {
       ? props.state.searchAutoSuggest.autoSuggestItems
       : [];
 
+  const autoSuggestHashTags =
+    props.state.searchAutoSuggest.state === SearchAutoSuggestState.Computed
+      ? props.state.searchAutoSuggest.autoSuggestHashTags
+      : [];
+
   return (
     <div className="client-area-outer">
       <div className="client-area-inner">
@@ -33,6 +38,7 @@ function ClientArea(props: {
           noteTitleEditor={noteTitleEditor}
           noteTextEditor={noteTextEditor}
           noteList={noteList}
+          autoSuggestHashTags={autoSuggestHashTags}
           dispatch={dispatch}
         />
         <Footer noteList={noteList} dispatch={dispatch} />

@@ -537,6 +537,7 @@ export const handleSearchAutoSuggestionsComputed = (
     searchAutoSuggest: {
       state: SearchAutoSuggestState.Computed,
       autoSuggestItems: event.autoSuggestItems,
+      autoSuggestHashTags: event.autoSuggestHashTags,
     },
   };
   return JustStateAuthenticated(newState);
