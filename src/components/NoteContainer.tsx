@@ -116,6 +116,7 @@ const NoteContainer = memo(function NoteContainer(props: {
                   note={note}
                   titleEditable={getTitleAsEditableText(noteTitleEditor, note)}
                   textEditable={getTextAsEditableText(noteTextEditor, note)}
+                  autoSuggestHashTags={autoSuggestHashTags}
                   dispatch={dispatch}
                 />
               )

@@ -11,6 +11,7 @@ import {
   isPendingStorageUpdate,
   EditableText,
   ModifiedState,
+  AutoSuggestHashTag,
 } from "../model";
 import { htmlEscape, renderNoteTextHtml } from "../ui";
 import { AppEvent, EventType } from "../events";
@@ -20,11 +21,13 @@ import ErrorIcon from "../assets/error_outline.svg";
 import Empty from "./Empty";
 import { Dispatch } from "../hooks/useReducer";
 import uistrings from "../uistrings";
+import NoteTitleAutocomplete from "./NoteTitleAutocomplete";
 
 const RegularNote = memo(function RegularNote(props: {
   note: NoteRegular;
   titleEditable: EditableText;
   textEditable: EditableText;
+  autoSuggestHashTags: AutoSuggestHashTag[];
   dispatch: Dispatch<AppEvent>;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -37,6 +40,7 @@ const RegularNote = memo(function RegularNote(props: {
   const errorText = hasError ? note.err : "";
   const titleEditable = props.titleEditable;
   const textEditable = props.textEditable;
+  const autoSuggestHashTags = props.autoSuggestHashTags;
 
   const getNoteTitle = (): string => {
     if (titleEditable.state === ModifiedState.ModifiedValue) {
@@ -315,6 +319,10 @@ const RegularNote = memo(function RegularNote(props: {
           onKeyUp={noteTitleOnKeyUp}
           placeholder={uistrings.NoteTitlePlaceholder}
           maxLength={50}
+        />
+        <NoteTitleAutocomplete
+          noteTitleId={`${note.id}_title`}
+          autoSuggestHashTags={autoSuggestHashTags}
         />
         {noteTextElement()}
         {controlArea()}
