@@ -57,6 +57,7 @@ export enum EventType {
   RetrieveFileListSuccess,
 
   SearchAutoSuggestionsComputed,
+  TitleAutoSuggestionsUpdated,
 
   LoadNoteTextSuccess,
   LoadNextPage,
@@ -191,6 +192,11 @@ export interface SearchAutoSuggestionsComputedEvent {
   autoSuggestHashTags: AutoSuggestHashTag[];
 }
 
+export interface TitleAutoSuggestionsUpdatedEvent {
+  type: EventType.TitleAutoSuggestionsUpdated;
+  autoSuggestHashTags: AutoSuggestHashTag[];
+}
+
 export interface LoadNoteTextSuccessEvent {
   type: EventType.LoadNoteTextSuccess;
   note: NoteRef;
@@ -272,6 +278,7 @@ export type AppEvent =
   | NoteSavedEvent
   | RetrieveFileListSuccessEvent
   | SearchAutoSuggestionsComputedEvent
+  | TitleAutoSuggestionsUpdatedEvent
   | LoadNoteTextSuccessEvent
   | LoadNextPageEvent
   | NoteLoadFailedEvent

@@ -14,6 +14,7 @@ export enum CommandType {
   CreateUserSession,
   RetrieveFileList,
   ActivateSearchAutoSuggest,
+  ExtractNewHashTags,
   LoadNoteText,
   RenameNoteFromTitle,
   SaveNoteText,
@@ -50,6 +51,11 @@ export interface RetrieveFileListCommand extends Command<AppEvent> {
 export interface ActivateSearchAutoSuggestCommand extends Command<AppEvent> {
   type: CommandType.ActivateSearchAutoSuggest;
   fileList: string[];
+}
+
+export interface ExtractNewHashTagsCommand extends Command<AppEvent> {
+  type: CommandType.ExtractNewHashTags;
+  title: string;
 }
 
 export interface LoadNoteTextCommand extends Command<AppEvent> {
@@ -98,6 +104,7 @@ export type AppCommand =
   | CreateUserSessionCommand
   | RetrieveFileListCommand
   | ActivateSearchAutoSuggestCommand
+  | ExtractNewHashTagsCommand
   | LoadNoteTextCommand
   | RenameNoteFromTitleCommand
   | SaveNoteTextCommand

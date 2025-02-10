@@ -1,7 +1,10 @@
 import { AppCommand, DoMany, DoNothing } from "./commands";
 import { ReportError } from "./commands/alerts";
 import { StartUserSession } from "./commands/auth";
-import { ActivateSearchAutoSuggest } from "./commands/autosuggest";
+import {
+  ActivateSearchAutoSuggest,
+  ExtractNewHashTags,
+} from "./commands/autosuggest";
 import {
   CreateNewNoteWithText,
   CreateNewNoteWithTitle,
@@ -34,6 +37,7 @@ import {
   SearchTextAutoFilledEvent,
   SearchTextChangedEvent,
   TemplateNoteTitleEditorTextChangedEvent,
+  TitleAutoSuggestionsUpdatedEvent,
   UserAuthenticatedEvent,
 } from "./events";
 import {
@@ -543,22 +547,40 @@ export const handleSearchAutoSuggestionsComputed = (
   return JustStateAuthenticated(newState);
 };
 
+export const handleTitleAutoSuggestionsUpdated = (
+  state: AppStateAuthenticated,
+  event: TitleAutoSuggestionsUpdatedEvent
+): [AppStateAuthenticated, AppCommand] => {
+  if (state.searchAutoSuggest.state === SearchAutoSuggestState.Computed) {
+    const newState: AppStateAuthenticated = {
+      ...state,
+      searchAutoSuggest: {
+        ...state.searchAutoSuggest,
+        autoSuggestHashTags: [
+          ...state.searchAutoSuggest.autoSuggestHashTags,
+          ...event.autoSuggestHashTags,
+        ],
+      },
+    };
+    return JustStateAuthenticated(newState);
+  }
+  return JustStateAuthenticated(state);
+};
+
 export const handleNoteSavedOnNewPath = (
   state: AppStateAuthenticated,
   event: NoteSavedOnNewPathEvent
 ): [AppStateAuthenticated, AppCommand] => {
-  const [newNoteList, newNoteTitleEditor, newNoteTextEditor] = updateNotePath(
-    state,
-    event.note,
-    event.newPath
-  );
+  const [newNoteList, newNoteTitleEditor, newNoteTextEditor, command] =
+    updateNotePath(state, event.note, event.newPath);
   const newState: AppStateAuthenticated = {
     ...state,
     noteTitleEditor: newNoteTitleEditor,
     noteTextEditor: newNoteTextEditor,
     noteList: newNoteList,
   };
-  return JustStateAuthenticated(newState);
+
+  return [newState, command];
 };
 
 export const handleNoteSaved = (
@@ -896,7 +918,7 @@ const updateNotePath = (
   state: AppStateAuthenticated,
   note: NotePendingStorageUpdate,
   newPath: string
-): [NoteList, NoteTitleEditor, NoteTextEditor] => {
+): [NoteList, NoteTitleEditor, NoteTextEditor, AppCommand] => {
   const noteTitleEditor = state.noteTitleEditor;
   const noteTextEditor = state.noteTextEditor;
   const noteList = state.noteList;
@@ -926,10 +948,15 @@ const updateNotePath = (
       }
     }
 
-    return [newNoteList, newNoteTitleEditor, newNoteTextEditor];
+    return [
+      newNoteList,
+      newNoteTitleEditor,
+      newNoteTextEditor,
+      ExtractNewHashTags(newNote.title),
+    ];
   }
 
-  return [noteList, noteTitleEditor, noteTextEditor];
+  return [noteList, noteTitleEditor, noteTextEditor, DoNothing];
 };
 
 const updateNoteAsSynced = (

@@ -32,7 +32,7 @@ export const computeAutoSuggestLookups = (
   for (let i = 0, filesTotal = fileList.length; i < filesTotal; i++) {
     const path = fileList[i];
     const title = getTitleFromPath(path);
-    const hashTags = _hashTagsExtractor.extractNewHashTags(title);
+    const hashTags = hashTagsExtractor.extractNewHashTags(title);
 
     for (let j = 0, hashTagsTotal = hashTags.length; j < hashTagsTotal; j++) {
       const hashTag = hashTags[j];
@@ -90,12 +90,12 @@ export const isFullTitleAutoSuggest = (
   return suggestion.data.g === TITLE_GROUP;
 };
 
-const _hashTagsExtractor = (function () {
+export const hashTagsExtractor = (function () {
   const _autoSuggestHashTagsUsed = new Set<string>();
 
   return {
-    extractNewHashTags: function extractNewHashTags(title: string) {
-      const newHashTags = [];
+    extractNewHashTags: function extractNewHashTags(title: string): string[] {
+      const newHashTags: string[] = [];
 
       const hashTags = title.split(SEARCH_STRING_DELIMITER);
       for (let i = 0, hashTagsTotal = hashTags.length; i < hashTagsTotal; i++) {

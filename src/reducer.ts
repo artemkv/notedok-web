@@ -29,6 +29,7 @@ import {
   handleTemplateNoteTextUpdated,
   handleTemplateNoteTitleEditorTextChanged,
   handleTemplateNoteTitleUpdated,
+  handleTitleAutoSuggestionsUpdated,
   handleUserAuthenticated,
   handleUserSessionCreated,
 } from "./business";
@@ -147,6 +148,10 @@ export const Reducer = (
 
     if (event.type === EventType.SearchAutoSuggestionsComputed) {
       return handleSearchAutoSuggestionsComputed(state, event);
+    }
+
+    if (event.type == EventType.TitleAutoSuggestionsUpdated) {
+      return handleTitleAutoSuggestionsUpdated(state, event);
     }
 
     if (event.type === EventType.NoteSavedOnNewPath) {
