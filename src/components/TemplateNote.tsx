@@ -1,5 +1,5 @@
 import "./Note.css";
-import { memo, useEffect, useRef } from "react";
+import { memo, useCallback, useEffect, useRef } from "react";
 import { AppEvent, EventType } from "../events";
 import Empty from "./Empty";
 import { AutoSuggestHashTag, EditableText, ModifiedState } from "../model";
@@ -63,6 +63,16 @@ const TemplateNote = memo(function TemplateNote(props: {
       });
     }
   };
+
+  const noteTitleAutoComplete = useCallback(
+    (newText: string) => {
+      dispatch({
+        type: EventType.TemplateNoteTitleEditorTextChanged,
+        newText,
+      });
+    },
+    [dispatch]
+  );
 
   const onStartNoteTextEditing = () => {
     dispatch({
@@ -170,6 +180,7 @@ const TemplateNote = memo(function TemplateNote(props: {
         <NoteTitleAutocomplete
           noteTitleId="note_template_title"
           autoSuggestHashTags={autoSuggestHashTags}
+          onAutocomplete={noteTitleAutoComplete}
         />
         {isEditingText ? textEditor() : noteTextPlaceholder()}
         {isEditingText ? editingNoteControlArea() : <Empty />}

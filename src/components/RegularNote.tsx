@@ -1,5 +1,5 @@
 import "./Note.css";
-import { memo, useEffect, useRef } from "react";
+import { memo, useCallback, useEffect, useRef } from "react";
 import {
   NoteRegular,
   NoteState,
@@ -102,6 +102,19 @@ const RegularNote = memo(function RegularNote(props: {
       });
     }
   };
+
+  const noteTitleAutoComplete = useCallback(
+    (newText: string) => {
+      if (isTitleEditable(note)) {
+        dispatch({
+          type: EventType.RegularNoteTitleEditorTextChanged,
+          note,
+          newText,
+        });
+      }
+    },
+    [dispatch, note]
+  );
 
   const noteTextOnClick = (e: React.SyntheticEvent) => {
     const element = e.target as HTMLElement;
@@ -323,6 +336,7 @@ const RegularNote = memo(function RegularNote(props: {
         <NoteTitleAutocomplete
           noteTitleId={`${note.id}_title`}
           autoSuggestHashTags={autoSuggestHashTags}
+          onAutocomplete={noteTitleAutoComplete}
         />
         {noteTextElement()}
         {controlArea()}

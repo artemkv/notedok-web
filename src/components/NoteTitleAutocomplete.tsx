@@ -10,9 +10,11 @@ import { AutoSuggestHashTag } from "../model";
 function NoteTitleAutocomplete(props: {
   noteTitleId: string;
   autoSuggestHashTags: AutoSuggestHashTag[];
+  onAutocomplete: (newText: string) => void;
 }) {
   const noteTitleId = props.noteTitleId;
   const autoSuggestHashTags = props.autoSuggestHashTags;
+  const onAutocomplete = props.onAutocomplete;
 
   useEffect(() => {
     const autocompleteContainer = $(`#${noteTitleId}-suggestions_container`);
@@ -28,9 +30,12 @@ function NoteTitleAutocomplete(props: {
       appendTo: autocompleteContainer,
       lookupFilter: (suggestion, _, queryLowerCase) =>
         hashTagAutoSuggestFilter(suggestion, queryLowerCase),
+      onSelect: () => {
+        onAutocomplete(titleInputElement.val());
+      },
     };
     titleInputElement.autocomplete(options);
-  }, [autoSuggestHashTags, noteTitleId]);
+  }, [autoSuggestHashTags, noteTitleId, onAutocomplete]); // TODO: do I need to do cleanup???
 
   return (
     <div
