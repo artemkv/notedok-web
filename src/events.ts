@@ -30,23 +30,23 @@ export enum EventType {
   SearchTextAutoFilled,
   SearchCancelEdit,
 
-  TitleEditorActivated,
-  TitleEditorCancelEdit,
-
-  TemplateNoteTitleEditorTextChanged,
+  TemplateNoteStartTitleEditing,
   TemplateNoteTitleUpdated,
 
-  RegularNoteTitleEditorTextChanged,
+  RegularNoteStartTitleEditing,
   RegularNoteTitleUpdated,
 
-  NoteTextEditorTextChanged,
-  NoteTextEditorCancelEdit,
+  NoteTitleEditorTextChanged,
+  NoteTitleEditorCancelEdit,
 
   TemplateNoteStartTextEditing,
   TemplateNoteTextUpdated,
 
   RegularNoteStartTextEditing,
   RegularNoteTextUpdated,
+
+  NoteTextEditorTextChanged,
+  NoteTextEditorCancelEdit,
 
   NoteDeleteTriggered,
   NoteRestoreTriggered,
@@ -112,17 +112,8 @@ export interface SearchCancelEditEvent {
   type: EventType.SearchCancelEdit;
 }
 
-export interface TitleEditorActivatedEvent {
-  type: EventType.TitleEditorActivated;
-}
-
-export interface TitleEditorCancelEditEvent {
-  type: EventType.TitleEditorCancelEdit;
-}
-
-export interface TemplateNoteTitleEditorTextChangedEvent {
-  type: EventType.TemplateNoteTitleEditorTextChanged;
-  newText: string;
+export interface TemplateNoteStartTitleEditingEvent {
+  type: EventType.TemplateNoteStartTitleEditing;
 }
 
 export interface TemplateNoteTitleUpdatedEvent {
@@ -130,10 +121,9 @@ export interface TemplateNoteTitleUpdatedEvent {
   newTitle: string;
 }
 
-export interface RegularNoteTitleEditorTextChangedEvent {
-  type: EventType.RegularNoteTitleEditorTextChanged;
+export interface RegularNoteStartTitleEditingEvent {
+  type: EventType.RegularNoteStartTitleEditing;
   note: NoteTitleEditable;
-  newText: string;
 }
 
 export interface RegularNoteTitleUpdatedEvent {
@@ -142,13 +132,13 @@ export interface RegularNoteTitleUpdatedEvent {
   newTitle: string;
 }
 
-export interface NoteTextEditorTextChangedEvent {
-  type: EventType.NoteTextEditorTextChanged;
+export interface NoteTitleEditorTextChangedEvent {
+  type: EventType.NoteTitleEditorTextChanged;
   newText: string;
 }
 
-export interface NoteTextEditorCancelEditEvent {
-  type: EventType.NoteTextEditorCancelEdit;
+export interface NoteTitleEditorCancelEditEvent {
+  type: EventType.NoteTitleEditorCancelEdit;
 }
 
 export interface TemplateNoteStartTextEditingEvent {
@@ -169,6 +159,15 @@ export interface RegularNoteTextUpdatedEvent {
   type: EventType.RegularNoteTextUpdated;
   note: NoteTextSaveable;
   newText: string;
+}
+
+export interface NoteTextEditorTextChangedEvent {
+  type: EventType.NoteTextEditorTextChanged;
+  newText: string;
+}
+
+export interface NoteTextEditorCancelEditEvent {
+  type: EventType.NoteTextEditorCancelEdit;
 }
 
 export interface NoteDeleteTriggeredEvent {
@@ -275,18 +274,18 @@ export type AppEvent =
   | SearchTextSubmittedEvent
   | SearchTextAutoFilledEvent
   | SearchCancelEditEvent
-  | TitleEditorActivatedEvent
-  | TitleEditorCancelEditEvent
-  | TemplateNoteTitleEditorTextChangedEvent
+  | TemplateNoteStartTitleEditingEvent
   | TemplateNoteTitleUpdatedEvent
-  | RegularNoteTitleEditorTextChangedEvent
+  | RegularNoteStartTitleEditingEvent
   | RegularNoteTitleUpdatedEvent
-  | NoteTextEditorTextChangedEvent
-  | NoteTextEditorCancelEditEvent
+  | NoteTitleEditorTextChangedEvent
+  | NoteTitleEditorCancelEditEvent
   | TemplateNoteStartTextEditingEvent
   | TemplateNoteTextUpdatedEvent
   | RegularNoteStartTextEditingEvent
   | RegularNoteTextUpdatedEvent
+  | NoteTextEditorTextChangedEvent
+  | NoteTextEditorCancelEditEvent
   | NoteDeleteTriggeredEvent
   | NoteRestoreTriggeredEvent
   | NoteRenamedEvent

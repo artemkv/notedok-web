@@ -29,16 +29,16 @@ import {
   NoteSyncFailedEvent,
   NoteTextEditorTextChangedEvent,
   NoteTextSavedEvent,
+  NoteTitleEditorTextChangedEvent,
   RegularNoteStartTextEditingEvent,
+  RegularNoteStartTitleEditingEvent,
   RegularNoteTextUpdatedEvent,
-  RegularNoteTitleEditorTextChangedEvent,
   RegularNoteTitleUpdatedEvent,
   RestApiErrorEvent,
   RetrieveFileListSuccessEvent,
   SearchAutoSuggestionsComputedEvent,
   SearchTextAutoFilledEvent,
   SearchTextChangedEvent,
-  TemplateNoteTitleEditorTextChangedEvent,
   TitleAutoSuggestionsUpdatedEvent,
   UserAuthenticatedEvent,
 } from "./events";
@@ -188,11 +188,15 @@ export const handleSearchTextAutoFilled = (
   return [newState, RetrieveFileList(event.text, newFileListVersion)];
 };
 
-export const cancelAllActiveEditors = (
+export const handleSearchActivated = (
   state: AppStateAuthenticated
 ): [AppStateAuthenticated, AppCommand] => {
+  // cancel all active editors
   const newState: AppStateAuthenticated = {
     ...state,
+    noteTitleEditor: {
+      state: NoteTitleEditorState.NotActive,
+    },
     noteTextEditor: {
       state: NoteTextEditorState.NotActive,
     },
@@ -221,18 +225,24 @@ export const handleSearchCancelEdit = (
   return JustStateAuthenticated(newState);
 };
 
-export const handleTemplateNoteTitleEditorTextChanged = (
+export const handleNoteTitleEditorTextChanged = (
   state: AppStateAuthenticated,
-  event: TemplateNoteTitleEditorTextChangedEvent
+  event: NoteTitleEditorTextChangedEvent
 ): [AppStateAuthenticated, AppCommand] => {
-  const newState: AppStateAuthenticated = {
-    ...state,
-    noteTitleEditor: {
-      state: NoteTitleEditorState.EditingTemplateNote,
-      text: event.newText,
-    },
-  };
-  return JustStateAuthenticated(newState);
+  if (
+    state.noteTitleEditor.state === NoteTitleEditorState.EditingRegularNote ||
+    state.noteTitleEditor.state === NoteTitleEditorState.EditingTemplateNote
+  ) {
+    const newState: AppStateAuthenticated = {
+      ...state,
+      noteTitleEditor: {
+        ...state.noteTitleEditor,
+        text: event.newText,
+      },
+    };
+    return JustStateAuthenticated(newState);
+  }
+  return JustStateAuthenticated(state);
 };
 
 export const handleTemplateNoteTitleUpdated = (
@@ -266,21 +276,6 @@ export const handleTemplateNoteTitleUpdated = (
     ...state,
     noteTitleEditor: {
       state: NoteTitleEditorState.NotActive,
-    },
-  };
-  return JustStateAuthenticated(newState);
-};
-
-export const handleRegularNoteTitleEditorTextChanged = (
-  state: AppStateAuthenticated,
-  event: RegularNoteTitleEditorTextChangedEvent
-): [AppStateAuthenticated, AppCommand] => {
-  const newState: AppStateAuthenticated = {
-    ...state,
-    noteTitleEditor: {
-      state: NoteTitleEditorState.EditingRegularNote,
-      note: event.note,
-      text: event.newText,
     },
   };
   return JustStateAuthenticated(newState);
@@ -358,11 +353,48 @@ export const handleNoteTextEditorCancelEdit = (
   return JustStateAuthenticated(newState);
 };
 
+export const handleTemplateNoteStartTitleEditing = (
+  state: AppStateAuthenticated
+): [AppStateAuthenticated, AppCommand] => {
+  const newState: AppStateAuthenticated = {
+    ...state,
+    noteTitleEditor: {
+      state: NoteTitleEditorState.EditingTemplateNote,
+      text: "",
+    },
+    noteTextEditor: {
+      state: NoteTextEditorState.NotActive,
+    },
+  };
+  return JustStateAuthenticated(newState);
+};
+
+export const handleRegularNoteStartTitleEditing = (
+  state: AppStateAuthenticated,
+  event: RegularNoteStartTitleEditingEvent
+): [AppStateAuthenticated, AppCommand] => {
+  const newState: AppStateAuthenticated = {
+    ...state,
+    noteTitleEditor: {
+      state: NoteTitleEditorState.EditingRegularNote,
+      note: event.note,
+      text: event.note.title,
+    },
+    noteTextEditor: {
+      state: NoteTextEditorState.NotActive,
+    },
+  };
+  return JustStateAuthenticated(newState);
+};
+
 export const handleTemplateNoteStartTextEditing = (
   state: AppStateAuthenticated
 ): [AppStateAuthenticated, AppCommand] => {
   const newState: AppStateAuthenticated = {
     ...state,
+    noteTitleEditor: {
+      state: NoteTitleEditorState.NotActive,
+    },
     noteTextEditor: {
       state: NoteTextEditorState.EditingTemplateNote,
       text: "",
@@ -411,6 +443,9 @@ export const handleRegularNoteStartTextEditing = (
 ): [AppStateAuthenticated, AppCommand] => {
   const newState: AppStateAuthenticated = {
     ...state,
+    noteTitleEditor: {
+      state: NoteTitleEditorState.NotActive,
+    },
     noteTextEditor: {
       state: NoteTextEditorState.EditingRegularNote,
       note: event.note,

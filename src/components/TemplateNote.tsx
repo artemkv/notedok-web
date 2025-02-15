@@ -20,13 +20,13 @@ const TemplateNote = memo(function TemplateNote(props: {
   const autoSuggestHashTags = props.autoSuggestHashTags;
   const dispatch = props.dispatch;
 
-  const getNoteTitle = (): string => {
+  const getTitleEditorState = (): [boolean, string] => {
     if (titleEditable.state === ModifiedState.ModifiedValue) {
-      return titleEditable.newValue;
+      return [true, titleEditable.newValue];
     }
-    return "";
+    return [false, ""];
   };
-  const noteTitle = getNoteTitle();
+  const [isEditingTitle, noteTitle] = getTitleEditorState();
 
   const getTextEditorState = (): [boolean, string] => {
     if (textEditable.state === ModifiedState.ModifiedValue) {
@@ -38,17 +38,18 @@ const TemplateNote = memo(function TemplateNote(props: {
 
   const noteTitleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({
-      type: EventType.TemplateNoteTitleEditorTextChanged,
+      type: EventType.NoteTitleEditorTextChanged,
       newText: e.target.value,
     });
   };
 
   const noteTitleOnFocus = () => {
     dispatch({
-      type: EventType.TitleEditorActivated,
+      type: EventType.TemplateNoteStartTitleEditing,
     });
   };
 
+  // TODO: replace with submit
   const noteTitleOnBlur = () => {
     dispatch({
       type: EventType.TemplateNoteTitleUpdated,
@@ -59,7 +60,7 @@ const TemplateNote = memo(function TemplateNote(props: {
   const noteTitleOnKeyUp = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
       dispatch({
-        type: EventType.TitleEditorCancelEdit,
+        type: EventType.NoteTitleEditorCancelEdit,
       });
     }
   };
@@ -67,7 +68,7 @@ const TemplateNote = memo(function TemplateNote(props: {
   const noteTitleAutoComplete = useCallback(
     (newText: string) => {
       dispatch({
-        type: EventType.TemplateNoteTitleEditorTextChanged,
+        type: EventType.NoteTitleEditorTextChanged,
         newText,
       });
     },
@@ -168,7 +169,7 @@ const TemplateNote = memo(function TemplateNote(props: {
         <input
           id="note_template_title"
           type="text"
-          className="note-title"
+          className={`note-title${isEditingTitle ? "-editable" : ""}`}
           value={noteTitle}
           onChange={noteTitleOnChange}
           onFocus={noteTitleOnFocus}

@@ -50,16 +50,16 @@ const RegularNote = memo(function RegularNote(props: {
   const textEditable = props.textEditable;
   const autoSuggestHashTags = props.autoSuggestHashTags;
 
-  const getNoteTitle = (): string => {
+  const getTitleEditorState = (): [boolean, string] => {
     if (titleEditable.state === ModifiedState.ModifiedValue) {
-      return titleEditable.newValue;
+      return [true, titleEditable.newValue];
     }
     if (note.state === NoteState.CreatingFromText) {
-      return "";
+      return [false, ""];
     }
-    return note.title;
+    return [false, note.title];
   };
-  const noteTitle = getNoteTitle();
+  const [isEditingTitle, noteTitle] = getTitleEditorState();
 
   const getTextEditorState = (): [boolean, string] => {
     if (textEditable.state === ModifiedState.ModifiedValue) {
@@ -80,19 +80,22 @@ const RegularNote = memo(function RegularNote(props: {
   const noteTitleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isTitleEditable(note)) {
       dispatch({
-        type: EventType.RegularNoteTitleEditorTextChanged,
-        note,
+        type: EventType.NoteTitleEditorTextChanged,
         newText: e.target.value,
       });
     }
   };
 
   const noteTitleOnFocus = () => {
-    dispatch({
-      type: EventType.TitleEditorActivated,
-    });
+    if (isTitleEditable(note)) {
+      dispatch({
+        type: EventType.RegularNoteStartTitleEditing,
+        note,
+      });
+    }
   };
 
+  // TODO: replace with submit
   const noteTitleOnBlur = () => {
     if (isTitleSaveable(note)) {
       dispatch({
@@ -106,7 +109,7 @@ const RegularNote = memo(function RegularNote(props: {
   const noteTitleOnKeyUp = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
       dispatch({
-        type: EventType.TitleEditorCancelEdit,
+        type: EventType.NoteTitleEditorCancelEdit,
       });
     }
   };
@@ -115,8 +118,7 @@ const RegularNote = memo(function RegularNote(props: {
     (newText: string) => {
       if (isTitleEditable(note)) {
         dispatch({
-          type: EventType.RegularNoteTitleEditorTextChanged,
-          note,
+          type: EventType.NoteTitleEditorTextChanged,
           newText,
         });
       }
@@ -332,7 +334,7 @@ const RegularNote = memo(function RegularNote(props: {
         <input
           id={`${note.id}_title`}
           type="text"
-          className="note-title"
+          className={`note-title${isEditingTitle ? "-editable" : ""}`}
           value={noteTitle}
           onChange={noteTitleOnChange}
           onFocus={noteTitleOnFocus}
