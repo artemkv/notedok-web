@@ -43,18 +43,18 @@ const TemplateNote = memo(function TemplateNote(props: {
     });
   };
 
-  const noteTitleOnFocus = () => {
+  const noteTitleOnClick = () => {
     dispatch({
       type: EventType.TemplateNoteStartTitleEditing,
     });
   };
 
-  // TODO: replace with submit
-  const noteTitleOnBlur = () => {
+  const onTitleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     dispatch({
       type: EventType.TemplateNoteTitleUpdated,
       newTitle: noteTitle,
     });
+    e.preventDefault();
   };
 
   const noteTitleOnKeyUp = (e: React.KeyboardEvent) => {
@@ -166,18 +166,20 @@ const TemplateNote = memo(function TemplateNote(props: {
   return (
     <div id="note_template" className="note-outer">
       <div className="note-inner">
-        <input
-          id="note_template_title"
-          type="text"
-          className={`note-title${isEditingTitle ? "-editable" : ""}`}
-          value={noteTitle}
-          onChange={noteTitleOnChange}
-          onFocus={noteTitleOnFocus}
-          onBlur={noteTitleOnBlur}
-          onKeyUp={noteTitleOnKeyUp}
-          placeholder={uistrings.TemplateNoteTitlePlaceholder}
-          maxLength={50}
-        />
+        <form onSubmit={onTitleSubmit}>
+          <input
+            readOnly={!isEditingTitle}
+            id="note_template_title"
+            type="text"
+            className={`note-title${isEditingTitle ? "-editable" : ""}`}
+            value={noteTitle}
+            onChange={noteTitleOnChange}
+            onFocus={noteTitleOnClick}
+            onKeyUp={noteTitleOnKeyUp}
+            placeholder={uistrings.TemplateNoteTitlePlaceholder}
+            maxLength={50}
+          />
+        </form>
         <NoteTitleAutocomplete
           noteTitleId="note_template_title"
           autoSuggestHashTags={autoSuggestHashTags}

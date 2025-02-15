@@ -86,7 +86,7 @@ const RegularNote = memo(function RegularNote(props: {
     }
   };
 
-  const noteTitleOnFocus = () => {
+  const noteTitleOnClick = () => {
     if (isTitleEditable(note)) {
       dispatch({
         type: EventType.RegularNoteStartTitleEditing,
@@ -95,8 +95,7 @@ const RegularNote = memo(function RegularNote(props: {
     }
   };
 
-  // TODO: replace with submit
-  const noteTitleOnBlur = () => {
+  const onTitleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     if (isTitleSaveable(note)) {
       dispatch({
         type: EventType.RegularNoteTitleUpdated,
@@ -104,6 +103,7 @@ const RegularNote = memo(function RegularNote(props: {
         newTitle: noteTitle,
       });
     }
+    e.preventDefault();
   };
 
   const noteTitleOnKeyUp = (e: React.KeyboardEvent) => {
@@ -331,18 +331,20 @@ const RegularNote = memo(function RegularNote(props: {
     <div id={note.id} className="note-outer">
       {hasError ? noteError() : Empty()}
       <div className="note-inner">
-        <input
-          id={`${note.id}_title`}
-          type="text"
-          className={`note-title${isEditingTitle ? "-editable" : ""}`}
-          value={noteTitle}
-          onChange={noteTitleOnChange}
-          onFocus={noteTitleOnFocus}
-          onBlur={noteTitleOnBlur}
-          onKeyUp={noteTitleOnKeyUp}
-          placeholder={uistrings.NoteTitlePlaceholder}
-          maxLength={50}
-        />
+        <form onSubmit={onTitleSubmit}>
+          <input
+            readOnly={!isEditingTitle}
+            id={`${note.id}_title`}
+            type="text"
+            className={`note-title${isEditingTitle ? "-editable" : ""}`}
+            value={noteTitle}
+            onChange={noteTitleOnChange}
+            onClick={noteTitleOnClick}
+            onKeyUp={noteTitleOnKeyUp}
+            placeholder={uistrings.NoteTitlePlaceholder}
+            maxLength={50}
+          />
+        </form>
         <NoteTitleAutocomplete
           noteTitleId={`${note.id}_title`}
           autoSuggestHashTags={autoSuggestHashTags}
