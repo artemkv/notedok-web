@@ -97,6 +97,7 @@ Once the changes are saved, the new empty note should appear allowing me to cont
 
 
 TODOs:
+- it's lagging again... test if this is because of autocomplete
 - tab does not stop on control area buttons
 - utf-8
 - use etags to avoid getting content if didn't change
@@ -128,43 +129,3 @@ title updated ->
 	- V try to save, not overwrite (POST files)
 	- V if conflicts, make unique and save with overwrite (PUT file)
 	- inform UI
-
-
-
-/*
-export const commitAnyOpenEditor = (
-  state: AppStateAuthenticated
-): [AppStateAuthenticated, AppCommand] => {
-  if (state.noteList.state === NoteListState.FileListRetrieved) {
-    if (state.noteTextEditor.state === NoteTextEditorState.NotActive) {
-      return JustStateAuthenticated(state);
-    }
-
-    let newNoteList: NoteListFileListRetrieved;
-    let command: AppCommand;
-    if (state.noteTextEditor.state === NoteTextEditorState.EditingRegularNote) {
-      [newNoteList, command] = finishNoteTextEditing(
-        state.noteList,
-        state.noteTextEditor.note as NoteTextSaveable,
-        state.noteTextEditor
-      );
-    } else {
-      [newNoteList, command] = convertToRegularNoteOnTextUpdated(
-        state.noteList,
-        state.noteTextEditor
-      );
-    }
-
-    const newState: AppStateAuthenticated = {
-      ...state,
-      noteList: newNoteList,
-      noteTextEditor: {
-        state: NoteTextEditorState.NotActive,
-      },
-    };
-    return [newState, command];
-  }
-
-  return JustStateAuthenticated(state);
-};
-*/
