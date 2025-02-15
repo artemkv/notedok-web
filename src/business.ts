@@ -815,7 +815,7 @@ const shiftNotesToLoad = (
 
   // Prepare the dummy notes that need to be loaded
   const notesToLoad = filesToLoad.map((path, idx) => {
-    return createNewNoteRef(noteList.lastUsedNoteId + idx, path);
+    return createNewNoteRef(noteList.lastUsedNoteId + idx + 1, path);
   });
 
   // Put on a rendering queue to keep track of the order

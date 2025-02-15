@@ -98,7 +98,6 @@ Once the changes are saved, the new empty note should appear allowing me to cont
 
 TODOs:
 - it's lagging again... test if this is because of autocomplete
-- for some reason it is possible to have 2 deleted notes visible
 - tab does not stop on control area buttons
 - utf-8
 - use etags to avoid getting content if didn't change
