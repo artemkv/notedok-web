@@ -10,43 +10,48 @@
     border-bottom: 1px solid #e3e3e3;
 }
 
-.note-title {
+.note-title-container {
     margin-top: 4px;
-    margin-bottom: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.note-title-form {
+    flex: 2;
+}
+
+.note-title {
     font-family: "Segoe UI", arial, sans-serif;
     font-weight: 400;
     font-size: 30px;
-    padding: 4px 8px 2px 8px;
+    padding: 4px 8px 1px 8px;
+    width: 100%;
     border: none;
     outline: none;
-    width: 100%;
-    box-sizing: border-box;
     color: #000000;
     text-overflow: ellipsis;
 }
 
-.note-title-editable {
-    margin-top: 4px;
-    margin-bottom: 16px;
-    font-family: "Segoe UI", arial, sans-serif;
-    font-weight: 400;
-    font-size: 30px;
-    padding: 4px 8px 2px 8px;
-    border: none;
+.note-title-editable-underline {
     border-bottom: 1px solid #e3e3e3;
-    outline: none;
-    width: 100%;
-    box-sizing: border-box;
-    color: #000000;
-    text-overflow: ellipsis;
+    margin: 0px 8px 16px 8px;
+}
+
+.note-title-underline {
+    border-bottom: 1px solid white;
+    margin: 0px 8px 16px 8px;
+}
+
+.note-title-progress {
+    margin-right: 8px;
 }
 
 .note-error {
     margin-top: 4px;
     margin-bottom: 4px;
-    padding: 4px 8px 2px 8px;
-    border: none;
-    outline: none;
     width: 100%;
     box-sizing: border-box;
     display: flex;
@@ -55,7 +60,8 @@
 }
 
 .note-error-text {
-    margin-left: 16px;
+    margin-left: 2px;
+    padding: 2px 8px 2px 8px;
     color: #e92967;
     border: none;
     outline: none;

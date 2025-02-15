@@ -168,20 +168,31 @@ const TemplateNote = memo(function TemplateNote(props: {
   return (
     <div id="note_template" className="note-outer">
       <div className="note-inner">
-        <form onSubmit={onTitleSubmit}>
-          <input
-            readOnly={!isEditingTitle}
-            id="note_template_title"
-            type="text"
-            className={`note-title${isEditingTitle ? "-editable" : ""}`}
-            value={noteTitle}
-            onChange={noteTitleOnChange}
-            onFocus={noteTitleOnClick}
-            onKeyUp={noteTitleOnKeyUp}
-            placeholder={uistrings.TemplateNoteTitlePlaceholder}
-            maxLength={50}
-          />
-        </form>
+        <div className="note-title-outer">
+          <div className="note-title-container">
+            <form onSubmit={onTitleSubmit}>
+              <input
+                readOnly={!isEditingTitle}
+                id="note_template_title"
+                type="text"
+                className="note-title"
+                value={noteTitle}
+                onChange={noteTitleOnChange}
+                onFocus={noteTitleOnClick}
+                onKeyUp={noteTitleOnKeyUp}
+                placeholder={uistrings.TemplateNoteTitlePlaceholder}
+                maxLength={50}
+              />
+            </form>
+          </div>
+          <div
+            className={
+              isEditingTitle
+                ? "note-title-editable-underline"
+                : "note-title-underline"
+            }
+          ></div>
+        </div>
         <NoteTitleAutocomplete
           noteTitleId="note_template_title"
           autoSuggestHashTags={autoSuggestHashTags}

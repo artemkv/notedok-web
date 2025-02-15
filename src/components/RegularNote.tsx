@@ -34,16 +34,20 @@ const RegularNote = memo(function RegularNote(props: {
   const note = props.note;
   const dispatch = props.dispatch;
 
-  const isPendingStorageUpdate = (note: NoteRegular) => {
+  const isPendingTitleUpdate = (note: NoteRegular) => {
+    return note.state === NoteState.Renaming;
+  };
+  const isPendingTextUpdate = (note: NoteRegular) => {
     return (
-      note.state === NoteState.Renaming ||
       note.state === NoteState.SavingText ||
       note.state === NoteState.Restoring ||
-      note.state === NoteState.CreatingFromText ||
-      note.state === NoteState.CreatingFromTitle
+      note.state === NoteState.CreatingFromTitle || // prevents showing "Save" button until saved
+      note.state === NoteState.CreatingFromText
     );
   };
-  const isBusy = isPendingStorageUpdate(note);
+  const isBusyTitle = isPendingTitleUpdate(note);
+  const isBusyText = isPendingTextUpdate(note);
+
   const hasError = note.state === NoteState.OutOfSync;
   const errorText = hasError ? note.err : "";
   const titleEditable = props.titleEditable;
@@ -262,7 +266,7 @@ const RegularNote = memo(function RegularNote(props: {
   };
 
   const controlArea = () => {
-    if (isBusy) {
+    if (isBusyText) {
       return busyNoteControlArea();
     }
     if (isEditingText) {
@@ -331,20 +335,46 @@ const RegularNote = memo(function RegularNote(props: {
     <div id={note.id} className="note-outer">
       {hasError ? noteError() : Empty()}
       <div className="note-inner">
-        <form onSubmit={onTitleSubmit}>
-          <input
-            readOnly={!isEditingTitle}
-            id={`${note.id}_title`}
-            type="text"
-            className={`note-title${isEditingTitle ? "-editable" : ""}`}
-            value={noteTitle}
-            onChange={noteTitleOnChange}
-            onClick={noteTitleOnClick}
-            onKeyUp={noteTitleOnKeyUp}
-            placeholder={uistrings.NoteTitlePlaceholder}
-            maxLength={50}
-          />
-        </form>
+        <div className="note-title-outer">
+          <div className="note-title-container">
+            <form className="note-title-form" onSubmit={onTitleSubmit}>
+              <input
+                readOnly={!isEditingTitle}
+                id={`${note.id}_title`}
+                type="text"
+                className="note-title"
+                value={noteTitle}
+                onChange={noteTitleOnChange}
+                onClick={noteTitleOnClick}
+                onKeyUp={noteTitleOnKeyUp}
+                placeholder={uistrings.NoteTitlePlaceholder}
+                maxLength={50}
+              />
+            </form>
+            <div className="note-title-progress-container">
+              {isBusyTitle ? (
+                <div className="note-title-progress">
+                  <OrbitProgress
+                    variant="dotted"
+                    color="#a9a9a9"
+                    style={{ fontSize: "3px" }}
+                    text=""
+                    textColor=""
+                  />
+                </div>
+              ) : (
+                <Empty />
+              )}
+            </div>
+          </div>
+          <div
+            className={
+              isEditingTitle
+                ? "note-title-editable-underline"
+                : "note-title-underline"
+            }
+          ></div>
+        </div>
         <NoteTitleAutocomplete
           noteTitleId={`${note.id}_title`}
           autoSuggestHashTags={autoSuggestHashTags}
