@@ -44,9 +44,11 @@ const TemplateNote = memo(function TemplateNote(props: {
   };
 
   const noteTitleOnClick = () => {
-    dispatch({
-      type: EventType.TemplateNoteStartTitleEditing,
-    });
+    if (!isEditingTitle) {
+      dispatch({
+        type: EventType.TemplateNoteStartTitleEditing,
+      });
+    }
   };
 
   const onTitleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

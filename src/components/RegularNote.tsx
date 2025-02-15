@@ -87,7 +87,7 @@ const RegularNote = memo(function RegularNote(props: {
   };
 
   const noteTitleOnClick = () => {
-    if (isTitleEditable(note)) {
+    if (isTitleEditable(note) && !isEditingTitle) {
       dispatch({
         type: EventType.RegularNoteStartTitleEditing,
         note,
@@ -116,14 +116,14 @@ const RegularNote = memo(function RegularNote(props: {
 
   const noteTitleAutoComplete = useCallback(
     (newText: string) => {
-      if (isTitleEditable(note)) {
+      if (isEditingTitle) {
         dispatch({
           type: EventType.NoteTitleEditorTextChanged,
           newText,
         });
       }
     },
-    [dispatch, note]
+    [dispatch, isEditingTitle]
   );
 
   const noteTextOnClick = (e: React.SyntheticEvent) => {
