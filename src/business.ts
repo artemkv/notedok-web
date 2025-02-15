@@ -17,16 +17,18 @@ import {
 } from "./commands/storage";
 import {
   LoadNoteTextSuccessEvent,
-  NoteCreationFromTextFailedEvent,
-  NoteCreationFromTitleFailedEvent,
+  NoteCreatedEvent,
+  NoteCreationFailedEvent,
   NoteDeletedEvent,
   NoteDeleteTriggeredEvent,
   NoteLoadFailedEvent,
+  NoteRenamedEvent,
+  NoteRestoredEvent,
+  NoteRestoredOnNewPathEvent,
   NoteRestoreTriggeredEvent,
-  NoteSavedEvent,
-  NoteSavedOnNewPathEvent,
   NoteSyncFailedEvent,
   NoteTextEditorTextChangedEvent,
+  NoteTextSavedEvent,
   RegularNoteStartTextEditingEvent,
   RegularNoteTextUpdatedEvent,
   RegularNoteTitleEditorTextChangedEvent,
@@ -60,8 +62,6 @@ import {
   NoteState,
   NoteTextSaveable,
   NoteTitleSaveable,
-  NoteSyncing,
-  NotePendingStorageUpdate,
   NoteDeleted,
   NoteDeletable,
   Note,
@@ -71,6 +71,11 @@ import {
   AppStateAuthenticated,
   AppStateUnauthenticated,
   SearchAutoSuggestState,
+  NoteRenaming,
+  NoteSavingText,
+  NoteCreatingFromText,
+  NoteCreatingFromTitle,
+  NoteRestoring,
 } from "./model";
 import {
   createNewNoteFromText,
@@ -80,17 +85,23 @@ import {
   noteCreatingFromTextToSynced,
   noteCreatingFromTitleToOutOfSync,
   noteCreatingFromTitleToSynced,
-  noteDeletedToSyncing,
+  noteDeletedToRestoring,
   noteDeletingToDeleted,
   noteOutOfSyncToDeleting,
-  noteOutOfSyncToSyncing,
+  noteOutOfSyncToRenaming,
+  noteOutOfSyncToSavingText,
   noteRefToOutOfSync,
   noteRefToSynced,
+  noteRenamingToOutOfSync,
+  noteRenamingToSyncedWithNewPath,
+  noteRestoringToOutOfSync,
+  noteRestoringToSynced,
+  noteRestoringToSyncedWithNewPath,
+  noteSavingTextToOutOfSync,
+  noteSavingTextToSynced,
   noteSyncedToDeleting,
-  noteSyncedToSyncing,
-  noteSyncingToOutOfSync,
-  noteSyncingToSynced,
-  noteSyncingToSyncedWithNewPath,
+  noteSyncedToRenaming,
+  noteSyncedToSavingText,
 } from "./noteLifecycle";
 
 export const NOTES_ON_PAGE = 10;
@@ -567,9 +578,9 @@ export const handleTitleAutoSuggestionsUpdated = (
   return JustStateAuthenticated(state);
 };
 
-export const handleNoteSavedOnNewPath = (
+export const handleNoteRenamed = (
   state: AppStateAuthenticated,
-  event: NoteSavedOnNewPathEvent
+  event: NoteRenamedEvent
 ): [AppStateAuthenticated, AppCommand] => {
   const [newNoteList, newNoteTitleEditor, newNoteTextEditor, command] =
     updateNotePath(state, event.note, event.newPath);
@@ -583,9 +594,56 @@ export const handleNoteSavedOnNewPath = (
   return [newState, command];
 };
 
-export const handleNoteSaved = (
+export const handleNoteCreated = (
   state: AppStateAuthenticated,
-  event: NoteSavedEvent
+  event: NoteCreatedEvent
+): [AppStateAuthenticated, AppCommand] => {
+  const [newNoteList, newNoteTitleEditor, newNoteTextEditor, command] =
+    updateNotePath(state, event.note, event.newPath);
+  const newState: AppStateAuthenticated = {
+    ...state,
+    noteTitleEditor: newNoteTitleEditor,
+    noteTextEditor: newNoteTextEditor,
+    noteList: newNoteList,
+  };
+
+  return [newState, command];
+};
+
+export const handleNoteRestoredOnNewPath = (
+  state: AppStateAuthenticated,
+  event: NoteRestoredOnNewPathEvent
+): [AppStateAuthenticated, AppCommand] => {
+  const [newNoteList, newNoteTitleEditor, newNoteTextEditor, command] =
+    updateNotePath(state, event.note, event.newPath);
+  const newState: AppStateAuthenticated = {
+    ...state,
+    noteTitleEditor: newNoteTitleEditor,
+    noteTextEditor: newNoteTextEditor,
+    noteList: newNoteList,
+  };
+
+  return [newState, command];
+};
+
+export const handleNoteTextSaved = (
+  state: AppStateAuthenticated,
+  event: NoteTextSavedEvent
+): [AppStateAuthenticated, AppCommand] => {
+  const [newNoteList, newNoteTitleEditor, newNoteTextEditor] =
+    updateNoteAsSynced(state, event.note);
+  const newState: AppStateAuthenticated = {
+    ...state,
+    noteTitleEditor: newNoteTitleEditor,
+    noteTextEditor: newNoteTextEditor,
+    noteList: newNoteList,
+  };
+  return JustStateAuthenticated(newState);
+};
+
+export const handleNoteRestored = (
+  state: AppStateAuthenticated,
+  event: NoteRestoredEvent
 ): [AppStateAuthenticated, AppCommand] => {
   const [newNoteList, newNoteTitleEditor, newNoteTextEditor] =
     updateNoteAsSynced(state, event.note);
@@ -668,7 +726,7 @@ export const handleNoteSyncFailed = (
   event: NoteSyncFailedEvent
 ): [AppStateAuthenticated, AppCommand] => {
   const [newNoteList, newNoteTitleEditor, newNoteTextEditor] =
-    updateNoteAsOutOfSync(state, event.note, event.note.path, event.err);
+    updateNoteAsOutOfSync(state, event.note, event.err);
   const newState: AppStateAuthenticated = {
     ...state,
     noteTitleEditor: newNoteTitleEditor,
@@ -678,27 +736,12 @@ export const handleNoteSyncFailed = (
   return [newState, ReportError(event.err)];
 };
 
-export const handleNoteCreationFromTitleFailed = (
+export const handleNoteCreationFailed = (
   state: AppStateAuthenticated,
-  event: NoteCreationFromTitleFailedEvent
+  event: NoteCreationFailedEvent
 ): [AppStateAuthenticated, AppCommand] => {
   const [newNoteList, newNoteTitleEditor, newNoteTextEditor] =
-    updateNoteAsOutOfSync(state, event.note, event.path, event.err);
-  const newState: AppStateAuthenticated = {
-    ...state,
-    noteTitleEditor: newNoteTitleEditor,
-    noteTextEditor: newNoteTextEditor,
-    noteList: newNoteList,
-  };
-  return [newState, ReportError(event.err)];
-};
-
-export const handleNoteCreationFromTextFailed = (
-  state: AppStateAuthenticated,
-  event: NoteCreationFromTextFailedEvent
-): [AppStateAuthenticated, AppCommand] => {
-  const [newNoteList, newNoteTitleEditor, newNoteTextEditor] =
-    updateNoteAsOutOfSync(state, event.note, event.path, event.err);
+    updateNoteAsOutOfSyncWithNewPath(state, event.note, event.path, event.err);
   const newState: AppStateAuthenticated = {
     ...state,
     noteTitleEditor: newNoteTitleEditor,
@@ -816,7 +859,7 @@ const finishNoteTitleEditing = (
     return [noteList, DoNothing];
   }
 
-  const newNote = noteTitleSaveableToSyncing(note, newTitle);
+  const newNote = noteTitleSaveableToRenaming(note, newTitle);
   const newNoteList = replaceNote(noteList, newNote);
   const command = RenameNoteFromTitle(newNote);
   return [newNoteList, command];
@@ -835,7 +878,7 @@ const finishNoteTextEditing = (
     return [noteList, DoNothing];
   }
 
-  const newNote = noteTextSaveableToSyncing(note, newText);
+  const newNote = noteTextSaveableToSavingText(note, newText);
   const newNoteList = replaceNote(noteList, newNote);
   const command = SaveNoteText(newNote);
   return [newNoteList, command];
@@ -916,7 +959,11 @@ const convertToRegularNoteOnTextUpdated = (
 
 const updateNotePath = (
   state: AppStateAuthenticated,
-  note: NotePendingStorageUpdate,
+  note:
+    | NoteRenaming
+    | NoteCreatingFromTitle
+    | NoteCreatingFromText
+    | NoteRestoring,
   newPath: string
 ): [NoteList, NoteTitleEditor, NoteTextEditor, AppCommand] => {
   const noteTitleEditor = state.noteTitleEditor;
@@ -925,7 +972,7 @@ const updateNotePath = (
 
   if (noteList.state === NoteListState.FileListRetrieved) {
     // New note with an updated path
-    const newNote: NoteSynced = notePendingStorageUpdateToSynced(note, newPath);
+    const newNote: NoteSynced = toSyncedWithNewPath(note, newPath);
     const newNoteList = replaceNote(noteList, newNote);
 
     // Update editors to make sure they reference up-to-date note
@@ -961,7 +1008,7 @@ const updateNotePath = (
 
 const updateNoteAsSynced = (
   state: AppStateAuthenticated,
-  note: NoteSyncing
+  note: NoteSavingText | NoteRestoring
 ): [NoteList, NoteTitleEditor, NoteTextEditor] => {
   const noteTitleEditor = state.noteTitleEditor;
   const noteTextEditor = state.noteTextEditor;
@@ -969,7 +1016,7 @@ const updateNoteAsSynced = (
 
   if (noteList.state === NoteListState.FileListRetrieved) {
     // New note with the same path
-    const newNote: NoteSynced = noteSyncingToSynced(note);
+    const newNote: NoteSynced = toSynced(note);
     const newNoteList = replaceNote(noteList, newNote);
 
     // Update editors to make sure they reference up-to-date note
@@ -1000,7 +1047,47 @@ const updateNoteAsSynced = (
 
 const updateNoteAsOutOfSync = (
   state: AppStateAuthenticated,
-  note: NotePendingStorageUpdate,
+  note: NoteRenaming | NoteSavingText | NoteRestoring,
+  err: string
+): [NoteList, NoteTitleEditor, NoteTextEditor] => {
+  const noteTitleEditor = state.noteTitleEditor;
+  const noteTextEditor = state.noteTextEditor;
+  const noteList = state.noteList;
+
+  if (noteList.state === NoteListState.FileListRetrieved) {
+    // New note with the same path
+    const newNote: NoteOutOfSync = toOutOfSync(note, err);
+    const newNoteList = replaceNote(noteList, newNote);
+
+    // Update editors to make sure they reference up-to-date note
+    let newNoteTextEditor = noteTextEditor;
+    if (noteTextEditor.state === NoteTextEditorState.EditingRegularNote) {
+      if (noteTextEditor.note.id === note.id) {
+        newNoteTextEditor = {
+          ...noteTextEditor,
+          note: newNote,
+        };
+      }
+    }
+    let newNoteTitleEditor = noteTitleEditor;
+    if (noteTitleEditor.state === NoteTitleEditorState.EditingRegularNote) {
+      if (noteTitleEditor.note.id === note.id) {
+        newNoteTitleEditor = {
+          ...noteTitleEditor,
+          note: newNote,
+        };
+      }
+    }
+
+    return [newNoteList, newNoteTitleEditor, newNoteTextEditor];
+  }
+
+  return [noteList, noteTitleEditor, noteTextEditor];
+};
+
+const updateNoteAsOutOfSyncWithNewPath = (
+  state: AppStateAuthenticated,
+  note: NoteCreatingFromTitle | NoteCreatingFromText,
   path: string,
   err: string
 ): [NoteList, NoteTitleEditor, NoteTextEditor] => {
@@ -1010,11 +1097,7 @@ const updateNoteAsOutOfSync = (
 
   if (noteList.state === NoteListState.FileListRetrieved) {
     // New note with the same path
-    const newNote: NoteOutOfSync = notePendingStorageUpdateToOutOfSync(
-      note,
-      path,
-      err
-    );
+    const newNote: NoteOutOfSync = toOutOfSyncWithNewPath(note, path, err);
     const newNoteList = replaceNote(noteList, newNote);
 
     // Update editors to make sure they reference up-to-date note
@@ -1093,9 +1176,9 @@ const updateNoteAsDeleted = (
 const restoreNote = (
   noteList: NoteListFileListRetrieved,
   note: NoteDeleted
-): [NoteListFileListRetrieved, NoteSyncing] => {
+): [NoteListFileListRetrieved, NoteRestoring] => {
   // Undelete the note
-  const newNote = noteDeletedToSyncing(note);
+  const newNote = noteDeletedToRestoring(note);
   const newNoteList = replaceNote(noteList, newNote);
 
   return [newNoteList, newNote];
@@ -1115,50 +1198,65 @@ const replaceNote = (
   };
 };
 
-const noteTitleSaveableToSyncing = (
+const noteTitleSaveableToRenaming = (
   note: NoteTitleSaveable,
   newTitle: string
-): NoteSyncing => {
+): NoteRenaming => {
   if (note.state === NoteState.Synced) {
     return {
-      ...noteSyncedToSyncing(note),
+      ...noteSyncedToRenaming(note),
       title: newTitle,
     };
   }
   if (note.state === NoteState.OutOfSync) {
     return {
-      ...noteOutOfSyncToSyncing(note),
+      ...noteOutOfSyncToRenaming(note),
       title: newTitle,
     };
   }
   throw new Error("Impossible");
 };
 
-const noteTextSaveableToSyncing = (
+const noteTextSaveableToSavingText = (
   note: NoteTextSaveable,
   newText: string
-): NoteSyncing => {
+): NoteSavingText => {
   if (note.state === NoteState.Synced) {
     return {
-      ...noteSyncedToSyncing(note),
+      ...noteSyncedToSavingText(note),
       text: newText,
     };
   }
   if (note.state === NoteState.OutOfSync) {
     return {
-      ...noteOutOfSyncToSyncing(note),
+      ...noteOutOfSyncToSavingText(note),
       text: newText,
     };
   }
   throw new Error("Impossible");
 };
 
-const notePendingStorageUpdateToSynced = (
-  note: NotePendingStorageUpdate,
+const toSynced = (note: NoteSavingText | NoteRestoring): NoteSynced => {
+  if (note.state === NoteState.SavingText) {
+    return noteSavingTextToSynced(note);
+  }
+  if (note.state === NoteState.Restoring) {
+    return noteRestoringToSynced(note);
+  }
+
+  throw new Error("Impossible");
+};
+
+const toSyncedWithNewPath = (
+  note:
+    | NoteRenaming
+    | NoteCreatingFromTitle
+    | NoteCreatingFromText
+    | NoteRestoring,
   newPath: string
 ): NoteSynced => {
-  if (note.state === NoteState.Syncing) {
-    return noteSyncingToSyncedWithNewPath(note, newPath);
+  if (note.state === NoteState.Renaming) {
+    return noteRenamingToSyncedWithNewPath(note, newPath);
   }
   if (note.state === NoteState.CreatingFromTitle) {
     return noteCreatingFromTitleToSynced(note, newPath);
@@ -1166,17 +1264,37 @@ const notePendingStorageUpdateToSynced = (
   if (note.state === NoteState.CreatingFromText) {
     return noteCreatingFromTextToSynced(note, newPath);
   }
+  if (note.state === NoteState.Restoring) {
+    return noteRestoringToSyncedWithNewPath(note, newPath);
+  }
   throw new Error("Impossible");
 };
 
-const notePendingStorageUpdateToOutOfSync = (
-  note: NotePendingStorageUpdate,
+const toOutOfSync = (
+  note: NoteRenaming | NoteSavingText | NoteRestoring,
+  err: string
+): NoteOutOfSync => {
+  if (note.state === NoteState.Renaming) {
+    return noteRenamingToOutOfSync(note, err);
+  }
+  if (note.state === NoteState.SavingText) {
+    return noteSavingTextToOutOfSync(note, err);
+  }
+  // TODO: consider this case
+  /*if (note.state === NoteState.Deleting) {
+    return noteDeletingToOutOfSync(note, err);
+  }*/
+  if (note.state === NoteState.Restoring) {
+    return noteRestoringToOutOfSync(note, err);
+  }
+  throw new Error("Impossible");
+};
+
+const toOutOfSyncWithNewPath = (
+  note: NoteCreatingFromTitle | NoteCreatingFromText,
   path: string,
   err: string
 ): NoteOutOfSync => {
-  if (note.state === NoteState.Syncing) {
-    return noteSyncingToOutOfSync(note, err);
-  }
   if (note.state === NoteState.CreatingFromTitle) {
     return noteCreatingFromTitleToOutOfSync(note, path, err);
   }

@@ -8,7 +8,6 @@ import {
   isTextEditable,
   isTextSaveable,
   isDeletable,
-  isPendingStorageUpdate,
   EditableText,
   ModifiedState,
   AutoSuggestHashTag,
@@ -35,6 +34,15 @@ const RegularNote = memo(function RegularNote(props: {
   const note = props.note;
   const dispatch = props.dispatch;
 
+  const isPendingStorageUpdate = (note: NoteRegular) => {
+    return (
+      note.state === NoteState.Renaming ||
+      note.state === NoteState.SavingText ||
+      note.state === NoteState.Restoring ||
+      note.state === NoteState.CreatingFromText ||
+      note.state === NoteState.CreatingFromTitle
+    );
+  };
   const isBusy = isPendingStorageUpdate(note);
   const hasError = note.state === NoteState.OutOfSync;
   const errorText = hasError ? note.err : "";

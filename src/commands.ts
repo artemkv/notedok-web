@@ -5,7 +5,9 @@ import {
   NoteCreatingFromTitle,
   NoteDeleting,
   NoteRef,
-  NoteSyncing,
+  NoteRenaming,
+  NoteRestoring,
+  NoteSavingText,
 } from "./model";
 
 export enum CommandType {
@@ -65,12 +67,12 @@ export interface LoadNoteTextCommand extends Command<AppEvent> {
 
 export interface RenameNoteFromTitleCommand extends Command<AppEvent> {
   type: CommandType.RenameNoteFromTitle;
-  note: NoteSyncing;
+  note: NoteRenaming;
 }
 
 export interface SaveNoteTextCommand extends Command<AppEvent> {
   type: CommandType.SaveNoteText;
-  note: NoteSyncing;
+  note: NoteSavingText;
 }
 
 export interface CreateNewNoteWithTitleCommand extends Command<AppEvent> {
@@ -90,7 +92,7 @@ export interface DeleteNoteCommand extends Command<AppEvent> {
 
 export interface RestoreNoteCommand extends Command<AppEvent> {
   type: CommandType.RestoreNote;
-  note: NoteSyncing;
+  note: NoteRestoring;
 }
 
 export interface ReportErrorCommand extends Command<AppEvent> {

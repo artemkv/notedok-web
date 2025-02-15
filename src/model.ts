@@ -1,26 +1,58 @@
 // note
 
+// State diagram, boxes
+
+// Design approach: retain information by using specific states
+// (e.g. 'Renaming' and 'SavingText' instead of simply 'Syncing')
+// This prevents impossible transitions and allows for more specific UI feedback
+// The history collapses as we arrive at the "happy" state (i.e. Synced)
+// Another point the history collapses is the "unhappy" state (i.e. OutOfSync)
+// This is by choice and not necessary universally correct decision,
+// as it could actually be useful to remember what exactly failed.
+// But the state transition diagram would grow more complex, so I decided
+// not to invest into unhappy flow too much, by treating all the note-specific errors equally.
+// The unhappy state may still have memory if we add retry mechanism.
 export enum NoteState {
   // Invisible, needs to be retrieved from storage
   Ref, // -> Synced, OutOfSync
+
   // Fully aligned with the storage. Can be edited, renamed or deleted
-  Synced, // -> Syncing, Deleting
-  // Has been changed from UI and is updating back to storage
+  // Here we forget the previous history
+  Synced, // -> Renaming, SavingText, Deleting
+
+  // The title has been updated and note is being renamed
   // Cannot edit, rename or delete
-  Syncing, // -> Synced | OutOfSync
+  Renaming, // -> Synced | OutOfSync
+
+  // The text has been updated and saving back to storage
+  // Cannot edit, rename or delete
+  SavingText, // -> Synced | OutOfSync
+
   // Has failed the sync attempt, and is not anymore aligned with storage
   // Can be edited, renamed or deleted, to allow the user to solve the issue
-  OutOfSync, // -> Syncing, Deleting
+  // Another point where we forget history,
+  //    although we could indirectly remember the last state,
+  //    if we add retry mechanism and keep the last failed command
+  OutOfSync, // -> Renaming, SavingText, Deleting
+
   // Was deleted in UI, and is pending deletion in the storage
   // Cannot edit, rename or delete
   Deleting, // -> Deleted, OutOfSync
+
   // Completely deleted from storage
   // Cannot edit or rename, only restore
-  Deleted, // -> Syncing
-  // Was created in UI from the template note by editing title, currently pending creation in the storage
+  Deleted, // -> Restoring
+
+  // Only exist in UI, being saved back to storage
+  Restoring, // -> Synced | OutOfSync
+
+  // Was created in UI from the template note by editing title,
+  // currently pending creation in the storage
   // Text is immediately editable, but cannot rename or delete until is synced
   CreatingFromTitle, // -> Synced, OutOfSync
-  // Was created in UI from the template note by editing text, currently pending creation in the storage
+
+  // Was created in UI from the template note by editing text,
+  // currently pending creation in the storage
   // Cannot edit, rename or delete
   CreatingFromText, // -> Synced, OutOfSync
 }
@@ -44,8 +76,17 @@ export interface NoteSynced {
   text: string;
 }
 
-export interface NoteSyncing {
-  state: NoteState.Syncing;
+export interface NoteRenaming {
+  state: NoteState.Renaming;
+
+  id: string;
+  path: string;
+  title: string;
+  text: string;
+}
+
+export interface NoteSavingText {
+  state: NoteState.SavingText;
 
   id: string;
   path: string;
@@ -82,6 +123,15 @@ export interface NoteDeleted {
   text: string;
 }
 
+export interface NoteRestoring {
+  state: NoteState.Restoring;
+
+  id: string;
+  path: string;
+  title: string;
+  text: string;
+}
+
 export interface NoteCreatingFromTitle {
   state: NoteState.CreatingFromTitle;
 
@@ -100,10 +150,12 @@ export type NoteInvisible = NoteRef;
 
 export type NoteVisible =
   | NoteSynced
-  | NoteSyncing
+  | NoteRenaming
+  | NoteSavingText
   | NoteOutOfSync
   | NoteDeleting
   | NoteDeleted
+  | NoteRestoring
   | NoteCreatingFromTitle
   | NoteCreatingFromText;
 
@@ -150,23 +202,12 @@ export const isDeletable = (note: Note) => {
   return note.state === NoteState.Synced || note.state === NoteState.OutOfSync;
 };
 
-export type NotePendingStorageUpdate =
-  | NoteSyncing
-  | NoteCreatingFromTitle
-  | NoteCreatingFromText;
-
-export const isPendingStorageUpdate = (note: Note) => {
-  return (
-    note.state === NoteState.Syncing ||
-    note.state === NoteState.CreatingFromTitle ||
-    note.state === NoteState.CreatingFromText
-  );
-};
-
 // Basically, there are 2 "special" notes, from the point of view of UI: template note and deleted note
 export type NoteRegular =
   | NoteSynced
-  | NoteSyncing
+  | NoteRenaming
+  | NoteSavingText
+  | NoteRestoring
   | NoteOutOfSync
   | NoteCreatingFromTitle
   | NoteCreatingFromText;

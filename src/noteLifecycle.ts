@@ -6,11 +6,14 @@ import {
   NoteDeleting,
   NoteOutOfSync,
   NoteRef,
+  NoteRenaming,
+  NoteRestoring,
+  NoteSavingText,
   NoteState,
   NoteSynced,
-  NoteSyncing,
 } from "./model";
 
+// State diagram, arrows
 // All the possible state transitions are found here
 
 export const createNewNoteRef = (id: number, path: string): NoteRef => {
@@ -67,9 +70,19 @@ export const noteRefToOutOfSync = (
   };
 };
 
-export const noteSyncedToSyncing = (note: NoteSynced): NoteSyncing => {
+export const noteSyncedToRenaming = (note: NoteSynced): NoteRenaming => {
   return {
-    state: NoteState.Syncing,
+    state: NoteState.Renaming,
+    id: note.id,
+    path: note.path,
+    title: note.title,
+    text: note.text,
+  };
+};
+
+export const noteSyncedToSavingText = (note: NoteSynced): NoteSavingText => {
+  return {
+    state: NoteState.SavingText,
     id: note.id,
     path: note.path,
     title: note.title,
@@ -97,31 +110,9 @@ export const noteDeletingToDeleted = (note: NoteDeleting): NoteDeleted => {
   };
 };
 
-export const noteSyncingToSynced = (note: NoteSyncing): NoteSynced => {
-  return {
-    state: NoteState.Synced,
-    id: note.id,
-    path: note.path,
-    title: note.title,
-    text: note.text,
-  };
-};
-
-export const noteSyncingToSyncedWithNewPath = (
-  note: NoteSyncing,
-  newPath: string
-): NoteSynced => {
-  return {
-    state: NoteState.Synced,
-    id: note.id,
-    path: newPath,
-    title: note.title,
-    text: note.text,
-  };
-};
-
-export const noteSyncingToOutOfSync = (
-  note: NoteSyncing,
+// TODO: this flow is missing, the storage simply reports API errors
+export const noteDeletingToOutOfSync = (
+  note: NoteDeleting,
   err: string
 ): NoteOutOfSync => {
   return {
@@ -134,9 +125,72 @@ export const noteSyncingToOutOfSync = (
   };
 };
 
-export const noteOutOfSyncToSyncing = (note: NoteOutOfSync): NoteSyncing => {
+export const noteRenamingToSyncedWithNewPath = (
+  note: NoteRenaming,
+  newPath: string
+): NoteSynced => {
   return {
-    state: NoteState.Syncing,
+    state: NoteState.Synced,
+    id: note.id,
+    path: newPath,
+    title: note.title,
+    text: note.text,
+  };
+};
+
+export const noteRenamingToOutOfSync = (
+  note: NoteRenaming,
+  err: string
+): NoteOutOfSync => {
+  return {
+    state: NoteState.OutOfSync,
+    id: note.id,
+    path: note.path,
+    title: note.title,
+    text: note.text,
+    err,
+  };
+};
+
+export const noteSavingTextToSynced = (note: NoteSavingText): NoteSynced => {
+  return {
+    state: NoteState.Synced,
+    id: note.id,
+    path: note.path,
+    title: note.title,
+    text: note.text,
+  };
+};
+
+export const noteSavingTextToOutOfSync = (
+  note: NoteSavingText,
+  err: string
+): NoteOutOfSync => {
+  return {
+    state: NoteState.OutOfSync,
+    id: note.id,
+    path: note.path,
+    title: note.title,
+    text: note.text,
+    err,
+  };
+};
+
+export const noteOutOfSyncToRenaming = (note: NoteOutOfSync): NoteRenaming => {
+  return {
+    state: NoteState.Renaming,
+    id: note.id,
+    path: note.path,
+    title: note.title,
+    text: note.text,
+  };
+};
+
+export const noteOutOfSyncToSavingText = (
+  note: NoteOutOfSync
+): NoteSavingText => {
+  return {
+    state: NoteState.SavingText,
     id: note.id,
     path: note.path,
     title: note.title,
@@ -154,13 +208,50 @@ export const noteOutOfSyncToDeleting = (note: NoteOutOfSync): NoteDeleting => {
   };
 };
 
-export const noteDeletedToSyncing = (note: NoteDeleted): NoteSyncing => {
+export const noteDeletedToRestoring = (note: NoteDeleted): NoteRestoring => {
   return {
-    state: NoteState.Syncing,
+    state: NoteState.Restoring,
     id: note.id,
     path: note.path,
     title: note.title,
     text: note.text,
+  };
+};
+
+export const noteRestoringToSynced = (note: NoteRestoring): NoteSynced => {
+  return {
+    state: NoteState.Synced,
+    id: note.id,
+    path: note.path,
+    title: note.title,
+    text: note.text,
+  };
+};
+
+export const noteRestoringToSyncedWithNewPath = (
+  note: NoteRestoring,
+  newPath: string
+): NoteSynced => {
+  return {
+    state: NoteState.Synced,
+    id: note.id,
+    path: newPath,
+    title: note.title,
+    text: note.text,
+  };
+};
+
+export const noteRestoringToOutOfSync = (
+  note: NoteRestoring,
+  err: string
+): NoteOutOfSync => {
+  return {
+    state: NoteState.OutOfSync,
+    id: note.id,
+    path: note.path,
+    title: note.title,
+    text: note.text,
+    err,
   };
 };
 

@@ -16,7 +16,9 @@ import {
   NoteCreatingFromTitle,
   NoteDeleting,
   NoteRef,
-  NoteSyncing,
+  NoteRenaming,
+  NoteRestoring,
+  NoteSavingText,
 } from "../model";
 import { ApiError } from "../restapi";
 import {
@@ -55,6 +57,10 @@ const mapToFiles = (fileData: FileData[]): FileDataWithDate[] => {
 };
 
 const PAGE_SIZE = 1000;
+
+// The design approachs:
+// All the "success" events are (with some exceptions) specific to an action
+// All the "error" events are non-specific, so we forget the history
 
 export const RetrieveFileList = (
   searchString: string,
@@ -127,7 +133,7 @@ export const LoadNoteText = (
 });
 
 export const RenameNoteFromTitle = (
-  note: NoteSyncing
+  note: NoteRenaming
 ): RenameNoteFromTitleCommand => ({
   type: CommandType.RenameNoteFromTitle,
   note,
@@ -138,7 +144,7 @@ export const RenameNoteFromTitle = (
     try {
       await renameFile(note.path, newPath);
       dispatch({
-        type: EventType.NoteSavedOnNewPath,
+        type: EventType.NoteRenamed,
         note,
         newPath,
       });
@@ -149,7 +155,7 @@ export const RenameNoteFromTitle = (
         try {
           await renameFile(note.path, newPath);
           dispatch({
-            type: EventType.NoteSavedOnNewPath,
+            type: EventType.NoteRenamed,
             note,
             newPath,
           });
@@ -171,7 +177,7 @@ export const RenameNoteFromTitle = (
   },
 });
 
-export const SaveNoteText = (note: NoteSyncing): SaveNoteTextCommand => ({
+export const SaveNoteText = (note: NoteSavingText): SaveNoteTextCommand => ({
   type: CommandType.SaveNoteText,
   note,
   execute: async (dispatch) => {
@@ -179,7 +185,7 @@ export const SaveNoteText = (note: NoteSyncing): SaveNoteTextCommand => ({
       // Store at the exact path we loaded from
       await putFile(note.path, note.text);
       dispatch({
-        type: EventType.NoteSaved,
+        type: EventType.NoteTextSaved,
         note,
       });
     } catch (err) {
@@ -204,7 +210,7 @@ export const CreateNewNoteWithTitle = (
       // Don't overwrite, in case not unique
       await postFile(path, "");
       dispatch({
-        type: EventType.NoteSavedOnNewPath,
+        type: EventType.NoteCreated,
         note,
         newPath: path,
       });
@@ -215,13 +221,13 @@ export const CreateNewNoteWithTitle = (
         try {
           await putFile(newPath, "");
           dispatch({
-            type: EventType.NoteSavedOnNewPath,
+            type: EventType.NoteCreated,
             note,
             newPath,
           });
         } catch (err) {
           dispatch({
-            type: EventType.NoteCreationFromTitleFailed,
+            type: EventType.NoteCreationFailed,
             note,
             path,
             err: `${err}`,
@@ -229,7 +235,7 @@ export const CreateNewNoteWithTitle = (
         }
       } else {
         dispatch({
-          type: EventType.NoteCreationFromTitleFailed,
+          type: EventType.NoteCreationFailed,
           note,
           path,
           err: `${err}`,
@@ -251,13 +257,13 @@ export const CreateNewNoteWithText = (
     try {
       await putFile(path, note.text);
       dispatch({
-        type: EventType.NoteSavedOnNewPath,
+        type: EventType.NoteCreated,
         note,
         newPath: path,
       });
     } catch (err) {
       dispatch({
-        type: EventType.NoteCreationFromTextFailed,
+        type: EventType.NoteCreationFailed,
         note,
         path,
         err: `${err}`,
@@ -286,7 +292,7 @@ export const DeleteNote = (note: NoteDeleting): DeleteNoteCommand => ({
   },
 });
 
-export const RestoreNote = (note: NoteSyncing): RestoreNoteCommand => ({
+export const RestoreNote = (note: NoteRestoring): RestoreNoteCommand => ({
   type: CommandType.RestoreNote,
   note,
   execute: async (dispatch) => {
@@ -294,7 +300,7 @@ export const RestoreNote = (note: NoteSyncing): RestoreNoteCommand => ({
       // Try to restore with exactly the same path as before, don't overwrite
       await postFile(note.path, note.text);
       dispatch({
-        type: EventType.NoteSaved,
+        type: EventType.NoteRestored,
         note,
       });
     } catch (err) {
@@ -305,7 +311,7 @@ export const RestoreNote = (note: NoteSyncing): RestoreNoteCommand => ({
         try {
           await putFile(newPath, "");
           dispatch({
-            type: EventType.NoteSavedOnNewPath,
+            type: EventType.NoteRestoredOnNewPath,
             note,
             newPath,
           });

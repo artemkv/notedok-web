@@ -2,17 +2,19 @@ import {
   cancelAllActiveEditors,
   handleLoadNextPage,
   handleLoadNoteTextSuccess,
-  handleNoteCreationFromTextFailed,
-  handleNoteCreationFromTitleFailed,
+  handleNoteCreated,
+  handleNoteCreationFailed,
   handleNoteDeleted,
   handleNoteDeleteTriggered,
   handleNoteLoadFailed,
+  handleNoteRenamed,
+  handleNoteRestored,
+  handleNoteRestoredOnNewPath,
   handleNoteRestoreTriggered,
-  handleNoteSaved,
-  handleNoteSavedOnNewPath,
   handleNoteSyncFailed,
   handleNoteTextEditorCancelEdit,
   handleNoteTextEditorTextChanged,
+  handleNoteTextSaved,
   handleNoteTitleEditorCancelEdit,
   handleRegularNoteStartTextEditing,
   handleRegularNoteTextUpdated,
@@ -66,12 +68,8 @@ export const Reducer = (
       return cancelAllActiveEditors(state);
     }
 
-    if (event.type === EventType.TitleEditorActivated) {
-      return cancelAllActiveEditors(state);
-    }
-
-    if (event.type === EventType.TitleEditorCancelEdit) {
-      return handleNoteTitleEditorCancelEdit(state);
+    if (event.type === EventType.SearchTextChanged) {
+      return handleSearchTextChanged(state, event);
     }
 
     if (event.type === EventType.SearchTextSubmitted) {
@@ -82,12 +80,16 @@ export const Reducer = (
       return handleSearchTextAutoFilled(state, event);
     }
 
-    if (event.type === EventType.SearchTextChanged) {
-      return handleSearchTextChanged(state, event);
-    }
-
     if (event.type === EventType.SearchCancelEdit) {
       return handleSearchCancelEdit(state);
+    }
+
+    if (event.type === EventType.TitleEditorActivated) {
+      return cancelAllActiveEditors(state);
+    }
+
+    if (event.type === EventType.TitleEditorCancelEdit) {
+      return handleNoteTitleEditorCancelEdit(state);
     }
 
     if (event.type === EventType.TemplateNoteTitleEditorTextChanged) {
@@ -134,12 +136,32 @@ export const Reducer = (
       return handleNoteDeleteTriggered(state, event);
     }
 
+    if (event.type === EventType.NoteRestoreTriggered) {
+      return handleNoteRestoreTriggered(state, event);
+    }
+
+    if (event.type === EventType.NoteRenamed) {
+      return handleNoteRenamed(state, event);
+    }
+
+    if (event.type === EventType.NoteTextSaved) {
+      return handleNoteTextSaved(state, event);
+    }
+
+    if (event.type === EventType.NoteCreated) {
+      return handleNoteCreated(state, event);
+    }
+
     if (event.type === EventType.NoteDeleted) {
       return handleNoteDeleted(state, event);
     }
 
-    if (event.type === EventType.NoteRestoreTriggered) {
-      return handleNoteRestoreTriggered(state, event);
+    if (event.type === EventType.NoteRestored) {
+      return handleNoteRestored(state, event);
+    }
+
+    if (event.type === EventType.NoteRestoredOnNewPath) {
+      return handleNoteRestoredOnNewPath(state, event);
     }
 
     if (event.type === EventType.RetrieveFileListSuccess) {
@@ -152,14 +174,6 @@ export const Reducer = (
 
     if (event.type == EventType.TitleAutoSuggestionsUpdated) {
       return handleTitleAutoSuggestionsUpdated(state, event);
-    }
-
-    if (event.type === EventType.NoteSavedOnNewPath) {
-      return handleNoteSavedOnNewPath(state, event);
-    }
-
-    if (event.type === EventType.NoteSaved) {
-      return handleNoteSaved(state, event);
     }
 
     if (event.type === EventType.LoadNoteTextSuccess) {
@@ -178,12 +192,8 @@ export const Reducer = (
       return handleNoteSyncFailed(state, event);
     }
 
-    if (event.type === EventType.NoteCreationFromTitleFailed) {
-      return handleNoteCreationFromTitleFailed(state, event);
-    }
-
-    if (event.type === EventType.NoteCreationFromTextFailed) {
-      return handleNoteCreationFromTextFailed(state, event);
+    if (event.type === EventType.NoteCreationFailed) {
+      return handleNoteCreationFailed(state, event);
     }
 
     if (event.type === EventType.RestApiError) {

@@ -6,9 +6,10 @@ import {
   NoteDeletable,
   NoteDeleted,
   NoteDeleting,
-  NotePendingStorageUpdate,
   NoteRef,
-  NoteSyncing,
+  NoteRenaming,
+  NoteRestoring,
+  NoteSavingText,
   NoteTextEditable,
   NoteTextSaveable,
   NoteTitleEditable,
@@ -48,11 +49,16 @@ export enum EventType {
   RegularNoteTextUpdated,
 
   NoteDeleteTriggered,
-  NoteDeleted,
   NoteRestoreTriggered,
 
-  NoteSavedOnNewPath,
-  NoteSaved,
+  // Storage-related events
+  // Success-indicating events are more specific so we can take specific actions
+  NoteRenamed, // NoteRenaming
+  NoteTextSaved, // NoteSavingText
+  NoteCreated, // NoteCreatingFromTitle | NoteCreatingFromText
+  NoteDeleted, // NoteDeleting
+  NoteRestored, // NoteRestoring
+  NoteRestoredOnNewPath, // NoteRestoring
 
   RetrieveFileListSuccess,
 
@@ -63,10 +69,10 @@ export enum EventType {
   LoadNextPage,
 
   // Note-related errors (or whatever we treat as such)
+  // Error-indicating events are less specific, to simplify the handling
   NoteLoadFailed,
-  NoteSyncFailed,
-  NoteCreationFromTitleFailed,
-  NoteCreationFromTextFailed,
+  NoteSyncFailed, // NoteRenaming | NoteSavingText | NoteRestoring
+  NoteCreationFailed, // NoteCreatingFromTitle | NoteCreatingFromText
 
   RestApiError, // Generic errors, includes failing to delete note
 }
@@ -84,13 +90,13 @@ export interface UserSessionCreatedEvent {
   type: EventType.UserSessionCreated;
 }
 
+export interface SearchActivatedEvent {
+  type: EventType.SearchActivated;
+}
+
 export interface SearchTextChangedEvent {
   type: EventType.SearchTextChanged;
   newText: string;
-}
-
-export interface SearchActivatedEvent {
-  type: EventType.SearchActivated;
 }
 
 export interface SearchTextSubmittedEvent {
@@ -170,14 +176,42 @@ export interface NoteDeleteTriggeredEvent {
   note: NoteDeletable;
 }
 
+export interface NoteRestoreTriggeredEvent {
+  type: EventType.NoteRestoreTriggered;
+  note: NoteDeleted;
+}
+
+export interface NoteRenamedEvent {
+  type: EventType.NoteRenamed;
+  note: NoteRenaming;
+  newPath: string;
+}
+
+export interface NoteTextSavedEvent {
+  type: EventType.NoteTextSaved;
+  note: NoteSavingText;
+}
+
+export interface NoteCreatedEvent {
+  type: EventType.NoteCreated;
+  note: NoteCreatingFromTitle | NoteCreatingFromText;
+  newPath: string;
+}
+
 export interface NoteDeletedEvent {
   type: EventType.NoteDeleted;
   note: NoteDeleting;
 }
 
-export interface NoteRestoreTriggeredEvent {
-  type: EventType.NoteRestoreTriggered;
-  note: NoteDeleted;
+export interface NoteRestoredEvent {
+  type: EventType.NoteRestored;
+  note: NoteRestoring;
+}
+
+export interface NoteRestoredOnNewPathEvent {
+  type: EventType.NoteRestoredOnNewPath;
+  note: NoteRestoring;
+  newPath: string;
 }
 
 export interface RetrieveFileListSuccessEvent {
@@ -208,17 +242,6 @@ export interface LoadNextPageEvent {
   type: EventType.LoadNextPage;
 }
 
-export interface NoteSavedOnNewPathEvent {
-  type: EventType.NoteSavedOnNewPath;
-  note: NotePendingStorageUpdate;
-  newPath: string;
-}
-
-export interface NoteSavedEvent {
-  type: EventType.NoteSaved;
-  note: NoteSyncing;
-}
-
 export interface NoteLoadFailedEvent {
   type: EventType.NoteLoadFailed;
   note: NoteRef;
@@ -227,20 +250,13 @@ export interface NoteLoadFailedEvent {
 
 export interface NoteSyncFailedEvent {
   type: EventType.NoteSyncFailed;
-  note: NoteSyncing;
+  note: NoteRenaming | NoteSavingText | NoteRestoring;
   err: string;
 }
 
-export interface NoteCreationFromTitleFailedEvent {
-  type: EventType.NoteCreationFromTitleFailed;
-  note: NoteCreatingFromTitle;
-  path: string;
-  err: string;
-}
-
-export interface NoteCreationFromTextFailedEvent {
-  type: EventType.NoteCreationFromTextFailed;
-  note: NoteCreatingFromText;
+export interface NoteCreationFailedEvent {
+  type: EventType.NoteCreationFailed;
+  note: NoteCreatingFromTitle | NoteCreatingFromText;
   path: string;
   err: string;
 }
@@ -272,10 +288,13 @@ export type AppEvent =
   | RegularNoteStartTextEditingEvent
   | RegularNoteTextUpdatedEvent
   | NoteDeleteTriggeredEvent
-  | NoteDeletedEvent
   | NoteRestoreTriggeredEvent
-  | NoteSavedOnNewPathEvent
-  | NoteSavedEvent
+  | NoteRenamedEvent
+  | NoteTextSavedEvent
+  | NoteCreatedEvent
+  | NoteDeletedEvent
+  | NoteRestoredEvent
+  | NoteRestoredOnNewPathEvent
   | RetrieveFileListSuccessEvent
   | SearchAutoSuggestionsComputedEvent
   | TitleAutoSuggestionsUpdatedEvent
@@ -283,6 +302,5 @@ export type AppEvent =
   | LoadNextPageEvent
   | NoteLoadFailedEvent
   | NoteSyncFailedEvent
-  | NoteCreationFromTitleFailedEvent
-  | NoteCreationFromTextFailedEvent
+  | NoteCreationFailedEvent
   | RestApiErrorEvent;
