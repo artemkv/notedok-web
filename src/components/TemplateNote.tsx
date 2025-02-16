@@ -170,7 +170,7 @@ const TemplateNote = memo(function TemplateNote(props: {
       <div className="note-inner">
         <div className="note-title-outer">
           <div className="note-title-container">
-            <form onSubmit={onTitleSubmit}>
+            <form className="note-title-form" onSubmit={onTitleSubmit}>
               <input
                 readOnly={!isEditingTitle}
                 id="note_template_title"
