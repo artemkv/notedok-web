@@ -24,9 +24,6 @@ import {
   handleRetrieveFileListSuccess,
   handleSearchActivated,
   handleSearchAutoSuggestionsComputed,
-  handleSearchCancelEdit,
-  handleSearchTextSubmittedFromAutocomplete,
-  handleSearchTextChanged,
   handleSearchTextSubmitted,
   handleTemplateNoteStartTextEditing,
   handleTemplateNoteStartTitleEditing,
@@ -69,20 +66,8 @@ export const Reducer = (
       return handleSearchActivated(state);
     }
 
-    if (event.type === EventType.SearchTextChanged) {
-      return handleSearchTextChanged(state, event);
-    }
-
     if (event.type === EventType.SearchTextSubmitted) {
-      return handleSearchTextSubmitted(state);
-    }
-
-    if (event.type === EventType.SearchTextSubmittedFromAutocomplete) {
-      return handleSearchTextSubmittedFromAutocomplete(state, event);
-    }
-
-    if (event.type === EventType.SearchCancelEdit) {
-      return handleSearchCancelEdit(state);
+      return handleSearchTextSubmitted(state, event);
     }
 
     if (event.type === EventType.TemplateNoteStartTitleEditing) {

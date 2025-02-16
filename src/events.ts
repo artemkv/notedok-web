@@ -25,10 +25,7 @@ export enum EventType {
   UserSessionCreated,
 
   SearchActivated,
-  SearchTextChanged,
   SearchTextSubmitted,
-  SearchTextSubmittedFromAutocomplete,
-  SearchCancelEdit,
 
   TemplateNoteStartTitleEditing,
   TemplateNoteTitleUpdated,
@@ -94,22 +91,9 @@ export interface SearchActivatedEvent {
   type: EventType.SearchActivated;
 }
 
-export interface SearchTextChangedEvent {
-  type: EventType.SearchTextChanged;
-  newText: string;
-}
-
 export interface SearchTextSubmittedEvent {
   type: EventType.SearchTextSubmitted;
-}
-
-export interface SearchTextSubmittedFromAutocompleteEvent {
-  type: EventType.SearchTextSubmittedFromAutocomplete;
   text: string;
-}
-
-export interface SearchCancelEditEvent {
-  type: EventType.SearchCancelEdit;
 }
 
 export interface TemplateNoteStartTitleEditingEvent {
@@ -221,13 +205,13 @@ export interface RetrieveFileListSuccessEvent {
 
 export interface SearchAutoSuggestionsComputedEvent {
   type: EventType.SearchAutoSuggestionsComputed;
-  autoSuggestItems: AutoSuggestItem[];
-  autoSuggestHashTags: AutoSuggestHashTag[];
+  items: AutoSuggestItem[];
+  hashTags: AutoSuggestHashTag[];
 }
 
 export interface TitleAutoSuggestionsUpdatedEvent {
   type: EventType.TitleAutoSuggestionsUpdated;
-  autoSuggestHashTags: AutoSuggestHashTag[];
+  hashTags: AutoSuggestHashTag[];
 }
 
 export interface LoadNoteTextSuccessEvent {
@@ -270,10 +254,7 @@ export type AppEvent =
   | UserAuthenticatedEvent
   | UserSessionCreatedEvent
   | SearchActivatedEvent
-  | SearchTextChangedEvent
   | SearchTextSubmittedEvent
-  | SearchTextSubmittedFromAutocompleteEvent
-  | SearchCancelEditEvent
   | TemplateNoteStartTitleEditingEvent
   | TemplateNoteTitleUpdatedEvent
   | RegularNoteStartTitleEditingEvent

@@ -1,24 +1,23 @@
 import { computeAutoSuggestLookups, hashTagsExtractor } from "../autosuggest";
 import {
   CommandType,
-  ActivateSearchAutoSuggestCommand,
+  ComputeSearchAutoSuggestionsCommand,
   ExtractNewHashTagsCommand,
 } from "../commands";
 import { EventType } from "../events";
 import { AutoSuggestHashTag } from "../model";
 
-export const ActivateSearchAutoSuggest = (
+export const ComputeSearchAutoSuggestions = (
   fileList: string[]
-): ActivateSearchAutoSuggestCommand => ({
-  type: CommandType.ActivateSearchAutoSuggest,
+): ComputeSearchAutoSuggestionsCommand => ({
+  type: CommandType.ComputeSearchAutoSuggestions,
   fileList,
   execute: async (dispatch) => {
-    const [autoSuggestItems, autoSuggestHashTags] =
-      computeAutoSuggestLookups(fileList);
+    const [items, hashTags] = computeAutoSuggestLookups(fileList);
     dispatch({
       type: EventType.SearchAutoSuggestionsComputed,
-      autoSuggestItems,
-      autoSuggestHashTags,
+      items,
+      hashTags,
     });
   },
 });
@@ -38,7 +37,7 @@ export const ExtractNewHashTags = (
     );
     dispatch({
       type: EventType.TitleAutoSuggestionsUpdated,
-      autoSuggestHashTags: newAutoSuggestHashTags,
+      hashTags: newAutoSuggestHashTags,
     });
   },
 });

@@ -269,8 +269,8 @@ export interface SearchAutoSuggestNotComputed {
 
 export interface SearchAutoSuggestComputed {
   state: SearchAutoSuggestState.Computed;
-  autoSuggestItems: AutoSuggestItem[];
-  autoSuggestHashTags: AutoSuggestHashTag[];
+  items: AutoSuggestItem[];
+  hashTags: AutoSuggestHashTag[];
 }
 
 export type SearchAutoSuggest =
@@ -353,7 +353,6 @@ export interface AppStateUnauthenticated {
 
 export interface AppStateAuthenticated {
   auth: AuthenticationStatus.Authenticated;
-  searchText: string;
   searchAutoSuggest: SearchAutoSuggest;
   // It is possible to start editing template note even before we load all the notes
   noteTextEditor: NoteTextEditor;

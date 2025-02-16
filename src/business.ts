@@ -2,7 +2,7 @@ import { AppCommand, DoMany, DoNothing } from "./commands";
 import { ReportError } from "./commands/alerts";
 import { StartUserSession } from "./commands/auth";
 import {
-  ActivateSearchAutoSuggest,
+  ComputeSearchAutoSuggestions,
   ExtractNewHashTags,
 } from "./commands/autosuggest";
 import {
@@ -37,10 +37,9 @@ import {
   RestApiErrorEvent,
   RetrieveFileListSuccessEvent,
   SearchAutoSuggestionsComputedEvent,
-  SearchTextSubmittedFromAutocompleteEvent,
-  SearchTextChangedEvent,
   TitleAutoSuggestionsUpdatedEvent,
   UserAuthenticatedEvent,
+  SearchTextSubmittedEvent,
 } from "./events";
 import {
   NoteListState,
@@ -123,7 +122,6 @@ export const handleUserSessionCreated = (): [
 ] => {
   const newState: AppStateAuthenticated = {
     auth: AuthenticationStatus.Authenticated,
-    searchText: "",
     searchAutoSuggest: {
       state: SearchAutoSuggestState.NotComputed,
     },
@@ -143,36 +141,13 @@ export const handleUserSessionCreated = (): [
 };
 
 export const handleSearchTextSubmitted = (
-  state: AppStateAuthenticated
-): [AppStateAuthenticated, AppCommand] => {
-  const newFileListVersion = state.noteList.fileListVersion + 1;
-
-  const newState: AppStateAuthenticated = {
-    ...state,
-    noteTextEditor: {
-      state: NoteTextEditorState.NotActive,
-    },
-    noteTitleEditor: {
-      state: NoteTitleEditorState.NotActive,
-    },
-    noteList: {
-      state: NoteListState.RetrievingFileList,
-      fileListVersion: newFileListVersion,
-    },
-  };
-
-  return [newState, RetrieveFileList(state.searchText, newFileListVersion)];
-};
-
-export const handleSearchTextSubmittedFromAutocomplete = (
   state: AppStateAuthenticated,
-  event: SearchTextSubmittedFromAutocompleteEvent
+  event: SearchTextSubmittedEvent
 ): [AppStateAuthenticated, AppCommand] => {
   const newFileListVersion = state.noteList.fileListVersion + 1;
 
   const newState: AppStateAuthenticated = {
     ...state,
-    searchText: event.text,
     noteTextEditor: {
       state: NoteTextEditorState.NotActive,
     },
@@ -191,36 +166,15 @@ export const handleSearchTextSubmittedFromAutocomplete = (
 export const handleSearchActivated = (
   state: AppStateAuthenticated
 ): [AppStateAuthenticated, AppCommand] => {
-  // cancel all active editors
   const newState: AppStateAuthenticated = {
     ...state,
+    // cancel all active editors
     noteTitleEditor: {
       state: NoteTitleEditorState.NotActive,
     },
     noteTextEditor: {
       state: NoteTextEditorState.NotActive,
     },
-  };
-  return JustStateAuthenticated(newState);
-};
-
-export const handleSearchTextChanged = (
-  state: AppStateAuthenticated,
-  event: SearchTextChangedEvent
-): [AppStateAuthenticated, AppCommand] => {
-  const newState: AppStateAuthenticated = {
-    ...state,
-    searchText: event.newText,
-  };
-  return JustStateAuthenticated(newState);
-};
-
-export const handleSearchCancelEdit = (
-  state: AppStateAuthenticated
-): [AppStateAuthenticated, AppCommand] => {
-  const newState: AppStateAuthenticated = {
-    ...state,
-    searchText: "",
   };
   return JustStateAuthenticated(newState);
 };
@@ -568,9 +522,9 @@ export const handleRetrieveFileListSuccess = (
       newState,
       DoMany([
         LoadNoteText(notesToLoad, event.fileListVersion),
-        // Only activate once
+        // Only compute once
         state.searchAutoSuggest.state === SearchAutoSuggestState.NotComputed
-          ? ActivateSearchAutoSuggest(event.fileList)
+          ? ComputeSearchAutoSuggestions(event.fileList)
           : DoNothing,
       ]),
     ];
@@ -586,8 +540,8 @@ export const handleSearchAutoSuggestionsComputed = (
     ...state,
     searchAutoSuggest: {
       state: SearchAutoSuggestState.Computed,
-      autoSuggestItems: event.autoSuggestItems,
-      autoSuggestHashTags: event.autoSuggestHashTags,
+      items: event.items,
+      hashTags: event.hashTags,
     },
   };
   return JustStateAuthenticated(newState);
@@ -602,10 +556,7 @@ export const handleTitleAutoSuggestionsUpdated = (
       ...state,
       searchAutoSuggest: {
         ...state.searchAutoSuggest,
-        autoSuggestHashTags: [
-          ...state.searchAutoSuggest.autoSuggestHashTags,
-          ...event.autoSuggestHashTags,
-        ],
+        hashTags: [...state.searchAutoSuggest.hashTags, ...event.hashTags],
       },
     };
     return JustStateAuthenticated(newState);

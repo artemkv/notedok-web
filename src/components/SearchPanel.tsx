@@ -4,29 +4,24 @@ import SearchAutocomplete from "./SearchAutocomplete";
 import { AutoSuggestItem } from "../model";
 import { Dispatch } from "../hooks/useReducer";
 import uistrings from "../uistrings";
-import { memo } from "react";
+import { memo, useCallback, useState } from "react";
 
 const SearchPanel = memo(function SearchPanel(props: {
-  searchText: string;
   autoSuggestItems: AutoSuggestItem[];
   dispatch: Dispatch<AppEvent>;
 }) {
-  const searchText = props.searchText;
+  const [searchText, setSearchText] = useState("");
+
   const autoSuggestItems = props.autoSuggestItems;
   const dispatch = props.dispatch;
 
   const searchTextOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({
-      type: EventType.SearchTextChanged,
-      newText: e.target.value,
-    });
+    setSearchText(() => e.target.value);
   };
 
   const searchTextOnKeyUp = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
-      dispatch({
-        type: EventType.SearchCancelEdit,
-      });
+      setSearchText(() => "");
     }
   };
 
@@ -39,9 +34,17 @@ const SearchPanel = memo(function SearchPanel(props: {
   const onSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     dispatch({
       type: EventType.SearchTextSubmitted,
+      text: searchText,
     });
     e.preventDefault();
   };
+
+  const onAutocomplete = useCallback(
+    (text: string) => {
+      setSearchText(() => text);
+    },
+    [setSearchText]
+  );
 
   return (
     <div className="search-outer">
@@ -63,7 +66,7 @@ const SearchPanel = memo(function SearchPanel(props: {
       </div>
       <SearchAutocomplete
         autoSuggestItems={autoSuggestItems}
-        dispatch={dispatch}
+        onAutocomplete={onAutocomplete}
       />
     </div>
   );

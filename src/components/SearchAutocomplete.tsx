@@ -2,17 +2,15 @@ import "./SearchAutocomplete.css";
 import $ from "jquery";
 import "devbridge-autocomplete";
 import { useEffect } from "react";
-import { AppEvent, EventType } from "../events";
 import { AutoSuggestItem } from "../model";
-import { autoSuggestFilter, isFullTitleAutoSuggest } from "../autosuggest";
-import { Dispatch } from "../hooks/useReducer";
+import { autoSuggestFilter } from "../autosuggest";
 
 function SearchAutocomplete(props: {
   autoSuggestItems: AutoSuggestItem[];
-  dispatch: Dispatch<AppEvent>;
+  onAutocomplete: (text: string) => void;
 }) {
   const autoSuggestItems = props.autoSuggestItems;
-  const dispatch = props.dispatch;
+  const onAutocomplete = props.onAutocomplete;
 
   useEffect(() => {
     const autocompleteContainer = $(
@@ -38,24 +36,12 @@ function SearchAutocomplete(props: {
           searchTextbox.val().toLowerCase(),
           queryLowerCase
         ),
-      onSelect: (suggestion: AutoSuggestItem) => {
-        if (isFullTitleAutoSuggest(suggestion)) {
-          // When full title is selected, trigger search immediately
-          dispatch({
-            type: EventType.SearchTextSubmittedFromAutocomplete,
-            text: searchTextbox.val(),
-          });
-        } else {
-          // This needs to happen otherwise the value is changed visually but not in the model
-          dispatch({
-            type: EventType.SearchTextChanged,
-            newText: searchTextbox.val(),
-          });
-        }
+      onSelect: () => {
+        onAutocomplete(searchTextbox.val());
       },
     };
     searchTextbox.autocomplete(options);
-  }, [dispatch, autoSuggestItems]);
+  }, [autoSuggestItems, onAutocomplete]);
 
   return (
     <div

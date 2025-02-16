@@ -10,7 +10,6 @@ function ClientArea(props: {
   state: AppStateAuthenticated;
   dispatch: Dispatch<AppEvent>;
 }) {
-  const searchText = props.state.searchText;
   const noteTitleEditor = props.state.noteTitleEditor;
   const noteTextEditor = props.state.noteTextEditor;
   const noteList = props.state.noteList;
@@ -18,19 +17,18 @@ function ClientArea(props: {
 
   const searchAutoSuggestItems =
     props.state.searchAutoSuggest.state === SearchAutoSuggestState.Computed
-      ? props.state.searchAutoSuggest.autoSuggestItems
+      ? props.state.searchAutoSuggest.items
       : [];
 
   const autoSuggestHashTags =
     props.state.searchAutoSuggest.state === SearchAutoSuggestState.Computed
-      ? props.state.searchAutoSuggest.autoSuggestHashTags
+      ? props.state.searchAutoSuggest.hashTags
       : [];
 
   return (
     <div className="client-area-outer">
       <div className="client-area-inner">
         <SearchPanel
-          searchText={searchText}
           autoSuggestItems={searchAutoSuggestItems}
           dispatch={dispatch}
         />
