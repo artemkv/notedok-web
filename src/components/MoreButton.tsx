@@ -2,8 +2,9 @@ import "./MoreButton.css";
 import { AppEvent, EventType } from "../events";
 import { Dispatch } from "../hooks/useReducer";
 import uistrings from "../uistrings";
+import { memo } from "react";
 
-function MoreButton(props: {
+const MoreButton = memo(function MoreButton(props: {
   notesNotYetLoadedTotal: number;
   dispatch: Dispatch<AppEvent>;
 }) {
@@ -23,6 +24,6 @@ function MoreButton(props: {
       {` ${uistrings.MoreButtonNotLoadedText})`}
     </button>
   );
-}
+});
 
 export default MoreButton;

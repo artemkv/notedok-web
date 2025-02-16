@@ -1,13 +1,13 @@
 import $ from "jquery";
 import "devbridge-autocomplete";
-import { useEffect } from "react";
+import { memo, useEffect } from "react";
 import {
   hashTagAutoSuggestFilter,
   SEARCH_STRING_DELIMITER,
 } from "../autosuggest";
 import { AutoSuggestHashTag } from "../model";
 
-function NoteTitleAutocomplete(props: {
+const NoteTitleAutocomplete = memo(function NoteTitleAutocomplete(props: {
   noteTitleId: string;
   autoSuggestHashTags: AutoSuggestHashTag[];
   onAutocomplete: (newText: string) => void;
@@ -43,6 +43,6 @@ function NoteTitleAutocomplete(props: {
       className="autocomplete-suggestions-container"
     />
   );
-}
+});
 
 export default NoteTitleAutocomplete;

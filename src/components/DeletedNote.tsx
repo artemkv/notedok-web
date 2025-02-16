@@ -4,8 +4,9 @@ import { AppEvent, EventType } from "../events";
 import { OrbitProgress } from "react-loading-indicators";
 import { Dispatch } from "../hooks/useReducer";
 import uistrings from "../uistrings";
+import { memo } from "react";
 
-function DeletedNote(props: {
+const DeletedNote = memo(function DeletedNote(props: {
   note: NoteDeleting | NoteDeleted;
   dispatch: Dispatch<AppEvent>;
 }) {
@@ -63,6 +64,6 @@ function DeletedNote(props: {
       </div>
     </div>
   );
-}
+});
 
 export default DeletedNote;

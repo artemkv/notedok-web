@@ -1,11 +1,11 @@
 import "./SearchAutocomplete.css";
 import $ from "jquery";
 import "devbridge-autocomplete";
-import { useEffect } from "react";
+import { memo, useEffect } from "react";
 import { AutoSuggestItem } from "../model";
 import { autoSuggestFilter } from "../autosuggest";
 
-function SearchAutocomplete(props: {
+const SearchAutocomplete = memo(function SearchAutocomplete(props: {
   autoSuggestItems: AutoSuggestItem[];
   onAutocomplete: (text: string) => void;
 }) {
@@ -49,6 +49,6 @@ function SearchAutocomplete(props: {
       className="autocomplete-suggestions-container"
     />
   );
-}
+});
 
 export default SearchAutocomplete;
