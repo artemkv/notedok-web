@@ -40,13 +40,13 @@ function SearchAutocomplete(props: {
         ),
       onSelect: (suggestion: AutoSuggestItem) => {
         if (isFullTitleAutoSuggest(suggestion)) {
-          // This needs to happen otherwise the value is changed visually but not in the model
+          // When full title is selected, trigger search immediately
           dispatch({
-            type: EventType.SearchTextAutoFilled,
+            type: EventType.SearchTextSubmittedFromAutocomplete,
             text: searchTextbox.val(),
           });
         } else {
-          // When full title is selected, trigger search immediately
+          // This needs to happen otherwise the value is changed visually but not in the model
           dispatch({
             type: EventType.SearchTextChanged,
             newText: searchTextbox.val(),

@@ -25,7 +25,7 @@ import {
   handleSearchActivated,
   handleSearchAutoSuggestionsComputed,
   handleSearchCancelEdit,
-  handleSearchTextAutoFilled,
+  handleSearchTextSubmittedFromAutocomplete,
   handleSearchTextChanged,
   handleSearchTextSubmitted,
   handleTemplateNoteStartTextEditing,
@@ -77,8 +77,8 @@ export const Reducer = (
       return handleSearchTextSubmitted(state);
     }
 
-    if (event.type === EventType.SearchTextAutoFilled) {
-      return handleSearchTextAutoFilled(state, event);
+    if (event.type === EventType.SearchTextSubmittedFromAutocomplete) {
+      return handleSearchTextSubmittedFromAutocomplete(state, event);
     }
 
     if (event.type === EventType.SearchCancelEdit) {

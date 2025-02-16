@@ -37,7 +37,7 @@ import {
   RestApiErrorEvent,
   RetrieveFileListSuccessEvent,
   SearchAutoSuggestionsComputedEvent,
-  SearchTextAutoFilledEvent,
+  SearchTextSubmittedFromAutocompleteEvent,
   SearchTextChangedEvent,
   TitleAutoSuggestionsUpdatedEvent,
   UserAuthenticatedEvent,
@@ -164,9 +164,9 @@ export const handleSearchTextSubmitted = (
   return [newState, RetrieveFileList(state.searchText, newFileListVersion)];
 };
 
-export const handleSearchTextAutoFilled = (
+export const handleSearchTextSubmittedFromAutocomplete = (
   state: AppStateAuthenticated,
-  event: SearchTextAutoFilledEvent
+  event: SearchTextSubmittedFromAutocompleteEvent
 ): [AppStateAuthenticated, AppCommand] => {
   const newFileListVersion = state.noteList.fileListVersion + 1;
 
