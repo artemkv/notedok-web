@@ -333,7 +333,7 @@ const RegularNote = memo(function RegularNote(props: {
 
   return (
     <div id={note.id} className="note-outer">
-      {hasError ? noteError() : Empty()}
+      {hasError ? noteError() : <Empty />}
       <div className="note-inner">
         <div className="note-title-outer">
           <div className="note-title-container">
