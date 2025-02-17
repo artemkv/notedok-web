@@ -99,6 +99,15 @@ const TemplateNote = memo(function TemplateNote(props: {
     }
   };
 
+  const noteCancelButtonOnClick = (e: React.KeyboardEvent) => {
+    if (e.key === " " || e.key === "Enter") {
+      dispatch({
+        type: EventType.NoteTextEditorCancelEdit,
+      });
+      e.preventDefault();
+    }
+  };
+
   const onCancelNoteTextEditing = () => {
     dispatch({
       type: EventType.NoteTextEditorCancelEdit,
@@ -110,6 +119,16 @@ const TemplateNote = memo(function TemplateNote(props: {
       type: EventType.TemplateNoteTextUpdated,
       newText: editedText,
     });
+  };
+
+  const noteSaveButtonOnClick = (e: React.KeyboardEvent) => {
+    if (e.key === " " || e.key === "Enter") {
+      dispatch({
+        type: EventType.TemplateNoteTextUpdated,
+        newText: editedText,
+      });
+      e.preventDefault();
+    }
   };
 
   const focusTextarea = () => {
@@ -124,7 +143,7 @@ const TemplateNote = memo(function TemplateNote(props: {
 
   const noteTextPlaceholder = () => {
     return (
-      <div className="note-text" tabIndex={0} onClick={onStartNoteTextEditing}>
+      <div className="note-text" onClick={onStartNoteTextEditing}>
         <span className="placeholder">
           {uistrings.TemplateNoteNoteTextPlaceholder}
         </span>
@@ -156,10 +175,20 @@ const TemplateNote = memo(function TemplateNote(props: {
   const editingNoteControlArea = () => {
     return (
       <div className="note-controlarea">
-        <a className="note-button" onClick={onSaveUpdatedNoteText}>
+        <a
+          className="note-button"
+          tabIndex={0}
+          onClick={onSaveUpdatedNoteText}
+          onKeyDown={noteSaveButtonOnClick}
+        >
           {uistrings.SaveButtonText}
         </a>
-        <a className="note-button" onClick={onCancelNoteTextEditing}>
+        <a
+          className="note-button"
+          tabIndex={0}
+          onClick={onCancelNoteTextEditing}
+          onKeyDown={noteCancelButtonOnClick}
+        >
           {uistrings.CancelButtonText}
         </a>
       </div>

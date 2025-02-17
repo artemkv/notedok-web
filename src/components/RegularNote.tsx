@@ -154,6 +154,18 @@ const RegularNote = memo(function RegularNote(props: {
     }
   };
 
+  const noteEditButtonOnClick = (e: React.KeyboardEvent) => {
+    if (e.key === " " || e.key === "Enter") {
+      if (isTextEditable(note)) {
+        dispatch({
+          type: EventType.RegularNoteStartTextEditing,
+          note,
+        });
+      }
+      e.preventDefault();
+    }
+  };
+
   const noteTextOnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (isTextEditable(note)) {
       dispatch({
@@ -177,6 +189,15 @@ const RegularNote = memo(function RegularNote(props: {
     });
   };
 
+  const noteCancelButtonOnClick = (e: React.KeyboardEvent) => {
+    if (e.key === " " || e.key === "Enter") {
+      dispatch({
+        type: EventType.NoteTextEditorCancelEdit,
+      });
+      e.preventDefault();
+    }
+  };
+
   const onSaveUpdatedNoteText = () => {
     if (isTextSaveable(note)) {
       dispatch({
@@ -184,6 +205,31 @@ const RegularNote = memo(function RegularNote(props: {
         note,
         newText: editedText,
       });
+    }
+  };
+
+  const noteSaveButtonOnClick = (e: React.KeyboardEvent) => {
+    if (e.key === " " || e.key === "Enter") {
+      if (isTextSaveable(note)) {
+        dispatch({
+          type: EventType.RegularNoteTextUpdated,
+          note,
+          newText: editedText,
+        });
+      }
+      e.preventDefault();
+    }
+  };
+
+  const noteDeleteButtonOnClick = (e: React.KeyboardEvent) => {
+    if (e.key === " " || e.key === "Enter") {
+      if (isDeletable(note)) {
+        dispatch({
+          type: EventType.NoteDeleteTriggered,
+          note,
+        });
+      }
+      e.preventDefault();
     }
   };
 
@@ -216,7 +262,7 @@ const RegularNote = memo(function RegularNote(props: {
 
   const noteTextPlaceholder = () => {
     return (
-      <div className="note-text" tabIndex={0} onClick={onStartNoteTextEditing}>
+      <div className="note-text" onClick={onStartNoteTextEditing}>
         <span className="placeholder">{uistrings.NoteTextPlaceholder}</span>
       </div>
     );
@@ -226,7 +272,6 @@ const RegularNote = memo(function RegularNote(props: {
     return (
       <div
         className="note-text"
-        tabIndex={0}
         dangerouslySetInnerHTML={{
           __html: renderNoteTextHtml(htmlEscape(noteText)),
         }}
@@ -295,10 +340,20 @@ const RegularNote = memo(function RegularNote(props: {
   const readonlyNoteControlArea = () => {
     return (
       <div className="note-controlarea">
-        <a className="note-button" onClick={onStartNoteTextEditing}>
+        <a
+          className="note-button"
+          tabIndex={0}
+          onClick={onStartNoteTextEditing}
+          onKeyDown={noteEditButtonOnClick}
+        >
           {uistrings.EditButtonText}
         </a>
-        <a className="note-button" onClick={onDeleteNote}>
+        <a
+          className="note-button"
+          tabIndex={0}
+          onClick={onDeleteNote}
+          onKeyDown={noteDeleteButtonOnClick}
+        >
           {uistrings.DeleteButtonText}
         </a>
       </div>
@@ -308,10 +363,20 @@ const RegularNote = memo(function RegularNote(props: {
   const editingNoteControlArea = () => {
     return (
       <div className="note-controlarea">
-        <a className="note-button" onClick={onSaveUpdatedNoteText}>
+        <a
+          className="note-button"
+          tabIndex={0}
+          onClick={onSaveUpdatedNoteText}
+          onKeyDown={noteSaveButtonOnClick}
+        >
           {uistrings.SaveButtonText}
         </a>
-        <a className="note-button" onClick={onCancelNoteTextEditing}>
+        <a
+          className="note-button"
+          tabIndex={0}
+          onClick={onCancelNoteTextEditing}
+          onKeyDown={noteCancelButtonOnClick}
+        >
           {uistrings.CancelButtonText}
         </a>
       </div>

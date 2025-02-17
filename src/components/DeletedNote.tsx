@@ -23,6 +23,18 @@ const DeletedNote = memo(function DeletedNote(props: {
     }
   };
 
+  const noteRestoreButtonOnClick = (e: React.KeyboardEvent) => {
+    if (e.key === " " || e.key === "Enter") {
+      if (note.state === NoteState.Deleted) {
+        dispatch({
+          type: EventType.NoteRestoreTriggered,
+          note,
+        });
+      }
+      e.preventDefault();
+    }
+  };
+
   const controlArea = () => {
     if (isDeleting) {
       return deletingNoteControlArea();
@@ -47,7 +59,12 @@ const DeletedNote = memo(function DeletedNote(props: {
   const deletedNoteControlArea = () => {
     return (
       <div className="note-controlarea">
-        <a className="note-button" onClick={onRestoreNote}>
+        <a
+          className="note-button"
+          tabIndex={0}
+          onClick={onRestoreNote}
+          onKeyDown={noteRestoreButtonOnClick}
+        >
           {uistrings.RestoreButtonText}
         </a>
       </div>
