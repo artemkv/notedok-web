@@ -110,6 +110,19 @@ Test:
 - start loading second page before the first page notes have finished loading
 
 
+What I want from title editor:
+- It's a note making tool, so what you see you can edit, and what you edited, gets saved
+- With the text, it's a bit complicated, I wanted edit in place, but the markup makes it difficult
+- TODO: But maybe, you should not lose your changes. So if another editor opens, the current one should save. I am not sure about this, so I will use it and see if it makes sense
+- But with the title, at least the title should be readily available, as titles have no markup
+- Means if I focus there, I should be able to type, no need to click and convert to editable or give any visual clues more than a cursor
+- And as soon as I lose focus, it should save the changes, making it the most seamless experience possible
+- TODO: The only tricky part is autocomplete, using mouse: that makes it lose the focus, and save wrong title (autocomplete does not work either)
+- The only solution I see is to save on something else getting focus, but then I would have to add that handling all over the place. This is too complex and fragile
+- TODO: So can I not lose focus when autocomplete activates???
+- But I would rather postpone this as a known bug and live with the rest, than changing design approach
+
+
 
 Rules for overwriting on save:
 

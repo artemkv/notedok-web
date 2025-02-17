@@ -27,13 +27,14 @@ export enum EventType {
   SearchActivated,
   SearchTextSubmitted,
 
-  TemplateNoteStartTitleEditing,
+  TemplateNoteTitleEditorActivated,
+  TemplateNoteTitleEditorTextChanged,
   TemplateNoteTitleUpdated,
 
-  RegularNoteStartTitleEditing,
+  RegularNoteTitleEditorActivated,
+  RegularNoteTitleEditorTextChanged,
   RegularNoteTitleUpdated,
 
-  NoteTitleEditorTextChanged,
   NoteTitleEditorCancelEdit,
 
   TemplateNoteStartTextEditing,
@@ -96,8 +97,13 @@ export interface SearchTextSubmittedEvent {
   text: string;
 }
 
-export interface TemplateNoteStartTitleEditingEvent {
-  type: EventType.TemplateNoteStartTitleEditing;
+export interface TemplateNoteTitleEditorActivatedEvent {
+  type: EventType.TemplateNoteTitleEditorActivated;
+}
+
+export interface TemplateNoteTitleEditorTextChangedEvent {
+  type: EventType.TemplateNoteTitleEditorTextChanged;
+  newText: string;
 }
 
 export interface TemplateNoteTitleUpdatedEvent {
@@ -105,20 +111,21 @@ export interface TemplateNoteTitleUpdatedEvent {
   newTitle: string;
 }
 
-export interface RegularNoteStartTitleEditingEvent {
-  type: EventType.RegularNoteStartTitleEditing;
+export interface RegularNoteTitleEditorActivatedEvent {
+  type: EventType.RegularNoteTitleEditorActivated;
   note: NoteTitleEditable;
+}
+
+export interface RegularNoteTitleEditorTextChangedEvent {
+  type: EventType.RegularNoteTitleEditorTextChanged;
+  note: NoteTitleEditable;
+  newText: string;
 }
 
 export interface RegularNoteTitleUpdatedEvent {
   type: EventType.RegularNoteTitleUpdated;
   note: NoteTitleSaveable;
   newTitle: string;
-}
-
-export interface NoteTitleEditorTextChangedEvent {
-  type: EventType.NoteTitleEditorTextChanged;
-  newText: string;
 }
 
 export interface NoteTitleEditorCancelEditEvent {
@@ -255,11 +262,12 @@ export type AppEvent =
   | UserSessionCreatedEvent
   | SearchActivatedEvent
   | SearchTextSubmittedEvent
-  | TemplateNoteStartTitleEditingEvent
+  | TemplateNoteTitleEditorActivatedEvent
+  | TemplateNoteTitleEditorTextChangedEvent
   | TemplateNoteTitleUpdatedEvent
-  | RegularNoteStartTitleEditingEvent
+  | RegularNoteTitleEditorActivatedEvent
+  | RegularNoteTitleEditorTextChangedEvent
   | RegularNoteTitleUpdatedEvent
-  | NoteTitleEditorTextChangedEvent
   | NoteTitleEditorCancelEditEvent
   | TemplateNoteStartTextEditingEvent
   | TemplateNoteTextUpdatedEvent

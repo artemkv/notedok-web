@@ -84,22 +84,25 @@ const RegularNote = memo(function RegularNote(props: {
   const noteTitleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isTitleEditable(note)) {
       dispatch({
-        type: EventType.NoteTitleEditorTextChanged,
+        type: EventType.RegularNoteTitleEditorTextChanged,
+        note,
         newText: e.target.value,
       });
     }
   };
 
-  const noteTitleOnClick = () => {
+  const noteTitleOnFocus = () => {
     if (isTitleEditable(note) && !isEditingTitle) {
       dispatch({
-        type: EventType.RegularNoteStartTitleEditing,
+        type: EventType.RegularNoteTitleEditorActivated,
         note,
       });
     }
   };
 
-  const onTitleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  // TODO: the only thing that does not work with this, is picking autocomplete with mouse
+  // TODO: need to find the way to tackle this
+  const noteTitleOnBlur = () => {
     if (isTitleSaveable(note)) {
       dispatch({
         type: EventType.RegularNoteTitleUpdated,
@@ -107,7 +110,6 @@ const RegularNote = memo(function RegularNote(props: {
         newTitle: noteTitle,
       });
     }
-    e.preventDefault();
   };
 
   const noteTitleOnKeyUp = (e: React.KeyboardEvent) => {
@@ -120,14 +122,15 @@ const RegularNote = memo(function RegularNote(props: {
 
   const noteTitleAutoComplete = useCallback(
     (newText: string) => {
-      if (isEditingTitle) {
+      if (isTitleEditable(note)) {
         dispatch({
-          type: EventType.NoteTitleEditorTextChanged,
+          type: EventType.RegularNoteTitleEditorTextChanged,
+          note,
           newText,
         });
       }
     },
-    [dispatch, isEditingTitle]
+    [dispatch, note]
   );
 
   const noteTextOnClick = (e: React.SyntheticEvent) => {
@@ -335,45 +338,34 @@ const RegularNote = memo(function RegularNote(props: {
     <div id={note.id} className="note-outer">
       {hasError ? noteError() : <Empty />}
       <div className="note-inner">
-        <div className="note-title-outer">
-          <div className="note-title-container">
-            <form className="note-title-form" onSubmit={onTitleSubmit}>
-              <input
-                readOnly={!isEditingTitle}
-                id={`${note.id}_title`}
-                type="text"
-                className="note-title"
-                value={noteTitle}
-                onChange={noteTitleOnChange}
-                onClick={noteTitleOnClick}
-                onKeyUp={noteTitleOnKeyUp}
-                placeholder={uistrings.NoteTitlePlaceholder}
-                maxLength={50}
-              />
-            </form>
-            <div className="note-title-progress-container">
-              {isBusyTitle ? (
-                <div className="note-title-progress">
-                  <OrbitProgress
-                    variant="dotted"
-                    color="#a9a9a9"
-                    style={{ fontSize: "3px" }}
-                    text=""
-                    textColor=""
-                  />
-                </div>
-              ) : (
-                <Empty />
-              )}
-            </div>
+        <div className="note-title-container">
+          <input
+            id={`${note.id}_title`}
+            type="text"
+            className="note-title"
+            value={noteTitle}
+            onChange={noteTitleOnChange}
+            onFocus={noteTitleOnFocus}
+            onBlur={noteTitleOnBlur}
+            onKeyUp={noteTitleOnKeyUp}
+            placeholder={uistrings.NoteTitlePlaceholder}
+            maxLength={50}
+          />
+          <div className="note-title-progress-container">
+            {isBusyTitle ? (
+              <div className="note-title-progress">
+                <OrbitProgress
+                  variant="dotted"
+                  color="#a9a9a9"
+                  style={{ fontSize: "3px" }}
+                  text=""
+                  textColor=""
+                />
+              </div>
+            ) : (
+              <Empty />
+            )}
           </div>
-          <div
-            className={
-              isEditingTitle
-                ? "note-title-editable-underline"
-                : "note-title-underline"
-            }
-          ></div>
         </div>
         <NoteTitleAutocomplete
           noteTitleId={`${note.id}_title`}

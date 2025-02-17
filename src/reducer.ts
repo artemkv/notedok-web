@@ -15,10 +15,10 @@ import {
   handleNoteTextEditorTextChanged,
   handleNoteTextSaved,
   handleNoteTitleEditorCancelEdit,
-  handleNoteTitleEditorTextChanged,
   handleRegularNoteStartTextEditing,
-  handleRegularNoteStartTitleEditing,
   handleRegularNoteTextUpdated,
+  handleRegularNoteTitleEditorActivated,
+  handleRegularNoteTitleEditorTextChanged,
   handleRegularNoteTitleUpdated,
   handleRestApiError,
   handleRetrieveFileListSuccess,
@@ -26,8 +26,9 @@ import {
   handleSearchAutoSuggestionsComputed,
   handleSearchTextSubmitted,
   handleTemplateNoteStartTextEditing,
-  handleTemplateNoteStartTitleEditing,
   handleTemplateNoteTextUpdated,
+  handleTemplateNoteTitleEditorActivated,
+  handleTemplateNoteTitleEditorTextChanged,
   handleTemplateNoteTitleUpdated,
   handleTitleAutoSuggestionsUpdated,
   handleUserAuthenticated,
@@ -70,24 +71,28 @@ export const Reducer = (
       return handleSearchTextSubmitted(state, event);
     }
 
-    if (event.type === EventType.TemplateNoteStartTitleEditing) {
-      return handleTemplateNoteStartTitleEditing(state);
+    if (event.type === EventType.TemplateNoteTitleEditorActivated) {
+      return handleTemplateNoteTitleEditorActivated(state);
+    }
+
+    if (event.type === EventType.TemplateNoteTitleEditorTextChanged) {
+      return handleTemplateNoteTitleEditorTextChanged(state, event);
     }
 
     if (event.type === EventType.TemplateNoteTitleUpdated) {
       return handleTemplateNoteTitleUpdated(state);
     }
 
-    if (event.type === EventType.RegularNoteStartTitleEditing) {
-      return handleRegularNoteStartTitleEditing(state, event);
+    if (event.type === EventType.RegularNoteTitleEditorActivated) {
+      return handleRegularNoteTitleEditorActivated(state, event);
+    }
+
+    if (event.type === EventType.RegularNoteTitleEditorTextChanged) {
+      return handleRegularNoteTitleEditorTextChanged(state, event);
     }
 
     if (event.type === EventType.RegularNoteTitleUpdated) {
       return handleRegularNoteTitleUpdated(state, event);
-    }
-
-    if (event.type === EventType.NoteTitleEditorTextChanged) {
-      return handleNoteTitleEditorTextChanged(state, event);
     }
 
     if (event.type === EventType.NoteTitleEditorCancelEdit) {

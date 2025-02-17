@@ -29,9 +29,7 @@ import {
   NoteSyncFailedEvent,
   NoteTextEditorTextChangedEvent,
   NoteTextSavedEvent,
-  NoteTitleEditorTextChangedEvent,
   RegularNoteStartTextEditingEvent,
-  RegularNoteStartTitleEditingEvent,
   RegularNoteTextUpdatedEvent,
   RegularNoteTitleUpdatedEvent,
   RestApiErrorEvent,
@@ -40,6 +38,9 @@ import {
   TitleAutoSuggestionsUpdatedEvent,
   UserAuthenticatedEvent,
   SearchTextSubmittedEvent,
+  TemplateNoteTitleEditorTextChangedEvent,
+  RegularNoteTitleEditorTextChangedEvent,
+  RegularNoteTitleEditorActivatedEvent,
 } from "./events";
 import {
   NoteListState,
@@ -173,30 +174,40 @@ export const handleSearchActivated = (
       state: NoteTitleEditorState.NotActive,
     },
     noteTextEditor: {
+      // TODO: consider saving changes, if any
       state: NoteTextEditorState.NotActive,
     },
   };
   return JustStateAuthenticated(newState);
 };
 
-export const handleNoteTitleEditorTextChanged = (
+export const handleTemplateNoteTitleEditorTextChanged = (
   state: AppStateAuthenticated,
-  event: NoteTitleEditorTextChangedEvent
+  event: TemplateNoteTitleEditorTextChangedEvent
 ): [AppStateAuthenticated, AppCommand] => {
-  if (
-    state.noteTitleEditor.state === NoteTitleEditorState.EditingRegularNote ||
-    state.noteTitleEditor.state === NoteTitleEditorState.EditingTemplateNote
-  ) {
-    const newState: AppStateAuthenticated = {
-      ...state,
-      noteTitleEditor: {
-        ...state.noteTitleEditor,
-        text: event.newText,
-      },
-    };
-    return JustStateAuthenticated(newState);
-  }
-  return JustStateAuthenticated(state);
+  const newState: AppStateAuthenticated = {
+    ...state,
+    noteTitleEditor: {
+      state: NoteTitleEditorState.EditingTemplateNote,
+      text: event.newText,
+    },
+  };
+  return JustStateAuthenticated(newState);
+};
+
+export const handleRegularNoteTitleEditorTextChanged = (
+  state: AppStateAuthenticated,
+  event: RegularNoteTitleEditorTextChangedEvent
+): [AppStateAuthenticated, AppCommand] => {
+  const newState: AppStateAuthenticated = {
+    ...state,
+    noteTitleEditor: {
+      state: NoteTitleEditorState.EditingRegularNote,
+      note: event.note,
+      text: event.newText,
+    },
+  };
+  return JustStateAuthenticated(newState);
 };
 
 export const handleTemplateNoteTitleUpdated = (
@@ -307,7 +318,7 @@ export const handleNoteTextEditorCancelEdit = (
   return JustStateAuthenticated(newState);
 };
 
-export const handleTemplateNoteStartTitleEditing = (
+export const handleTemplateNoteTitleEditorActivated = (
   state: AppStateAuthenticated
 ): [AppStateAuthenticated, AppCommand] => {
   const newState: AppStateAuthenticated = {
@@ -317,15 +328,16 @@ export const handleTemplateNoteStartTitleEditing = (
       text: "",
     },
     noteTextEditor: {
+      // TODO: consider saving changes, if any
       state: NoteTextEditorState.NotActive,
     },
   };
   return JustStateAuthenticated(newState);
 };
 
-export const handleRegularNoteStartTitleEditing = (
+export const handleRegularNoteTitleEditorActivated = (
   state: AppStateAuthenticated,
-  event: RegularNoteStartTitleEditingEvent
+  event: RegularNoteTitleEditorActivatedEvent
 ): [AppStateAuthenticated, AppCommand] => {
   const newState: AppStateAuthenticated = {
     ...state,
@@ -335,6 +347,7 @@ export const handleRegularNoteStartTitleEditing = (
       text: event.note.title,
     },
     noteTextEditor: {
+      // TODO: consider saving changes, if any
       state: NoteTextEditorState.NotActive,
     },
   };
@@ -349,6 +362,7 @@ export const handleTemplateNoteStartTextEditing = (
     noteTitleEditor: {
       state: NoteTitleEditorState.NotActive,
     },
+    // TODO: Consider saving changes, if any
     noteTextEditor: {
       state: NoteTextEditorState.EditingTemplateNote,
       text: "",
@@ -400,6 +414,7 @@ export const handleRegularNoteStartTextEditing = (
     noteTitleEditor: {
       state: NoteTitleEditorState.NotActive,
     },
+    // TODO: Consider saving changes, if any
     noteTextEditor: {
       state: NoteTextEditorState.EditingRegularNote,
       note: event.note,

@@ -38,25 +38,26 @@ const TemplateNote = memo(function TemplateNote(props: {
 
   const noteTitleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({
-      type: EventType.NoteTitleEditorTextChanged,
+      type: EventType.TemplateNoteTitleEditorTextChanged,
       newText: e.target.value,
     });
   };
 
-  const noteTitleOnClick = () => {
+  const noteTitleOnFocus = () => {
     if (!isEditingTitle) {
       dispatch({
-        type: EventType.TemplateNoteStartTitleEditing,
+        type: EventType.TemplateNoteTitleEditorActivated,
       });
     }
   };
 
-  const onTitleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  // TODO: the only thing that does not work with this, is picking autocomplete with mouse
+  // TODO: need to find the way to tackle this
+  const noteTitleOnBlur = () => {
     dispatch({
       type: EventType.TemplateNoteTitleUpdated,
       newTitle: noteTitle,
     });
-    e.preventDefault();
   };
 
   const noteTitleOnKeyUp = (e: React.KeyboardEvent) => {
@@ -70,7 +71,7 @@ const TemplateNote = memo(function TemplateNote(props: {
   const noteTitleAutoComplete = useCallback(
     (newText: string) => {
       dispatch({
-        type: EventType.NoteTitleEditorTextChanged,
+        type: EventType.TemplateNoteTitleEditorTextChanged,
         newText,
       });
     },
@@ -168,30 +169,19 @@ const TemplateNote = memo(function TemplateNote(props: {
   return (
     <div id="note_template" className="note-outer">
       <div className="note-inner">
-        <div className="note-title-outer">
-          <div className="note-title-container">
-            <form className="note-title-form" onSubmit={onTitleSubmit}>
-              <input
-                readOnly={!isEditingTitle}
-                id="note_template_title"
-                type="text"
-                className="note-title"
-                value={noteTitle}
-                onChange={noteTitleOnChange}
-                onClick={noteTitleOnClick}
-                onKeyUp={noteTitleOnKeyUp}
-                placeholder={uistrings.TemplateNoteTitlePlaceholder}
-                maxLength={50}
-              />
-            </form>
-          </div>
-          <div
-            className={
-              isEditingTitle
-                ? "note-title-editable-underline"
-                : "note-title-underline"
-            }
-          ></div>
+        <div className="note-title-container">
+          <input
+            id="note_template_title"
+            type="text"
+            className="note-title"
+            value={noteTitle}
+            onChange={noteTitleOnChange}
+            onFocus={noteTitleOnFocus}
+            onBlur={noteTitleOnBlur}
+            onKeyUp={noteTitleOnKeyUp}
+            placeholder={uistrings.TemplateNoteTitlePlaceholder}
+            maxLength={50}
+          />
         </div>
         <NoteTitleAutocomplete
           noteTitleId="note_template_title"

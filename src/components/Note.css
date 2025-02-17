@@ -19,30 +19,17 @@
     align-items: center;
 }
 
-.note-title-form {
-    flex: 2;
-}
-
 .note-title {
     font-family: "Segoe UI", arial, sans-serif;
     font-weight: 400;
     font-size: 30px;
-    padding: 4px 8px 1px 8px;
+    padding: 4px 8px 16px 8px;
     width: 100%;
     border: none;
     outline: none;
     color: #000000;
     text-overflow: ellipsis;
-}
-
-.note-title-editable-underline {
-    border-bottom: 1px solid #e3e3e3;
-    margin: 0px 8px 16px 8px;
-}
-
-.note-title-underline {
-    border-bottom: 1px solid white;
-    margin: 0px 8px 16px 8px;
+    flex: 2;
 }
 
 .note-title-progress {
