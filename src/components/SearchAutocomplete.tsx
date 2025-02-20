@@ -41,6 +41,10 @@ const SearchAutocomplete = memo(function SearchAutocomplete(props: {
       },
     };
     searchTextbox.autocomplete(options);
+
+    return () => {
+      searchTextbox.autocomplete("dispose");
+    };
   }, [autoSuggestItems, onAutocomplete]);
 
   return (

@@ -35,6 +35,10 @@ const NoteTitleAutocomplete = memo(function NoteTitleAutocomplete(props: {
       },
     };
     titleInputElement.autocomplete(options);
+
+    return () => {
+      titleInputElement.autocomplete("dispose");
+    };
   }, [autoSuggestHashTags, noteTitleId, onAutocomplete]); // TODO: do I need to do cleanup???
 
   return (
