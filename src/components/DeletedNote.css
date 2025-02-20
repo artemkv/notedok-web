@@ -6,4 +6,10 @@
 .deleted-note .note-title {
 	background-color: #f1f1f1;
 	color: #a9a9a9;
+	font-family: "Segoe UI", arial, sans-serif;
+	font-weight: 400;
+	font-size: 30px;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
