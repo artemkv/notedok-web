@@ -1,10 +1,10 @@
 import "./DeletedNote.css";
 import { NoteDeleted, NoteDeleting, NoteState } from "../model";
 import { AppEvent, EventType } from "../events";
-import { OrbitProgress } from "react-loading-indicators";
 import { Dispatch } from "../hooks/useReducer";
 import uistrings from "../uistrings";
 import { memo } from "react";
+import OrbitProgressIndicator from "./OrbitProgressIndicator";
 
 const DeletedNote = memo(function DeletedNote(props: {
   note: NoteDeleting | NoteDeleted;
@@ -45,13 +45,7 @@ const DeletedNote = memo(function DeletedNote(props: {
   const deletingNoteControlArea = () => {
     return (
       <div className="note-progress">
-        <OrbitProgress
-          variant="dotted"
-          color="#a9a9a9"
-          style={{ fontSize: "3px" }}
-          text=""
-          textColor=""
-        />
+        <OrbitProgressIndicator />
       </div>
     );
   };

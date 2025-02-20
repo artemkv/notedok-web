@@ -15,12 +15,12 @@ import {
 import { htmlEscape, renderNoteTextHtml } from "../ui";
 import { AppEvent, EventType } from "../events";
 import { countLines, selectionIsNotEmpty } from "../util";
-import { OrbitProgress } from "react-loading-indicators";
 import ErrorIcon from "../assets/error_outline.svg";
 import Empty from "./Empty";
 import { Dispatch } from "../hooks/useReducer";
 import uistrings from "../uistrings";
 import NoteTitleAutocomplete from "./NoteTitleAutocomplete";
+import OrbitProgressIndicator from "./OrbitProgressIndicator";
 
 const RegularNote = memo(function RegularNote(props: {
   note: NoteRegular;
@@ -326,13 +326,7 @@ const RegularNote = memo(function RegularNote(props: {
   const busyNoteControlArea = () => {
     return (
       <div className="note-progress">
-        <OrbitProgress
-          variant="dotted"
-          color="#a9a9a9"
-          style={{ fontSize: "3px" }}
-          text=""
-          textColor=""
-        />
+        <OrbitProgressIndicator />
       </div>
     );
   };
@@ -419,13 +413,7 @@ const RegularNote = memo(function RegularNote(props: {
           <div className="note-title-progress-container">
             {isBusyTitle ? (
               <div className="note-title-progress">
-                <OrbitProgress
-                  variant="dotted"
-                  color="#a9a9a9"
-                  style={{ fontSize: "3px" }}
-                  text=""
-                  textColor=""
-                />
+                <OrbitProgressIndicator />
               </div>
             ) : (
               <Empty />
