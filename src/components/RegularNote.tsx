@@ -29,218 +29,268 @@ const RegularNote = memo(function RegularNote(props: {
   autoSuggestHashTags: AutoSuggestHashTag[];
   dispatch: Dispatch<AppEvent>;
 }) {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
   const note = props.note;
-  const dispatch = props.dispatch;
-
-  const isPendingTitleUpdate = (note: NoteRegular) => {
-    return note.state === NoteState.Renaming;
-  };
-  const isPendingTextUpdate = (note: NoteRegular) => {
-    return (
-      note.state === NoteState.SavingText ||
-      note.state === NoteState.Restoring ||
-      note.state === NoteState.CreatingFromTitle || // prevents showing "Save" button until saved
-      note.state === NoteState.CreatingFromText
-    );
-  };
-  const isBusyTitle = isPendingTitleUpdate(note);
-  const isBusyText = isPendingTextUpdate(note);
-
-  const hasError = note.state === NoteState.OutOfSync;
-  const errorText = hasError ? note.err : "";
   const titleEditable = props.titleEditable;
   const textEditable = props.textEditable;
   const autoSuggestHashTags = props.autoSuggestHashTags;
+  const dispatch = props.dispatch;
 
-  const getTitleEditorState = (): [boolean, string] => {
-    if (titleEditable.state === ModifiedState.ModifiedValue) {
-      return [true, titleEditable.newValue];
-    }
-    if (note.state === NoteState.CreatingFromText) {
-      return [false, ""];
-    }
-    return [false, note.title];
-  };
-  const [isEditingTitle, noteTitle] = getTitleEditorState();
+  const isPendingTextUpdate =
+    note.state === NoteState.SavingText ||
+    note.state === NoteState.Restoring ||
+    note.state === NoteState.CreatingFromTitle || // prevents showing "Save" button until saved
+    note.state === NoteState.CreatingFromText;
+  const hasError = note.state === NoteState.OutOfSync;
+  const errorText = hasError ? note.err : "";
 
-  const getTextEditorState = (): [boolean, string] => {
+  const [isEditingText, effectiveNoteText] = (() => {
     if (textEditable.state === ModifiedState.ModifiedValue) {
       return [true, textEditable.newValue];
     }
-    return [false, ""];
-  };
-  const [isEditingText, editedText] = getTextEditorState();
-
-  const getReadOnlyText = (): string => {
     if (note.state === NoteState.CreatingFromTitle) {
-      return "";
+      return [false, ""];
     }
-    return note.text;
-  };
-  const noteText = getReadOnlyText();
+    return [false, note.text];
+  })();
 
-  const noteTitleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (isTitleEditable(note)) {
-      dispatch({
-        type: EventType.RegularNoteTitleEditorTextChanged,
-        note,
-        newText: e.target.value,
-      });
+  const noteTextElement = () => {
+    if (isEditingText) {
+      return (
+        <TextEditor
+          note={note}
+          editedText={effectiveNoteText}
+          dispatch={dispatch}
+        />
+      );
     }
-  };
-
-  const noteTitleOnFocus = () => {
-    if (isTitleEditable(note) && !isEditingTitle) {
-      dispatch({
-        type: EventType.RegularNoteTitleEditorActivated,
-        note,
-      });
+    if (effectiveNoteText) {
+      return (
+        <NoteTextReadonly
+          note={note}
+          readOnlyText={effectiveNoteText}
+          dispatch={dispatch}
+        />
+      );
     }
-  };
-
-  // TODO: the only thing that does not work with this, is picking autocomplete with mouse
-  // TODO: need to find the way to tackle this
-  const noteTitleOnBlur = () => {
-    if (isTitleSaveable(note)) {
-      dispatch({
-        type: EventType.RegularNoteTitleUpdated,
-        note,
-        newTitle: noteTitle,
-      });
-    }
+    return <NoteTextPlaceholder note={note} dispatch={dispatch} />;
   };
 
-  const noteTitleOnKeyUp = (e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
-      dispatch({
-        type: EventType.NoteTitleEditorCancelEdit,
-      });
+  const controlArea = () => {
+    if (isPendingTextUpdate) {
+      return <BusyNoteControlArea />;
     }
+    if (isEditingText) {
+      return (
+        <EditingNoteControlArea
+          note={note}
+          editedText={effectiveNoteText}
+          dispatch={dispatch}
+        />
+      );
+    }
+    return <ReadonlyNoteControlArea note={note} dispatch={dispatch} />;
   };
 
-  const noteTitleAutoComplete = useCallback(
-    (newText: string) => {
+  return (
+    <div id={note.id} className="note-outer">
+      {hasError ? <NoteError errorText={errorText} /> : <Empty />}
+      <div className="note-inner">
+        <NoteTitle
+          note={note}
+          titleEditable={titleEditable}
+          autoSuggestHashTags={autoSuggestHashTags}
+          dispatch={dispatch}
+        />
+        {noteTextElement()}
+        {controlArea()}
+      </div>
+    </div>
+  );
+});
+
+const NoteTitle = memo(
+  (props: {
+    note: NoteRegular;
+    titleEditable: EditableText;
+    autoSuggestHashTags: AutoSuggestHashTag[];
+    dispatch: Dispatch<AppEvent>;
+  }) => {
+    const note = props.note;
+    const titleEditable = props.titleEditable;
+    const autoSuggestHashTags = props.autoSuggestHashTags;
+    const dispatch = props.dispatch;
+
+    const isPendingTitleUpdate = note.state === NoteState.Renaming;
+
+    const [isEditingTitle, effectiveNoteTitle] = (() => {
+      if (titleEditable.state === ModifiedState.ModifiedValue) {
+        return [true, titleEditable.newValue];
+      }
+      if (note.state === NoteState.CreatingFromText) {
+        return [false, ""];
+      }
+      return [false, note.title];
+    })();
+
+    const noteTitleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (isTitleEditable(note)) {
         dispatch({
           type: EventType.RegularNoteTitleEditorTextChanged,
           note,
-          newText,
+          newText: e.target.value,
         });
       }
-    },
-    [dispatch, note]
-  );
+    };
 
-  const noteTextOnClick = (e: React.SyntheticEvent) => {
-    const element = e.target as HTMLElement;
-
-    if (element.nodeName.toUpperCase() !== "A") {
-      onStartNoteTextEditing();
-    }
-  };
-
-  const onStartNoteTextEditing = () => {
-    if (selectionIsNotEmpty()) {
-      return;
-    }
-
-    if (isTextEditable(note)) {
-      dispatch({
-        type: EventType.RegularNoteStartTextEditing,
-        note,
-      });
-    }
-  };
-
-  const noteEditButtonOnClick = (e: React.KeyboardEvent) => {
-    if (e.key === " " || e.key === "Enter") {
-      if (isTextEditable(note)) {
+    const noteTitleOnFocus = () => {
+      if (isTitleEditable(note) && !isEditingTitle) {
         dispatch({
-          type: EventType.RegularNoteStartTextEditing,
+          type: EventType.RegularNoteTitleEditorActivated,
           note,
         });
       }
-      e.preventDefault();
-    }
-  };
+    };
 
-  const noteTextOnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (isTextEditable(note)) {
-      dispatch({
-        type: EventType.NoteTextEditorTextChanged,
-        newText: e.target.value,
-      });
-    }
-  };
+    // TODO: the only thing that does not work with this, is picking autocomplete with mouse
+    // TODO: need to find the way to tackle this
+    const noteTitleOnBlur = () => {
+      if (isTitleSaveable(note)) {
+        dispatch({
+          type: EventType.RegularNoteTitleUpdated,
+          note,
+          newTitle: effectiveNoteTitle,
+        });
+      }
+    };
 
-  const noteTextOnKeyUp = (e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
-      dispatch({
-        type: EventType.NoteTextEditorCancelEdit,
-      });
-    }
-  };
+    const noteTitleOnKeyUp = (e: React.KeyboardEvent) => {
+      if (e.key === "Escape") {
+        dispatch({
+          type: EventType.NoteTitleEditorCancelEdit,
+        });
+      }
+    };
 
-  const onCancelNoteTextEditing = () => {
+    const noteTitleAutoComplete = useCallback(
+      (newText: string) => {
+        if (isTitleEditable(note)) {
+          dispatch({
+            type: EventType.RegularNoteTitleEditorTextChanged,
+            note,
+            newText,
+          });
+        }
+      },
+      [dispatch, note]
+    );
+
+    return (
+      <>
+        <div className="note-title-container">
+          <input
+            id={`${note.id}_title`}
+            type="text"
+            className="note-title"
+            value={effectiveNoteTitle}
+            onChange={noteTitleOnChange}
+            onFocus={noteTitleOnFocus}
+            onBlur={noteTitleOnBlur}
+            onKeyUp={noteTitleOnKeyUp}
+            placeholder={uistrings.NoteTitlePlaceholder}
+            maxLength={50}
+          />
+          <div className="note-title-progress-container">
+            {isPendingTitleUpdate ? (
+              <div className="note-title-progress">
+                <OrbitProgressIndicator />
+              </div>
+            ) : (
+              <Empty />
+            )}
+          </div>
+        </div>
+        <NoteTitleAutocomplete
+          noteTitleId={`${note.id}_title`}
+          autoSuggestHashTags={autoSuggestHashTags}
+          onAutocomplete={noteTitleAutoComplete}
+        />
+      </>
+    );
+  }
+);
+
+const onStartNoteTextEditing = (
+  note: NoteRegular,
+  dispatch: Dispatch<AppEvent>
+) => {
+  if (selectionIsNotEmpty()) {
+    return;
+  }
+
+  if (isTextEditable(note)) {
     dispatch({
-      type: EventType.NoteTextEditorCancelEdit,
+      type: EventType.RegularNoteStartTextEditing,
+      note,
     });
-  };
+  }
+};
 
-  const noteCancelButtonOnClick = (e: React.KeyboardEvent) => {
-    if (e.key === " " || e.key === "Enter") {
-      dispatch({
-        type: EventType.NoteTextEditorCancelEdit,
-      });
-      e.preventDefault();
-    }
-  };
+const NoteTextPlaceholder = memo(
+  (props: { note: NoteRegular; dispatch: Dispatch<AppEvent> }) => {
+    const note = props.note;
+    const dispatch = props.dispatch;
 
-  const onSaveUpdatedNoteText = () => {
-    if (isTextSaveable(note)) {
-      dispatch({
-        type: EventType.RegularNoteTextUpdated,
-        note,
-        newText: editedText,
-      });
-    }
-  };
+    return (
+      <div
+        className="note-text"
+        onClick={() => onStartNoteTextEditing(note, dispatch)}
+      >
+        <span className="placeholder">{uistrings.NoteTextPlaceholder}</span>
+      </div>
+    );
+  }
+);
 
-  const noteSaveButtonOnClick = (e: React.KeyboardEvent) => {
-    if (e.key === " " || e.key === "Enter") {
-      if (isTextSaveable(note)) {
-        dispatch({
-          type: EventType.RegularNoteTextUpdated,
-          note,
-          newText: editedText,
-        });
+const NoteTextReadonly = memo(
+  (props: {
+    note: NoteRegular;
+    readOnlyText: string;
+    dispatch: Dispatch<AppEvent>;
+  }) => {
+    const note = props.note;
+    const readOnlyText = props.readOnlyText;
+    const dispatch = props.dispatch;
+
+    const noteTextOnClick = (e: React.SyntheticEvent) => {
+      const element = e.target as HTMLElement;
+
+      if (element.nodeName.toUpperCase() !== "A") {
+        onStartNoteTextEditing(note, dispatch);
       }
-      e.preventDefault();
-    }
-  };
+    };
 
-  const noteDeleteButtonOnClick = (e: React.KeyboardEvent) => {
-    if (e.key === " " || e.key === "Enter") {
-      if (isDeletable(note)) {
-        dispatch({
-          type: EventType.NoteDeleteTriggered,
-          note,
-        });
-      }
-      e.preventDefault();
-    }
-  };
+    return (
+      <div
+        className="note-text"
+        dangerouslySetInnerHTML={{
+          __html: renderNoteTextHtml(htmlEscape(readOnlyText)),
+        }}
+        onClick={noteTextOnClick}
+      ></div>
+    );
+  }
+);
 
-  const onDeleteNote = () => {
-    if (isDeletable(note)) {
-      dispatch({
-        type: EventType.NoteDeleteTriggered,
-        note,
-      });
-    }
-  };
+const TextEditor = (props: {
+  note: NoteRegular;
+  editedText: string;
+  dispatch: Dispatch<AppEvent>;
+}) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const note = props.note;
+  const editedText = props.editedText;
+  const dispatch = props.dispatch;
 
   const focusTextarea = () => {
     if (textareaRef.current) {
@@ -260,84 +310,90 @@ const RegularNote = memo(function RegularNote(props: {
     return countLines(note.text) > 10;
   };
 
-  const noteTextPlaceholder = () => {
-    return (
-      <div className="note-text" onClick={onStartNoteTextEditing}>
-        <span className="placeholder">{uistrings.NoteTextPlaceholder}</span>
-      </div>
-    );
-  };
-
-  const noteTextReadonly = () => {
-    return (
-      <div
-        className="note-text"
-        dangerouslySetInnerHTML={{
-          __html: renderNoteTextHtml(htmlEscape(noteText)),
-        }}
-        onClick={noteTextOnClick}
-      ></div>
-    );
-  };
-
-  const textEditor = () => {
-    return (
-      <div className="note-text-editable-container">
-        <textarea
-          ref={textareaRef}
-          className={`note-text-editable ${
-            isLongText() ? "text-area-tall" : "text-area-short"
-          }`}
-          value={editedText}
-          onChange={noteTextOnChange}
-          onKeyUp={noteTextOnKeyUp}
-        ></textarea>
-      </div>
-    );
-  };
-
-  // TODO: this is only on tablets I guess, review
-  /*
-          <button className="note-save-button">
-            {uistrings.SaveButtonText}
-          </button>
-  */
-
-  const noteTextElement = () => {
-    if (isEditingText) {
-      return textEditor();
+  const noteTextOnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (isTextEditable(note)) {
+      dispatch({
+        type: EventType.NoteTextEditorTextChanged,
+        newText: e.target.value,
+      });
     }
-    if (noteText) {
-      return noteTextReadonly();
-    }
-    return noteTextPlaceholder();
   };
 
-  const controlArea = () => {
-    if (isBusyText) {
-      return busyNoteControlArea();
+  const noteTextOnKeyUp = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") {
+      dispatch({
+        type: EventType.NoteTextEditorCancelEdit,
+      });
     }
-    if (isEditingText) {
-      return editingNoteControlArea();
-    }
-    return readonlyNoteControlArea();
   };
 
-  const busyNoteControlArea = () => {
-    return (
-      <div className="note-progress">
-        <OrbitProgressIndicator />
-      </div>
-    );
-  };
+  return (
+    <div className="note-text-editable-container">
+      <textarea
+        ref={textareaRef}
+        className={`note-text-editable ${
+          isLongText() ? "text-area-tall" : "text-area-short"
+        }`}
+        value={editedText}
+        onChange={noteTextOnChange}
+        onKeyUp={noteTextOnKeyUp}
+      ></textarea>
+    </div>
+  );
+};
 
-  const readonlyNoteControlArea = () => {
+const BusyNoteControlArea = memo(() => {
+  return (
+    <div className="note-progress">
+      <OrbitProgressIndicator />
+    </div>
+  );
+});
+
+const ReadonlyNoteControlArea = memo(
+  (props: { note: NoteRegular; dispatch: Dispatch<AppEvent> }) => {
+    const note = props.note;
+    const dispatch = props.dispatch;
+
+    const noteEditButtonOnClick = (e: React.KeyboardEvent) => {
+      if (e.key === " " || e.key === "Enter") {
+        if (isTextEditable(note)) {
+          dispatch({
+            type: EventType.RegularNoteStartTextEditing,
+            note,
+          });
+        }
+        e.preventDefault();
+      }
+    };
+
+    const noteDeleteButtonOnClick = (e: React.KeyboardEvent) => {
+      if (e.key === " " || e.key === "Enter") {
+        if (isDeletable(note)) {
+          dispatch({
+            type: EventType.NoteDeleteTriggered,
+            note,
+          });
+        }
+        e.preventDefault();
+      }
+    };
+
+    const onDeleteNote = () => {
+      if (isDeletable(note)) {
+        dispatch({
+          type: EventType.NoteDeleteTriggered,
+          note,
+        });
+      }
+    };
+
     return (
       <div className="note-controlarea">
         <a
           className="note-button"
           tabIndex={0}
-          onClick={onStartNoteTextEditing}
+          onClick={() => onStartNoteTextEditing(note, dispatch)}
           onKeyDown={noteEditButtonOnClick}
         >
           {uistrings.EditButtonText}
@@ -352,9 +408,58 @@ const RegularNote = memo(function RegularNote(props: {
         </a>
       </div>
     );
-  };
+  }
+);
 
-  const editingNoteControlArea = () => {
+const EditingNoteControlArea = memo(
+  (props: {
+    note: NoteRegular;
+    // TODO: we don't actually have to pass it here, we can get it from the state
+    editedText: string;
+    dispatch: Dispatch<AppEvent>;
+  }) => {
+    const note = props.note;
+    const editedText = props.editedText;
+    const dispatch = props.dispatch;
+
+    const onCancelNoteTextEditing = () => {
+      dispatch({
+        type: EventType.NoteTextEditorCancelEdit,
+      });
+    };
+
+    const noteCancelButtonOnClick = (e: React.KeyboardEvent) => {
+      if (e.key === " " || e.key === "Enter") {
+        dispatch({
+          type: EventType.NoteTextEditorCancelEdit,
+        });
+        e.preventDefault();
+      }
+    };
+
+    const onSaveUpdatedNoteText = () => {
+      if (isTextSaveable(note)) {
+        dispatch({
+          type: EventType.RegularNoteTextUpdated,
+          note,
+          newText: editedText,
+        });
+      }
+    };
+
+    const noteSaveButtonOnClick = (e: React.KeyboardEvent) => {
+      if (e.key === " " || e.key === "Enter") {
+        if (isTextSaveable(note)) {
+          dispatch({
+            type: EventType.RegularNoteTextUpdated,
+            note,
+            newText: editedText,
+          });
+        }
+        e.preventDefault();
+      }
+    };
+
     return (
       <div className="note-controlarea">
         <a
@@ -375,59 +480,23 @@ const RegularNote = memo(function RegularNote(props: {
         </a>
       </div>
     );
-  };
+  }
+);
 
-  // TODO: maybe better tooltip
-  // TODO: maybe allow copying the error
-  const noteError = () => {
-    return (
-      <div className="note-error">
-        <img className="note-error-icon" src={ErrorIcon} title={errorText} />
-        <input
-          type="text"
-          className="note-error-text"
-          value={errorText}
-          readOnly
-        />
-      </div>
-    );
-  };
+// TODO: maybe better tooltip
+// TODO: maybe allow copying the error
+const NoteError = memo((props: { errorText: string }) => {
+  const errorText = props.errorText;
 
   return (
-    <div id={note.id} className="note-outer">
-      {hasError ? noteError() : <Empty />}
-      <div className="note-inner">
-        <div className="note-title-container">
-          <input
-            id={`${note.id}_title`}
-            type="text"
-            className="note-title"
-            value={noteTitle}
-            onChange={noteTitleOnChange}
-            onFocus={noteTitleOnFocus}
-            onBlur={noteTitleOnBlur}
-            onKeyUp={noteTitleOnKeyUp}
-            placeholder={uistrings.NoteTitlePlaceholder}
-            maxLength={50}
-          />
-          <div className="note-title-progress-container">
-            {isBusyTitle ? (
-              <div className="note-title-progress">
-                <OrbitProgressIndicator />
-              </div>
-            ) : (
-              <Empty />
-            )}
-          </div>
-        </div>
-        <NoteTitleAutocomplete
-          noteTitleId={`${note.id}_title`}
-          autoSuggestHashTags={autoSuggestHashTags}
-          onAutocomplete={noteTitleAutoComplete}
-        />
-        {noteTextElement()}
-        {controlArea()}
-      </div>
+    <div className="note-error">
+      <img className="note-error-icon" src={ErrorIcon} title={errorText} />
+      <input
+        type="text"
+        className="note-error-text"
+        value={errorText}
+        readOnly
+      />
     </div>
   );
 });
