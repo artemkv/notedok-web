@@ -80,13 +80,7 @@ const RegularNote = memo(function RegularNote(props: {
       return <BusyNoteControlArea />;
     }
     if (isEditingText) {
-      return (
-        <EditingNoteControlArea
-          note={note}
-          editedText={effectiveNoteText}
-          dispatch={dispatch}
-        />
-      );
+      return <EditingNoteControlArea note={note} dispatch={dispatch} />;
     }
     return <ReadonlyNoteControlArea note={note} dispatch={dispatch} />;
   };
@@ -412,14 +406,8 @@ const ReadonlyNoteControlArea = memo(
 );
 
 const EditingNoteControlArea = memo(
-  (props: {
-    note: NoteRegular;
-    // TODO: we don't actually have to pass it here, we can get it from the state
-    editedText: string;
-    dispatch: Dispatch<AppEvent>;
-  }) => {
+  (props: { note: NoteRegular; dispatch: Dispatch<AppEvent> }) => {
     const note = props.note;
-    const editedText = props.editedText;
     const dispatch = props.dispatch;
 
     const onCancelNoteTextEditing = () => {
@@ -442,7 +430,6 @@ const EditingNoteControlArea = memo(
         dispatch({
           type: EventType.RegularNoteTextUpdated,
           note,
-          newText: editedText,
         });
       }
     };
@@ -453,7 +440,6 @@ const EditingNoteControlArea = memo(
           dispatch({
             type: EventType.RegularNoteTextUpdated,
             note,
-            newText: editedText,
           });
         }
         e.preventDefault();

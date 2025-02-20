@@ -138,7 +138,6 @@ export interface TemplateNoteStartTextEditingEvent {
 
 export interface TemplateNoteTextUpdatedEvent {
   type: EventType.TemplateNoteTextUpdated;
-  newText: string;
 }
 
 export interface RegularNoteStartTextEditingEvent {
@@ -149,7 +148,6 @@ export interface RegularNoteStartTextEditingEvent {
 export interface RegularNoteTextUpdatedEvent {
   type: EventType.RegularNoteTextUpdated;
   note: NoteTextSaveable;
-  newText: string;
 }
 
 export interface NoteTextEditorTextChangedEvent {

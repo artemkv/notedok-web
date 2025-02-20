@@ -35,10 +35,7 @@ const TemplateNote = memo(function TemplateNote(props: {
 
   const controlArea = () => {
     return isEditingText ? (
-      <EditingNoteControlArea
-        editedText={effectiveNoteText}
-        dispatch={dispatch}
-      />
+      <EditingNoteControlArea dispatch={dispatch} />
     ) : (
       <Empty />
     );
@@ -210,13 +207,8 @@ const TextEditor = (props: {
 };
 
 const EditingNoteControlArea = memo(
-  (props: {
-    // TODO: we don't actually have to pass it here, we can get it from the state
-    editedText: string;
-    dispatch: Dispatch<AppEvent>;
-  }) => {
+  (props: { dispatch: Dispatch<AppEvent> }) => {
     const dispatch = props.dispatch;
-    const editedText = props.editedText;
 
     const onCancelNoteTextEditing = () => {
       dispatch({
@@ -236,7 +228,6 @@ const EditingNoteControlArea = memo(
     const onSaveUpdatedNoteText = () => {
       dispatch({
         type: EventType.TemplateNoteTextUpdated,
-        newText: editedText,
       });
     };
 
@@ -244,7 +235,6 @@ const EditingNoteControlArea = memo(
       if (e.key === " " || e.key === "Enter") {
         dispatch({
           type: EventType.TemplateNoteTextUpdated,
-          newText: editedText,
         });
         e.preventDefault();
       }
