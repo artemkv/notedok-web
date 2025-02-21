@@ -8,7 +8,7 @@ _This is a port of a project (https://notedok.com/) I started back in 2013, so s
 
 ![app model](note_states.png "App model")
 
-### Most important parts
+### Most important project files
 
 - `src\model.ts` contains the boxes, i.e. types for each of the note states. _All the types are treated as immutable_
 - `src\noteLifecycle.ts` contains the arrows, i.e. all the valid state transitions. _All the functions here are pure_
@@ -21,6 +21,7 @@ _This is a port of a project (https://notedok.com/) I started back in 2013, so s
 - There is also some impurity due integration with a legacy autocomplete library (no time to tackle it now). Some components force focus upon first render etc.
 - Most of the components, however, treated as pure and are wrapped in `memo`
 - The state is managed using custom-made `src\hooks\useReducer.ts` hook. The reason to use custom hook is that I like the Elm model where reducer spits out new state and command, and the existing `useReducer` only returns the new state. I don't like thunks and stuff like that
+- The app state lives in `src\AppStatefulContainer.tsx`, the uppermost component
 
 ## Running the app
 
