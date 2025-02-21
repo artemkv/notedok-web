@@ -14,6 +14,7 @@ export enum CommandType {
   DoNothing,
   DoMany,
   CreateUserSession,
+  ScheduleIdTokenRefresh,
   RetrieveFileList,
   ComputeSearchAutoSuggestions,
   ExtractNewHashTags,
@@ -43,6 +44,10 @@ export interface DoManyCommand extends Command<AppEvent> {
 export interface CreateUserSessionCommand extends Command<AppEvent> {
   type: CommandType.CreateUserSession;
   idToken: string;
+}
+
+export interface ScheduleIdTokenRefreshCommand extends Command<AppEvent> {
+  type: CommandType.ScheduleIdTokenRefresh;
 }
 
 export interface RetrieveFileListCommand extends Command<AppEvent> {
@@ -104,6 +109,7 @@ export type AppCommand =
   | DoNothingCommand
   | DoManyCommand
   | CreateUserSessionCommand
+  | ScheduleIdTokenRefreshCommand
   | RetrieveFileListCommand
   | ComputeSearchAutoSuggestionsCommand
   | ExtractNewHashTagsCommand

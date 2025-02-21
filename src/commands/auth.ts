@@ -1,6 +1,13 @@
-import { CommandType, CreateUserSessionCommand } from "../commands";
+import {
+  CommandType,
+  CreateUserSessionCommand,
+  ScheduleIdTokenRefreshCommand,
+} from "../commands";
 import { EventType } from "../events";
 import { setIdToken } from "../sessionapi";
+import { fetchAuthSession } from "aws-amplify/auth";
+
+const ID_TOKEN_REFRESH_INTERVAL = 300000;
 
 export const StartUserSession = (
   idToken: string
@@ -14,3 +21,21 @@ export const StartUserSession = (
     });
   },
 });
+
+export const ScheduleIdTokenRefresh = (): ScheduleIdTokenRefreshCommand => ({
+  type: CommandType.ScheduleIdTokenRefresh,
+  execute: async () => {
+    scheduleIdTokenRefresh();
+  },
+});
+
+const scheduleIdTokenRefresh = () => {
+  setTimeout(() => {
+    fetchAuthSession().then((s) => {
+      if (s.tokens && s.tokens.idToken) {
+        setIdToken(s.tokens.idToken.toString());
+      }
+      scheduleIdTokenRefresh();
+    });
+  }, ID_TOKEN_REFRESH_INTERVAL);
+};

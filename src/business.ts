@@ -1,6 +1,6 @@
 import { AppCommand, DoMany, DoNothing } from "./commands";
 import { ReportError } from "./commands/alerts";
-import { StartUserSession } from "./commands/auth";
+import { ScheduleIdTokenRefresh, StartUserSession } from "./commands/auth";
 import {
   ComputeSearchAutoSuggestions,
   ExtractNewHashTags,
@@ -138,7 +138,10 @@ export const handleUserSessionCreated = (): [
     },
   };
 
-  return [newState, RetrieveFileList("", 0)];
+  return [
+    newState,
+    DoMany([RetrieveFileList("", 0), ScheduleIdTokenRefresh()]),
+  ];
 };
 
 export const handleSearchTextSubmitted = (
