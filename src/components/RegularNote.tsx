@@ -320,6 +320,15 @@ const TextEditor = (props: {
     }
   };
 
+  const noteSaveButtonOnClick = () => {
+    if (isTextSaveable(note)) {
+      dispatch({
+        type: EventType.RegularNoteTextUpdated,
+        note,
+      });
+    }
+  };
+
   return (
     <div className="note-text-editable-container">
       <textarea
@@ -331,6 +340,9 @@ const TextEditor = (props: {
         onChange={noteTextOnChange}
         onKeyUp={noteTextOnKeyUp}
       ></textarea>
+      <button className="note-save-button" onClick={noteSaveButtonOnClick}>
+        {uistrings.SaveButtonText}
+      </button>
     </div>
   );
 };

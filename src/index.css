@@ -8,3 +8,11 @@ html {
     font-family: "Segoe UI", arial, sans-serif;
     background-color: #f1f1f1;
 }
+
+@media only screen and (max-device-width: 768px) {
+
+    body,
+    html {
+        background-color: white;
+    }
+}

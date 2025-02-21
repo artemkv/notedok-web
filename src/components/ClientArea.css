@@ -8,3 +8,11 @@
     width: 100%;
     height: 100%;
 }
+
+@media only screen and (max-device-width: 768px) {
+    .client-area-outer {
+        margin-left: 0px;
+        margin-right: 0px;
+        width: 100%;
+    }
+}
