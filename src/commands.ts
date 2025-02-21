@@ -19,7 +19,7 @@ export enum CommandType {
   ComputeSearchAutoSuggestions,
   ExtractNewHashTags,
   LoadNoteText,
-  RenameNoteFromTitle,
+  RenameNote,
   SaveNoteText,
   CreateNewNoteWithTitle,
   CreateNewNoteWithText,
@@ -52,6 +52,7 @@ export interface ScheduleIdTokenRefreshCommand extends Command<AppEvent> {
 
 export interface RetrieveFileListCommand extends Command<AppEvent> {
   type: CommandType.RetrieveFileList;
+  searchString: string;
   fileListVersion: number;
 }
 
@@ -68,10 +69,11 @@ export interface ExtractNewHashTagsCommand extends Command<AppEvent> {
 export interface LoadNoteTextCommand extends Command<AppEvent> {
   type: CommandType.LoadNoteText;
   notes: NoteRef[];
+  fileListVersion: number;
 }
 
-export interface RenameNoteFromTitleCommand extends Command<AppEvent> {
-  type: CommandType.RenameNoteFromTitle;
+export interface RenameNoteCommand extends Command<AppEvent> {
+  type: CommandType.RenameNote;
   note: NoteRenaming;
 }
 
@@ -114,7 +116,7 @@ export type AppCommand =
   | ComputeSearchAutoSuggestionsCommand
   | ExtractNewHashTagsCommand
   | LoadNoteTextCommand
-  | RenameNoteFromTitleCommand
+  | RenameNoteCommand
   | SaveNoteTextCommand
   | CreateNewNoteWithTitleCommand
   | CreateNewNoteWithTextCommand

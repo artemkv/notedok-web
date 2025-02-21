@@ -1135,8 +1135,46 @@ const handleNoteFailedToLoad = (
   note: NoteRef,
   err: string
 ): NoteListFileListRetrieved => {
+  // Shortcuts to inner props
+  const queue = noteList.renderingQueue;
+
+  // Create a new note
   const newNote: NoteOutOfSync = noteRefToOutOfSync(note, err);
-  return replaceNote(noteList, newNote);
+
+  // Update the note on the queue with the loaded one
+  const newQueue = replaceOnQueue(queue, newNote);
+
+  // Find out which notes are ready to be shown
+  // (I.e. all the notes visible notes at the beginning of the rendering queue)
+  const readyNotes: NoteVisible[] = [];
+  let firstNotReadyNoteIdx = 0;
+  while (firstNotReadyNoteIdx < newQueue.length) {
+    if (isVisible(newQueue[firstNotReadyNoteIdx])) {
+      const note: NoteVisible = newQueue[firstNotReadyNoteIdx] as NoteVisible;
+      readyNotes.push(note);
+      firstNotReadyNoteIdx++;
+    } else {
+      break;
+    }
+  }
+
+  // Cut out the notes that are not ready
+  const notReadyNotes = newQueue.slice(firstNotReadyNoteIdx, newQueue.length);
+
+  // Now ready to be shown
+  const newNotes = [...noteList.notes, ...readyNotes];
+
+  // New state
+  const newNoteList: NoteListFileListRetrieved = {
+    state: NoteListState.FileListRetrieved,
+    fileListVersion: noteList.fileListVersion,
+    unprocessedFiles: noteList.unprocessedFiles,
+    lastUsedNoteId: noteList.lastUsedNoteId,
+    renderingQueue: notReadyNotes,
+    notes: newNotes,
+  };
+
+  return newNoteList;
 };
 
 const deleteNote = (

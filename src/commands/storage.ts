@@ -4,7 +4,7 @@ import {
   CreateNewNoteWithTitleCommand,
   DeleteNoteCommand,
   LoadNoteTextCommand,
-  RenameNoteFromTitleCommand,
+  RenameNoteCommand,
   RestoreNoteCommand,
   RetrieveFileListCommand,
   SaveNoteTextCommand,
@@ -67,6 +67,7 @@ export const RetrieveFileList = (
   fileListVersion: number
 ): RetrieveFileListCommand => ({
   type: CommandType.RetrieveFileList,
+  searchString,
   fileListVersion,
   execute: async (dispatch) => {
     try {
@@ -110,6 +111,7 @@ export const LoadNoteText = (
 ): LoadNoteTextCommand => ({
   type: CommandType.LoadNoteText,
   notes,
+  fileListVersion,
   execute: (dispatch) => {
     notes.forEach((note) => {
       try {
@@ -132,10 +134,8 @@ export const LoadNoteText = (
   },
 });
 
-export const RenameNoteFromTitle = (
-  note: NoteRenaming
-): RenameNoteFromTitleCommand => ({
-  type: CommandType.RenameNoteFromTitle,
+export const RenameNoteFromTitle = (note: NoteRenaming): RenameNoteCommand => ({
+  type: CommandType.RenameNote,
   note,
   execute: async (dispatch) => {
     // First time try with path derived from title

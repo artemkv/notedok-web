@@ -152,7 +152,6 @@ const NoteTitle = memo(
         dispatch({
           type: EventType.RegularNoteTitleUpdated,
           note,
-          newTitle: effectiveNoteTitle,
         });
       }
     };

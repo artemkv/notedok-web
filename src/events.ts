@@ -108,7 +108,6 @@ export interface TemplateNoteTitleEditorTextChangedEvent {
 
 export interface TemplateNoteTitleUpdatedEvent {
   type: EventType.TemplateNoteTitleUpdated;
-  newTitle: string;
 }
 
 export interface RegularNoteTitleEditorActivatedEvent {
@@ -125,7 +124,6 @@ export interface RegularNoteTitleEditorTextChangedEvent {
 export interface RegularNoteTitleUpdatedEvent {
   type: EventType.RegularNoteTitleUpdated;
   note: NoteTitleSaveable;
-  newTitle: string;
 }
 
 export interface NoteTitleEditorCancelEditEvent {

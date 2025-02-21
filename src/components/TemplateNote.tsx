@@ -93,7 +93,6 @@ const NoteTitle = memo(
     const noteTitleOnBlur = () => {
       dispatch({
         type: EventType.TemplateNoteTitleUpdated,
-        newTitle: effectiveNoteTitle,
       });
     };
 

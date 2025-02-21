@@ -355,8 +355,8 @@ export interface AppStateAuthenticated {
   auth: AuthenticationStatus.Authenticated;
   searchAutoSuggest: SearchAutoSuggest;
   // It is possible to start editing template note even before we load all the notes
-  noteTextEditor: NoteTextEditor;
   noteTitleEditor: NoteTitleEditor;
+  noteTextEditor: NoteTextEditor;
   noteList: NoteList;
 }
 
