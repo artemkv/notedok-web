@@ -2895,5 +2895,3 @@ test("When received generic rest API error, report it", () => {
   expect(command.type).toBe(CommandType.ReportError);
   expect((command as ReportErrorCommand).err).toBe("error");
 });
-
-test("", () => {});
