@@ -31,7 +31,7 @@ export const ScheduleIdTokenRefresh = (): ScheduleIdTokenRefreshCommand => ({
 
 const scheduleIdTokenRefresh = () => {
   setTimeout(() => {
-    fetchAuthSession().then((s) => {
+    fetchAuthSession({ forceRefresh: true }).then((s) => {
       if (s.tokens && s.tokens.idToken) {
         setIdToken(s.tokens.idToken.toString());
       }
