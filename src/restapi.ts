@@ -50,7 +50,10 @@ function toData(json: Data) {
   return json.data;
 }
 
-function getJson(endpoint: string, session?: string) {
+const CONTENT_TYPE_JSON = "application/json";
+const CONTENT_TYPE_TEXT = "text/plain; charset=utf-8";
+
+function get(endpoint: string, session?: string) {
   const headers: StringMap = {};
   if (session) {
     headers["x-session"] = session;
@@ -59,70 +62,17 @@ function getJson(endpoint: string, session?: string) {
   return fetch(baseUrl + endpoint, {
     mode: "cors",
     headers,
-  })
-    .then(handleErrors)
-    .then(toJson)
-    .then(toData);
-}
-
-function getText(endpoint: string, session?: string) {
-  const headers: StringMap = {};
-  if (session) {
-    headers["x-session"] = session;
-  }
-
-  return fetch(baseUrl + endpoint, {
-    mode: "cors",
-    headers,
-  })
-    .then(handleErrors)
-    .then(toText);
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function postJson(endpoint: string, data: any, session?: string) {
-  const headers: StringMap = {
-    "Content-Type": "application/json",
-  };
-  if (session) {
-    headers["x-session"] = session;
-  }
-
-  return fetch(baseUrl + endpoint, {
-    method: "POST",
-    mode: "cors",
-    cache: "no-cache",
-    headers,
-    body: data ? JSON.stringify(data) : null,
-  })
-    .then(handleErrors)
-    .then(toJson)
-    .then(toData);
-}
-
-// TODO: These methods were working fine when I had purely JSON-based APIs, now there is too much variations
-// TODO: So maybe I need a neat library for this
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function postJsonNoResponse(endpoint: string, data: any, session?: string) {
-  const headers: StringMap = {
-    "Content-Type": "application/json",
-  };
-  if (session) {
-    headers["x-session"] = session;
-  }
-
-  return fetch(baseUrl + endpoint, {
-    method: "POST",
-    mode: "cors",
-    cache: "no-cache",
-    headers,
-    body: data ? JSON.stringify(data) : null,
   }).then(handleErrors);
 }
 
-function postText(endpoint: string, text: string, session?: string) {
+function post(
+  endpoint: string,
+  content: string,
+  contentType: string,
+  session?: string
+) {
   const headers: StringMap = {
-    "Content-Type": "text/plain; charset=utf-8",
+    "Content-Type": contentType,
   };
   if (session) {
     headers["x-session"] = session;
@@ -133,17 +83,18 @@ function postText(endpoint: string, text: string, session?: string) {
     mode: "cors",
     cache: "no-cache",
     headers,
-    body: text,
-  })
-    .then(handleErrors)
-    .then(toText);
+    body: content,
+  }).then(handleErrors);
 }
 
-/*
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function putJson(endpoint: string, data: any, session?: string) {
+function put(
+  endpoint: string,
+  content: string,
+  contentType: string,
+  session?: string
+) {
   const headers: StringMap = {
-    "Content-Type": "application/json",
+    "Content-Type": contentType,
   };
   if (session) {
     headers["x-session"] = session;
@@ -154,30 +105,8 @@ function putJson(endpoint: string, data: any, session?: string) {
     mode: "cors",
     cache: "no-cache",
     headers,
-    body: data ? JSON.stringify(data) : null,
-  })
-    .then(handleErrors)
-    .then(toJson)
-    .then(toData);
-}*/
-
-function putText(endpoint: string, text: string, session?: string) {
-  const headers: StringMap = {
-    "Content-Type": "text/plain; charset=utf-8",
-  };
-  if (session) {
-    headers["x-session"] = session;
-  }
-
-  return fetch(baseUrl + endpoint, {
-    method: "PUT",
-    mode: "cors",
-    cache: "no-cache",
-    headers,
-    body: text,
-  })
-    .then(handleErrors)
-    .then(toText);
+    body: content,
+  }).then(handleErrors);
 }
 
 function deleteObject(endpoint: string, session?: string) {
@@ -194,34 +123,68 @@ function deleteObject(endpoint: string, session?: string) {
   }).then(handleErrors);
 }
 
-export const signIn = (idToken: string) => {
-  return postJson("/signin", { id_token: idToken });
+export const signIn = async (idToken: string) => {
+  const body = { id_token: idToken };
+
+  const response = await post(
+    "/signin",
+    JSON.stringify(body),
+    CONTENT_TYPE_JSON
+  );
+  const json = await toJson(response);
+  return toData(json);
 };
 
-export const getFiles = (
+export const getFiles = async (
   session: string,
   pageSize: number,
   continuationToken: string
 ) => {
-  return getJson(
+  const response = await get(
     `/files?pageSize=${pageSize}&continuationToken=${continuationToken}`,
     session
   );
+  const json = await toJson(response);
+  return toData(json);
 };
 
-export const getFile = (session: string, filename: string) => {
-  return getText(`/files/${encodeURIComponent(filename)}`, session);
+export const getFile = async (session: string, filename: string) => {
+  const response = await get(`/files/${encodeURIComponent(filename)}`, session);
+  const text = await toText(response);
+  return text;
 };
 
-export const postFile = (session: string, filename: string, text: string) => {
-  return postText(`/files/${encodeURIComponent(filename)}`, text, session);
+export const postFile = async (
+  session: string,
+  filename: string,
+  content: string
+) => {
+  const response = await post(
+    `/files/${encodeURIComponent(filename)}`,
+    content,
+    CONTENT_TYPE_TEXT,
+    session
+  );
+  const text = await toText(response);
+  return text;
 };
 
-export const putFile = (session: string, filename: string, text: string) => {
-  return putText(`/files/${encodeURIComponent(filename)}`, text, session);
+export const putFile = async (
+  session: string,
+  filename: string,
+  content: string
+) => {
+  const response = await put(
+    `/files/${encodeURIComponent(filename)}`,
+    content,
+    CONTENT_TYPE_TEXT,
+    session
+  );
+  const text = await toText(response);
+  return text;
 };
 
-export const renameFile = (
+export const renameFile = async (
   session: string,
   filename: string,
   newFilename: string
@@ -231,9 +194,19 @@ export const renameFile = (
     newFileName: encodeURIComponent(newFilename),
   };
 
-  return postJsonNoResponse(`/rename`, body, session);
+  const response = await post(
+    `/rename`,
+    JSON.stringify(body),
+    CONTENT_TYPE_JSON,
+    session
+  );
+  return response;
 };
 
-export const deleteFile = (session: string, filename: string) => {
-  return deleteObject(`/files/${encodeURIComponent(filename)}`, session);
+export const deleteFile = async (session: string, filename: string) => {
+  const response = await deleteObject(
+    `/files/${encodeURIComponent(filename)}`,
+    session
+  );
+  return response;
 };
