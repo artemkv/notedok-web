@@ -80,7 +80,7 @@ export const RetrieveFileList = (
       // Keep retrieving until all
       while (getFilesResponse.hasMore) {
         getFilesResponse = await getFiles(
-          100,
+          PAGE_SIZE,
           getFilesResponse.nextContinuationToken
         );
         files = [...files, ...mapToFiles(getFilesResponse.files)];
