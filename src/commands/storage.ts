@@ -9,7 +9,11 @@ import {
   RetrieveFileListCommand,
   SaveNoteTextCommand,
 } from "../commands";
-import { generatePathFromTitle } from "../conversion";
+import {
+  generatePathFromTitleMd,
+  generatePathFromTitleText,
+  isMarkdownFile,
+} from "../conversion";
 import { EventType } from "../events";
 import {
   NoteCreatingFromText,
@@ -86,6 +90,7 @@ export const RetrieveFileList = (
         files = [...files, ...mapToFiles(getFilesResponse.files)];
       }
 
+      // Apply search string and sort by newest first
       files = files.filter((f) =>
         f.fileName.toLowerCase().includes(searchString.toLowerCase())
       );
@@ -134,13 +139,18 @@ export const LoadNoteText = (
   },
 });
 
+// Renaming doesn't change the file format (.md is renamed to .md, .txt to .txt)
 export const RenameNoteFromTitle = (note: NoteRenaming): RenameNoteCommand => ({
   type: CommandType.RenameNote,
   note,
   execute: async (dispatch) => {
+    const isMarkdown = isMarkdownFile(note.path);
+
     // First time try with path derived from title
     // Unless title is empty, in which case we immediately ask for a unique one
-    const newPath = generatePathFromTitle(note.title, note.title === "");
+    const newPath = isMarkdown
+      ? generatePathFromTitleMd(note.title, note.title === "")
+      : generatePathFromTitleText(note.title, note.title === "");
     try {
       await renameFile(note.path, newPath);
       dispatch({
@@ -151,7 +161,9 @@ export const RenameNoteFromTitle = (note: NoteRenaming): RenameNoteCommand => ({
     } catch (err) {
       if ((err as ApiError).statusCode === 409) {
         // Regenerate path from title, this time focing uniqueness
-        const newPath = generatePathFromTitle(note.title, true);
+        const newPath = isMarkdown
+          ? generatePathFromTitleMd(note.title, true)
+          : generatePathFromTitleText(note.title, true);
         try {
           await renameFile(note.path, newPath);
           dispatch({
@@ -198,6 +210,7 @@ export const SaveNoteText = (note: NoteSavingText): SaveNoteTextCommand => ({
   },
 });
 
+// New notes are created as .md
 export const CreateNewNoteWithTitle = (
   note: NoteCreatingFromTitle
 ): CreateNewNoteWithTitleCommand => ({
@@ -205,7 +218,7 @@ export const CreateNewNoteWithTitle = (
   note,
   execute: async (dispatch) => {
     // Title is not empty, ensured by business, so we first try to store with path derived from the title
-    const path = generatePathFromTitle(note.title, false);
+    const path = generatePathFromTitleMd(note.title, false);
     try {
       // Don't overwrite, in case not unique
       await postFile(path, "");
@@ -217,7 +230,7 @@ export const CreateNewNoteWithTitle = (
     } catch (err) {
       if ((err as ApiError).statusCode === 409) {
         // Regenerate path from title, this time enfocing uniqueness
-        const newPath = generatePathFromTitle(note.title, true);
+        const newPath = generatePathFromTitleMd(note.title, true);
         try {
           await putFile(newPath, "");
           dispatch({
@@ -245,6 +258,7 @@ export const CreateNewNoteWithTitle = (
   },
 });
 
+// New notes are created as .md
 export const CreateNewNoteWithText = (
   note: NoteCreatingFromText
 ): CreateNewNoteWithTextCommand => ({
@@ -253,7 +267,7 @@ export const CreateNewNoteWithText = (
   execute: async (dispatch) => {
     // Here we know that title is empty, so no need to even try storing it with an original path
     // Immediately ask for a unique (empty) path
-    const path = generatePathFromTitle("", true);
+    const path = generatePathFromTitleMd("", true);
     try {
       await putFile(path, note.text);
       dispatch({
@@ -292,6 +306,7 @@ export const DeleteNote = (note: NoteDeleting): DeleteNoteCommand => ({
   },
 });
 
+// Notes are restored in the same format (.md as .md, .txt as .txt)
 export const RestoreNote = (note: NoteRestoring): RestoreNoteCommand => ({
   type: CommandType.RestoreNote,
   note,
@@ -305,9 +320,13 @@ export const RestoreNote = (note: NoteRestoring): RestoreNoteCommand => ({
       });
     } catch (err) {
       if ((err as ApiError).statusCode === 409) {
+        const isMarkdown = isMarkdownFile(note.path);
+
         // The path that suddenly is taken (almost unrealistic)
         // Regenerate path from title, this time enfocing uniqueness
-        const newPath = generatePathFromTitle(note.title, true);
+        const newPath = isMarkdown
+          ? generatePathFromTitleMd(note.title, true)
+          : generatePathFromTitleText(note.title, true);
         try {
           await putFile(newPath, "");
           dispatch({

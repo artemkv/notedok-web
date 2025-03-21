@@ -99,7 +99,7 @@ Once the changes are saved, the new empty note should appear allowing me to cont
 TODOs:
 - it's lagging again... test if this is because of autocomplete
 - tab does not stop on control area buttons
-- utf-8
+- how do I make sure it's utf-8??
 - use etags to avoid getting content if didn't change
 - allowing to edit failed note may lead to displayed title not matching the path. Should I re-derive it?
 - there is something wrong with errors from API (TypeError: Failed to fetch)
