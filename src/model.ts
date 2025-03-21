@@ -1,5 +1,7 @@
 // note
 
+import { isMarkdownFile } from "./conversion";
+
 // State diagram, boxes
 
 // Design approach: retain information by using specific states
@@ -211,6 +213,24 @@ export type NoteRegular =
   | NoteOutOfSync
   | NoteCreatingFromTitle
   | NoteCreatingFromText;
+
+export const isMarkdownFormat = (note: Note) => {
+  if (
+    note.state === NoteState.CreatingFromTitle ||
+    note.state === NoteState.CreatingFromText
+  ) {
+    return true;
+  }
+
+  return (
+    (note.state === NoteState.Synced ||
+      note.state === NoteState.Renaming ||
+      note.state === NoteState.SavingText ||
+      note.state === NoteState.Restoring ||
+      note.state === NoteState.OutOfSync) &&
+    isMarkdownFile(note.path)
+  );
+};
 
 // note text editor
 

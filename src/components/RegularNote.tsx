@@ -1,4 +1,5 @@
 import "./Note.css";
+import "github-markdown-css";
 import { memo, useCallback, useEffect, useRef } from "react";
 import {
   NoteRegular,
@@ -11,6 +12,7 @@ import {
   EditableText,
   ModifiedState,
   AutoSuggestHashTag,
+  isMarkdownFormat,
 } from "../model";
 import { htmlEscape, renderNoteTextHtml } from "../ui";
 import { AppEvent, EventType } from "../events";
@@ -21,6 +23,9 @@ import { Dispatch } from "../hooks/useReducer";
 import uistrings from "../uistrings";
 import NoteTitleAutocomplete from "./NoteTitleAutocomplete";
 import OrbitProgressIndicator from "./OrbitProgressIndicator";
+import ReactMarkdown from "react-markdown";
+import gfm from "remark-gfm";
+import supersub from "remark-supersub";
 
 const RegularNote = memo(function RegularNote(props: {
   note: NoteRegular;
@@ -197,8 +202,10 @@ const NoteTitle = memo(
               <div className="note-title-progress">
                 <OrbitProgressIndicator />
               </div>
-            ) : (
+            ) : isMarkdownFormat(note) ? (
               <Empty />
+            ) : (
+              <div className="note-format-indicator">.txt</div>
             )}
           </div>
         </div>
@@ -262,15 +269,37 @@ const NoteTextReadonly = memo(
       }
     };
 
-    return (
-      <div
-        className="note-text"
-        dangerouslySetInnerHTML={{
-          __html: renderNoteTextHtml(htmlEscape(readOnlyText)),
-        }}
-        onClick={noteTextOnClick}
-      ></div>
-    );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const LinkRenderer = (props: any) => {
+      return (
+        <a href={props.href} target="_blank">
+          {props.children}
+        </a>
+      );
+    };
+
+    if (isMarkdownFormat(note)) {
+      return (
+        <div className="markdown-body" onClick={noteTextOnClick}>
+          <ReactMarkdown
+            components={{ a: LinkRenderer }}
+            remarkPlugins={[[gfm, { singleTilde: false }], supersub]}
+          >
+            {readOnlyText}
+          </ReactMarkdown>
+        </div>
+      );
+    } else {
+      return (
+        <div
+          className="note-text"
+          dangerouslySetInnerHTML={{
+            __html: renderNoteTextHtml(htmlEscape(readOnlyText)),
+          }}
+          onClick={noteTextOnClick}
+        ></div>
+      );
+    }
   }
 );
 

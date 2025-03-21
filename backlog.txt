@@ -103,6 +103,7 @@ TODOs:
 - use etags to avoid getting content if didn't change
 - allowing to edit failed note may lead to displayed title not matching the path. Should I re-derive it?
 - there is something wrong with errors from API (TypeError: Failed to fetch)
+- technically speaking, content type for md notes should be "text/markdown; charset=UTF-8"
 
 
 Test:
