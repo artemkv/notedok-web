@@ -54,7 +54,7 @@
     outline: none;
     font-family: "Segoe UI", arial, sans-serif;
     font-weight: 400;
-    font-size: 18px;
+    font-size: 16px;
     flex: 2;
     text-overflow: ellipsis;
 }
@@ -69,7 +69,7 @@
 
 .note-text,
 textarea.note-text-editable {
-    font-size: 18px;
+    font-size: 16px;
     line-height: 1.5;
     font-weight: 400;
     font-family: monospace;
@@ -81,6 +81,21 @@ textarea.note-text-editable {
     outline: none;
     white-space: pre-wrap;
     text-overflow: ellipsis;
+}
+
+.markdown-body {
+    font-size: 16px !important;
+    line-height: 1.5 !important;
+    font-weight: 400 !important;
+    font-family: "Segoe UI", arial, sans-serif !important;
+    font-family: monospace !important;
+    padding: 4px 8px 2px 8px;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto;
+    outline: none;
+    text-overflow: ellipsis;
+    border: 1px solid #ffffff;
 }
 
 div.note-text ul,
@@ -142,6 +157,17 @@ div.note-text-editable-container {
     background: #fbfbfb;
 }
 
+.markdown-body .highlight pre,
+.markdown-body pre {
+    border: 1px dotted #a9a9a9 !important;
+    padding: 12px !important;
+    font-size: 12px !important;
+    font-family: monospace !important;
+    overflow-x: auto !important;
+    background: #fbfbfb !important;
+    border-radius: 0px !important;
+}
+
 .note-save-button {
     display: none;
 }
@@ -156,37 +182,27 @@ h6 {
 }
 
 h1 {
-    font-size: 34px;
+    font-size: 32px;
 }
 
 h2 {
-    font-size: 30px;
+    font-size: 28px;
 }
 
 h3 {
-    font-size: 26px;
+    font-size: 24px;
 }
 
 h4 {
-    font-size: 22px;
+    font-size: 20px;
 }
 
 h5 {
-    font-size: 18px;
-}
-
-h6 {
     font-size: 16px;
 }
 
-.markdown-body {
-    border: 1px solid #ffffff;
-    padding: 4px 8px 2px 8px;
-    box-sizing: border-box;
-    overflow-x: hidden;
-    overflow-y: auto;
-    outline: none;
-    text-overflow: ellipsis;
+h6 {
+    font-size: 14px;
 }
 
 .note-format-indicator {
@@ -206,6 +222,11 @@ h6 {
     .note-text {
         font-size: 14px;
         font-family: Helvetica, sans-serif;
+    }
+
+    .markdown-body {
+        font-size: 14px !important;
+        font-family: Helvetica, sans-serif !important;
     }
 
     .note-title {

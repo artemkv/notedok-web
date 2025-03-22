@@ -143,3 +143,18 @@ title updated ->
 	- V try to save, not overwrite (POST files)
 	- V if conflicts, make unique and save with overwrite (PUT file)
 	- inform UI
+
+
+
+
+export const deleteAllFiles = async (session: string) => {
+  const response = await post(`/deleteall`, "{}", CONTENT_TYPE_JSON, session);
+  return response;
+};
+
+
+export const deleteAllFiles = () => {
+  return callApi(() => {
+    return api.deleteAllFiles(getSession());
+  });
+};
